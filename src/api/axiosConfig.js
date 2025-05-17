@@ -1,11 +1,8 @@
 import axios from 'axios';
 
 // Crear una instancia de Axios
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api', // URL base de tu API
-  headers: {
-    'Content-Type': 'application/json',
-  },
+const axiosInstance = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
 });
 
 // Interceptor de Solicitud (Sin cambios)

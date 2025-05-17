@@ -60,12 +60,12 @@ function App() {
             }
 
             try {
-                const res = await fetch("http://localhost:8080/api/auth/validate-token", {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/validate-token`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
 
                 if (!res.ok) throw new Error("Token inválido");
                 setEstaAutenticado(true);

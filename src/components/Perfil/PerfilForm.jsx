@@ -16,7 +16,7 @@ const PerfilForm = () => {
 
   useEffect(() => {
     if (token) {
-      axios.get('http://localhost:8080/api/usuarios/perfil', {
+      axios.get(`${process.env.REACT_APP_API_URL}/usuarios/perfil`,{
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => {
@@ -42,7 +42,7 @@ const PerfilForm = () => {
     setMensaje('');
     setError('');
 
-    axios.put('http://localhost:8080/api/usuarios/perfil', perfil, {
+    axios.put(`${process.env.REACT_APP_API_URL}/usuarios/perfil`, perfil,{
       headers: { Authorization: `Bearer ${token}` }
     })
     .then(() => setMensaje('Perfil actualizado correctamente'))
