@@ -1,0 +1,63 @@
+/* canchas.css */
+
+.canchas-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: #f7f7f7;
+}
+
+.cancha-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  width: 300px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.cancha-card:hover {
+  transform: translateY(-5px);
+}
+
+.cancha-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+.cancha-card h3 {
+  margin-top: 1rem;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.cancha-card a {
+  display: inline-block;
+  margin: 0.5rem 0;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.cancha-card a:hover {
+  text-decoration: underline;
+}
+
+.cancha-card button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.cancha-card button:hover {
+  background-color: #218838;
+}

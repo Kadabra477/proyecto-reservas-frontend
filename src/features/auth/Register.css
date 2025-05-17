@@ -1,0 +1,14 @@
+/* src/components/Register.css */
+@import url("../../styles/AuthForm.css"); /* Importa los estilos compartidos */
+
+/* Estilos específicos para el fondo de Register */
+.register-background {
+  background: linear-gradient(to right, #1e3c72, #2a5298); /* Gradiente azul oscuro específico */
+}
+
+/* Puedes añadir aquí otros estilos específicos o sobreescrituras para Register */
+/* Ejemplo:
+.register-form .auth-title {
+  color: #f0f0f0;
+}
+*/

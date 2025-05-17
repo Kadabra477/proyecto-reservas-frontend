@@ -1,0 +1,74 @@
+.pago-callback-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    min-height: 70vh; /* Ocupa buena parte de la pantalla */
+    border-radius: 8px;
+    margin: 40px auto;
+    max-width: 600px; /* Ancho máximo */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .pago-exito {
+    background-color: #e9f7ef; /* Verde claro */
+    border: 1px solid #5cb85c; /* Verde */
+    color: #3c763d; /* Verde oscuro */
+  }
+  
+  .pago-fallido {
+    background-color: #f8d7da; /* Rojo claro */
+    border: 1px solid #d9534f; /* Rojo */
+    color: #a94442; /* Rojo oscuro */
+  }
+  
+  .pago-pendiente {
+    background-color: #fcf8e3; /* Amarillo claro */
+    border: 1px solid #f0ad4e; /* Naranja */
+    color: #8a6d3b; /* Amarillo oscuro */
+  }
+  
+  .pago-callback-container h2 {
+    margin-bottom: 15px;
+    font-size: 2em;
+  }
+  
+  .pago-callback-container p {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    line-height: 1.6;
+  }
+  
+  .pago-icono {
+      width: 80px; /* Ajusta tamaño */
+      height: 80px;
+      margin-bottom: 25px;
+  }
+  
+  .pago-callback-container .btn {
+    margin: 10px 5px;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .pago-callback-container .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+  }
+  .pago-callback-container .btn-primary:hover {
+      background-color: #0056b3;
+  }
+  
+  .pago-callback-container .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+  }
+   .pago-callback-container .btn-secondary:hover {
+       background-color: #5a6268;
+   }

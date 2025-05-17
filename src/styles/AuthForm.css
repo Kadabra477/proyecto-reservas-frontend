@@ -1,0 +1,204 @@
+/* src/styles/AuthForm.css (Modificado) */
+/* ELIMINADO: Importación de fuente Montserrat, ahora está en App.css */
+/* @import url("..."); */
+
+/* ... (resto de estilos .auth-background, .auth-container, .auth-form, etc. sin cambios) ... */
+/* Contenedor de fondo que ocupa toda la pantalla */
+.auth-background {
+  position: fixed; /* Fijo para cubrir todo */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10; /* Asegura que esté visible */
+  display: flex; /* Centra el contenido */
+  align-items: center;
+  justify-content: center;
+  padding: 20px; /* Padding por si el formulario es muy grande */
+  box-sizing: border-box;
+}
+
+/* Contenedor del formulario y las gotas decorativas */
+.auth-container {
+  position: relative; /* Necesario para posicionar las gotas */
+  max-width: 400px; /* Ancho máximo del formulario */
+  width: 100%; /* Ocupa el ancho disponible hasta el máximo */
+}
+
+/* Estilo base del formulario */
+.auth-form {
+  background: rgba(255, 255, 255, 0.2); /* Fondo semitransparente */
+  padding: 2.5em 3em; /* Padding interno */
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.25); /* Borde sutil */
+  backdrop-filter: blur(15px); /* Efecto vidrio esmerilado */
+  -webkit-backdrop-filter: blur(15px); /* Soporte para Safari */
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25); /* Sombra más pronunciada */
+  text-align: center;
+  transition: transform 0.3s ease;
+  color: white; /* Texto blanco por defecto */
+  font-family: 'Montserrat', sans-serif; /* Fuente específica */
+}
+
+
+/* Título del formulario (Login/Register) */
+.auth-form .auth-title {
+  font-size: 1.8rem; /* Tamaño del título */
+  font-weight: 600; /* Más grueso */
+  margin-bottom: 30px; /* Más espacio debajo */
+  text-shadow: 1px 1px 5px rgba(0,0,0,0.35);
+}
+
+/* Enlace para cambiar entre Login/Register */
+.auth-form .auth-link {
+  color: #e0e0e0; /* Color grisáceo claro */
+  font-size: 0.85rem; /* Tamaño de fuente del enlace */
+  margin-top: 20px; /* Espacio arriba del enlace */
+  display: block; /* Ocupa toda la línea */
+  text-decoration: none;
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.auth-form .auth-link:hover {
+  color: #ffffff; /* Blanco al pasar el mouse */
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); /* Efecto de brillo */
+}
+
+
+.auth-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1em 1.5em;
+  margin-bottom: 1.5em;
+  border: none;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
+  outline: none;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* NUEVO: Estilo para .auth-button (usado en Register.js) */
+.auth-button {
+    display: block; /* Ocupa todo el ancho */
+    width: 100%;
+    padding: 1em 1.5em; /* Padding similar al input */
+    margin-top: 1em; /* Espacio arriba */
+    border: none;
+    border-radius: 30px; /* Mismo redondeo */
+    background-color: var(--primary); /* Usar variable global primaria */
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.auth-button:hover:not(:disabled) {
+    background-color: var(--primary-dark); /* Oscurecer al pasar el mouse */
+    transform: translateY(-2px);
+}
+
+.auth-button:disabled {
+    background-color: var(--gray); /* Color gris si deshabilitado */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Estilos para mensajes de error/éxito dentro del form */
+.auth-message {
+    margin-top: 1.5em;
+    padding: 0.8em 1em;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+}
+.auth-message.error {
+    background-color: rgba(231, 76, 60, 0.8); /* Fondo rojo más opaco */
+    color: white;
+}
+.auth-message.success {
+    background-color: rgba(46, 204, 113, 0.8); /* Fondo verde más opaco */
+    color: white;
+}
+
+/* Estilos para las gotas decorativas (si existen en el HTML) */
+.auth-drops {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1; /* Detrás del formulario */
+}
+
+/* ... (otros estilos) ... */
+
+/* Estilo para el botón de Google */
+.google-auth-button {
+  display: inline-flex; /* Alinear icono y texto */
+  align-items: center;
+  justify-content: center;
+  padding: 0.8em 1.5em;
+  border-radius: 30px;
+  background-color: #ffffff; /* Fondo blanco */
+  color: #444; /* Texto oscuro */
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid var(--gray); /* Borde sutil */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-auth-button:hover {
+  background-color: var(--gray-lightest);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.drop {
+    position: absolute;
+    bottom: -150px; /* Empiezan desde abajo */
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: rise 10s infinite ease-in;
+    opacity: 0;
+}
+/* ... (mantener @keyframes rise y .drop-N si los tenías) ... */
+.drop.drop-1 { left: 10%; width: 80px; height: 80px; animation-delay: 1s; animation-duration: 12s; }
+.drop.drop-2 { left: 25%; width: 120px; height: 120px; animation-delay: 3s; }
+.drop.drop-3 { left: 50%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 8s; }
+.drop.drop-4 { left: 70%; width: 100px; height: 100px; animation-delay: 5s; }
+.drop.drop-5 { left: 85%; width: 70px; height: 70px; animation-delay: 2s; animation-duration: 11s; }
+
+@keyframes rise {
+    0% {
+        bottom: -150px;
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.4;
+    }
+    100% {
+        bottom: 110%; /* Sube más allá del contenedor */
+        opacity: 0;
+    }
+}
+.oauth2-success-message {
+  text-align: center;
+  margin-top: 100px;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--primary-dark);
+}

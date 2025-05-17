@@ -1,0 +1,182 @@
+/* src/ReservaForm.css */
+
+/* Contenedor principal del formulario de reserva */
+.reserva-form-container {
+  max-width: 750px; /* Ancho máximo del contenedor */
+  margin: 40px auto; /* Centrado horizontal con margen vertical */
+  padding: 35px 45px; /* Padding interno */
+  background-color: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  font-family: 'Segoe UI', sans-serif;
+  border: 1px solid var(--gray-light); /* Borde sutil */
+}
+
+/* Título principal del formulario */
+.reserva-form-title {
+  text-align: center;
+  color: var(--primary);
+  margin-bottom: 25px; /* Espacio debajo del título */
+  font-size: 2rem; /* Tamaño de fuente */
+  font-weight: 700;
+}
+
+/* Sección con detalles de la cancha seleccionada */
+.reserva-cancha-details {
+  text-align: center;
+  margin-bottom: 35px; /* Espacio debajo de los detalles */
+  padding-bottom: 25px; /* Espacio antes del borde */
+  border-bottom: 1px solid var(--gray-light); /* Línea divisoria */
+}
+
+.reserva-cancha-img {
+  max-width: 100%;
+  height: 220px; /* Altura de la imagen */
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 20px; /* Espacio debajo de la imagen */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra de la imagen */
+}
+
+.reserva-cancha-details p {
+  margin: 8px 0; /* Espacio entre párrafos de detalles */
+  color: var(--text-light);
+  font-size: 1.05rem; /* Tamaño de fuente de detalles */
+}
+.reserva-cancha-details strong {
+  color: var(--text); /* Color para texto en negrita */
+  margin-right: 5px; /* Espacio después de la etiqueta en negrita */
+}
+
+/* Subtítulo para la sección de datos del usuario */
+.reserva-form-subtitle {
+  text-align: center;
+  color: var(--secondary); /* Color secundario */
+  margin-bottom: 30px;
+  font-size: 1.5rem; /* Tamaño de fuente */
+  font-weight: 600;
+}
+
+/* Estilo del formulario (usa CSS Grid) */
+.reserva-formulario {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas de igual tamaño */
+  gap: 22px 28px; /* Espacio vertical y horizontal entre campos */
+  margin-bottom: 30px; /* Espacio debajo del grid */
+}
+
+/* Grupo de cada campo (etiqueta + input) */
+.reserva-formulario .form-group {
+  display: flex;
+  flex-direction: column; /* Etiqueta arriba, input abajo */
+}
+
+.reserva-formulario label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-light);
+  font-size: 0.9rem; /* Tamaño de etiqueta */
+}
+
+/* Estilo de los inputs */
+.reserva-formulario input[type="text"],
+.reserva-formulario input[type="tel"],
+.reserva-formulario input[type="email"],
+.reserva-formulario input[type="date"],
+.reserva-formulario input[type="time"] {
+  padding: 13px 16px; /* Padding interno */
+  border: 1px solid var(--gray);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Estilo al enfocar un input */
+.reserva-formulario input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 172, 83, 0.2); /* Anillo de foco verde */
+}
+
+/* Estilo para inputs deshabilitados */
+.reserva-formulario input:disabled {
+    background-color: var(--gray-lightest);
+    cursor: not-allowed;
+}
+
+
+/* Botón de confirmar reserva */
+.reserva-submit-button {
+  grid-column: 1 / -1; /* Ocupa ambas columnas */
+  background-color: var(--primary);
+  color: white;
+  padding: 15px; /* Padding del botón */
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-top: 15px; /* Espacio arriba del botón */
+}
+
+.reserva-submit-button:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+   transform: translateY(-2px); /* Efecto al pasar el mouse */
+}
+
+/* Estilo del botón cuando está deshabilitado */
+.reserva-submit-button:disabled {
+    background-color: var(--gray);
+    cursor: not-allowed;
+    transform: none; /* Sin efecto hover */
+}
+
+/* Estilo para mensajes de feedback (éxito/error) */
+.reserva-mensaje {
+  text-align: center;
+  font-weight: 600;
+  margin-top: 25px; /* Espacio arriba del mensaje */
+  padding: 14px 18px; /* Padding interno */
+  border-radius: 8px;
+  border: 1px solid transparent;
+  line-height: 1.5;
+}
+
+.reserva-mensaje.success {
+  color: var(--success-dark);
+  background-color: rgba(46, 204, 113, 0.1);
+  border-color: rgba(46, 204, 113, 0.3);
+}
+
+.reserva-mensaje.error {
+   color: var(--danger-dark);
+   background-color: rgba(231, 76, 60, 0.1);
+   border-color: rgba(231, 76, 60, 0.3);
+}
+
+
+/* Ajustes Responsive para pantallas pequeñas */
+@media (max-width: 650px) {
+  .reserva-form-container {
+      padding: 25px 20px; /* Menos padding */
+      margin: 20px auto; /* Menos margen vertical */
+  }
+  .reserva-formulario {
+    grid-template-columns: 1fr; /* Una sola columna */
+    gap: 18px; /* Menos espacio entre campos */
+  }
+   .reserva-submit-button {
+      font-size: 1rem; /* Tamaño de fuente del botón */
+      padding: 14px;
+  }
+  .reserva-form-title {
+      font-size: 1.6rem;
+  }
+  .reserva-form-subtitle {
+      font-size: 1.3rem;
+  }
+}

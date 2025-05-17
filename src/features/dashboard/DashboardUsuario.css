@@ -1,0 +1,283 @@
+.dashboard-container {
+  max-width: var(--max-width);
+  margin: 40px auto;
+  padding: 30px 25px;
+  background: linear-gradient(to bottom, #ffffff, #f2f6fa);
+  border-radius: var(--radius-lg);
+}
+
+.dashboard-title {
+  color: var(--primary-dark);
+  font-size: 2.2rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.dashboard-subtitle {
+  color: var(--text-light);
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.dashboard-card {
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 25px 30px;
+  box-shadow: var(--shadow);
+  margin-bottom: 30px;
+  border-left: 5px solid var(--primary);
+}
+
+.dashboard-card h2 {
+  color: var(--primary);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.proximas-reservas p {
+  margin: 10px 0;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.proximas-reservas p strong {
+  color: var(--text-dark);
+  min-width: 80px;
+  display: inline-block;
+}
+
+.dashboard-info {
+  background-color: var(--gray-lightest);
+  padding: 15px 20px;
+  border-radius: var(--radius);
+  text-align: center;
+  color: var(--text-light);
+  margin-bottom: 30px;
+  border: 1px dashed var(--gray);
+}
+
+.dashboard-acciones h2 {
+  text-align: center;
+  color: var(--secondary);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.acciones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.accion-card {
+  text-decoration: none;
+  color: inherit;
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 30px 25px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-left: none;
+  border-bottom: 5px solid var(--secondary-light);
+}
+
+.accion-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-hover);
+  border-bottom-color: var(--secondary);
+}
+
+.accion-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  line-height: 1;
+}
+
+.accion-card h3 {
+  color: var(--secondary-dark);
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+
+.accion-card p {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.btn-main {
+  background-color: var(--primary);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.btn-main:hover {
+  background-color: var(--primary-dark);
+}
+
+@media (max-width: 768px) {
+  .dashboard-title { font-size: 1.8rem; }
+  .dashboard-subtitle { font-size: 1rem; }
+  .dashboard-acciones h2 { font-size: 1.5rem; }
+  .accion-card h3 { font-size: 1.1rem; }
+}
+.perfil-usuario p {
+  margin: 10px 0;
+  color: var(--text);
+  font-size: 1rem;
+}
+.perfil-usuario p strong {
+  color: var(--primary-dark);
+  display: inline-block;
+  width: 160px;
+}
+/* --- PERFIL estilo red social --- */
+.perfil-container {
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 40px;
+}
+
+.perfil-portada {
+  height: 160px;
+  background-color: var(--gray-light);
+  overflow: hidden;
+}
+
+.portada-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.perfil-info-box {
+  text-align: center;
+  padding: 20px 25px;
+  position: relative;
+  top: -50px;
+}
+
+.perfil-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 100%;
+  border: 4px solid var(--white);
+  object-fit: cover;
+  background-color: var(--gray);
+  margin-bottom: 10px;
+}
+
+.perfil-nombre {
+  font-size: 1.6rem;
+  color: var(--primary-dark);
+  margin: 5px 0 10px 0;
+}
+
+.perfil-dato {
+  margin: 4px 0;
+  color: var(--text-light);
+  font-size: 0.95rem;
+}
+/* Inputs de perfil */
+.perfil-input {
+  display: block;
+  margin: 8px auto;
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  border: 1px solid var(--gray);
+  border-radius: var(--radius);
+  max-width: 300px;
+  width: 100%;
+}
+
+/* Estilo editable de avatar al pasar el mouse */
+.perfil-avatar.editable {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.perfil-avatar.editable:hover {
+  transform: scale(1.05);
+}
+
+/* Lista de reservas */
+.lista-reservas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 15px;
+}
+
+.reserva-item {
+  background-color: var(--gray-lightest);
+  border-radius: var(--radius);
+  padding: 15px 20px;
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--secondary);
+}
+
+.reserva-item p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.reserva-item p strong {
+  color: var(--text-dark);
+}
+/* --- Modal --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: var(--white);
+  padding: 30px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hover);
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: var(--primary-dark);
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.modal-content p {
+  font-size: 1rem;
+  margin: 10px 0;
+  color: var(--text);
+}
+
+.modal-actions {
+  text-align: right;
+  margin-top: 20px;
+}

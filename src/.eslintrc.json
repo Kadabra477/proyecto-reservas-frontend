@@ -1,0 +1,38 @@
+// .eslintrc.json CORREGIDO Y SIMPLIFICADO
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    // "plugin:react-hooks/recommended", // <-- ELIMINADA (ya viene en "react-app")
+    "react-app",                     // <-- MANTENIDA (incluye config de hooks)
+    "react-app/jest"
+  ],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": [
+    "react" // <-- ELIMINADO "react-hooks" (ya viene en "react-app")
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "rules": {
+    // Puedes mantener estas reglas si quieres asegurarlas o personalizarlas
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off", // No necesario con React 17+
+    "react-hooks/rules-of-hooks": "error", // Asegura reglas básicas
+    "react-hooks/exhaustive-deps": "warn" // Advierte sobre dependencias faltantes
+    // Añade tus reglas personalizadas aquí si es necesario
+  }
+}

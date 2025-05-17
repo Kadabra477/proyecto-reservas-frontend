@@ -1,0 +1,346 @@
+/* src/AdminPanel.css */
+/* Las variables :root fueron movidas a App.css */
+
+.admin-panel {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1200px; /* Ancho máximo del panel */
+  margin: 30px auto; /* Centrado con margen superior/inferior */
+  padding: 30px 40px; /* Padding interno */
+  background-color: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.admin-panel h1 {
+  text-align: center;
+  color: var(--primary);
+  font-size: 2.2rem; /* Tamaño del título principal */
+  margin-bottom: 35px; /* Más espacio debajo */
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 15px;
+}
+
+/* Estilo de Mensajes (Éxito/Error) */
+.admin-mensaje {
+  padding: 14px 20px;
+  margin: 25px 0; /* Espaciado */
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  border-left: 5px solid; /* Borde lateral distintivo */
+  animation: fadeOutMessage 5s forwards; /* Animación para desaparecer */
+}
+.admin-mensaje.success {
+  background-color: rgba(46, 204, 113, 0.1); /* Fondo verde claro */
+  color: var(--success-dark);
+  border-left-color: var(--success);
+}
+.admin-mensaje.error {
+  background-color: rgba(231, 76, 60, 0.1); /* Fondo rojo claro */
+  color: var(--danger-dark);
+  border-left-color: var(--danger);
+}
+
+/* Animación para que el mensaje desaparezca */
+@keyframes fadeOutMessage {
+  0% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); } /* Permanece visible más tiempo */
+  100% { opacity: 0; transform: translateY(-10px); } /* Se desvanece hacia arriba */
+}
+
+
+/* Estilo de Pestañas (Tabs) */
+.admin-tabs {
+  display: flex;
+  justify-content: center; /* Centra las pestañas */
+  margin-bottom: 30px; /* Espacio debajo de las pestañas */
+  border-bottom: 1px solid var(--gray);
+}
+
+.admin-tab-button {
+  background: none;
+  border: none;
+  padding: 14px 30px; /* Más padding */
+  font-size: 1.1rem; /* Tamaño de fuente */
+  cursor: pointer;
+  color: var(--text-light); /* Color por defecto */
+  font-weight: 600;
+  transition: color 0.3s ease, border-color 0.3s ease;
+  border-bottom: 3px solid transparent; /* Borde inferior transparente */
+  margin-bottom: -1px; /* Alinea con el borde del contenedor */
+}
+
+.admin-tab-button:hover {
+  color: var(--info); /* Color al pasar el mouse */
+}
+.admin-tab-button.active {
+  color: var(--info); /* Color de pestaña activa */
+  border-bottom-color: var(--info); /* Borde inferior para pestaña activa */
+}
+
+
+/* Contenido de la Pestaña Activa */
+.admin-tab-content {
+  padding: 25px 0;
+}
+
+.admin-tab-content h2 {
+  color: var(--primary-dark);
+  font-size: 1.8rem; /* Tamaño de subtítulos */
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+/* Formulario para Canchas */
+.admin-cancha-form {
+  background-color: var(--gray-lightest);
+  padding: 30px 35px; /* Padding interno del formulario */
+  border-radius: 12px;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.06); /* Sombra interior */
+  margin-bottom: 40px;
+}
+
+/* Grupos de Campos del Formulario */
+.admin-form-group {
+  margin-bottom: 20px; /* Espacio entre grupos */
+  display: flex;
+  flex-direction: column; /* Etiqueta arriba, input abajo */
+}
+
+.admin-form-group label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.admin-form-group input[type="text"],
+.admin-form-group input[type="number"],
+.admin-form-group input[type="url"],
+.admin-form-group input[type="tel"],
+.admin-form-group textarea {
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid var(--gray);
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.admin-form-group input:focus,
+.admin-form-group textarea:focus {
+  border-color: var(--info); /* Color de borde al enfocar */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* Anillo de foco */
+}
+
+.admin-form-group textarea {
+  resize: vertical; /* Permitir redimensionar verticalmente */
+  min-height: 90px; /* Altura mínima */
+}
+
+/* Estilo del Checkbox */
+.admin-form-group.checkbox {
+  flex-direction: row; /* Checkbox y etiqueta en línea */
+  align-items: center; /* Alineación vertical */
+}
+.admin-form-group.checkbox label {
+  margin-bottom: 0;
+  margin-left: 10px; /* Espacio entre checkbox y texto */
+  font-weight: 500;
+  cursor: pointer;
+}
+.admin-form-group.checkbox input[type="checkbox"] {
+  width: auto; /* Ancho automático */
+  accent-color: var(--primary); /* Color del check */
+  cursor: pointer;
+  transform: scale(1.2); /* Ligeramente más grande */
+}
+
+/* Botones del Formulario */
+.admin-form-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px; /* Espacio arriba de los botones */
+  flex-wrap: wrap; /* Permitir que los botones pasen a la línea siguiente */
+}
+
+/* Estilo Base de Botones en Admin Panel */
+.admin-panel button {
+  padding: 10px 20px; /* Padding estándar */
+  border: none;
+  border-radius: 8px; /* Bordes redondeados */
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-medium);
+  font-size: 0.95rem;
+}
+.admin-panel button:hover:not(:disabled) {
+    filter: brightness(90%); /* Ligeramente más oscuro al pasar el mouse */
+    transform: translateY(-1px);
+}
+.admin-panel button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6; /* Menos opaco cuando está deshabilitado */
+}
+
+/* Colores específicos de botones */
+.admin-btn-save { background-color: var(--info); color: white; }
+.admin-btn-cancel { background-color: var(--gray-dark); color: white; }
+.admin-btn-edit { background-color: var(--warning); color: white; }
+.admin-btn-delete { background-color: var(--danger); color: white; }
+.admin-btn-confirm { background-color: var(--success); color: white; }
+
+/* Estilo de Tablas */
+.admin-cancha-list h3 { /* Título de la lista de canchas */
+    margin-top: 30px;
+    margin-bottom: 20px;
+    color: var(--primary-dark);
+    font-size: 1.4rem;
+}
+
+/* Contenedor para hacer tablas responsive con scroll horizontal */
+.admin-table-container {
+    display: block;
+    width: 100%;
+    overflow-x: auto; /* Habilita scroll horizontal si el contenido excede */
+    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+    border: 1px solid var(--gray-light); /* Borde opcional */
+    border-radius: 8px;
+    margin-top: 25px;
+}
+
+.admin-table-container table {
+  width: 100%;
+  min-width: 800px; /* Ancho mínimo para forzar scroll si es necesario */
+  border-collapse: collapse; /* Bordes colapsados */
+  background: white;
+  /* Quitar márgenes/sombras/bordes si están dentro del contenedor */
+  margin-top: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+
+th, td {
+  padding: 15px 20px; /* Padding en celdas */
+  text-align: left;
+  border-bottom: 1px solid var(--gray-light);
+  font-size: 0.95rem;
+  vertical-align: middle;
+  white-space: nowrap; /* Evitar que el contenido se parta por defecto */
+}
+/* Permitir que algunas celdas se envuelvan si es necesario */
+td[data-label="Descripción"], td[data-label="Ubicación"] {
+    white-space: normal;
+}
+
+
+th {
+  background-color: var(--gray-lightest);
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase; /* Mayúsculas para títulos */
+  font-size: 0.85rem; /* Tamaño más pequeño para títulos */
+  letter-spacing: 0.5px;
+  position: sticky; /* Encabezados fijos al hacer scroll vertical (opcional) */
+  top: 0;
+  z-index: 1;
+}
+
+tbody tr:hover {
+  background-color: var(--gray-lightest); /* Efecto hover en filas */
+}
+tbody tr:last-child td {
+    border-bottom: none; /* Sin borde en la última fila */
+}
+
+/* Botones dentro de la tabla */
+td[data-label="Acciones"] {
+    white-space: nowrap; /* Evitar que los botones se partan */
+}
+td button {
+  padding: 7px 14px; /* Padding más pequeño */
+  font-size: 0.85rem; /* Fuente más pequeña */
+  margin-right: 6px;
+  margin-bottom: 6px; /* Espacio si se envuelven */
+  border-radius: 6px;
+}
+td button:last-child {
+  margin-right: 0;
+}
+
+/* Estilo de Badges (etiquetas de estado) */
+.admin-badge {
+  display: inline-block;
+  padding: 6px 14px; /* Padding */
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap; /* Evitar que se parta el texto */
+}
+.admin-badge.available, .admin-badge.confirmed {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: var(--success-dark);
+}
+.admin-badge.unavailable, .admin-badge.pending {
+  background-color: rgba(243, 156, 18, 0.15);
+  color: var(--warning-dark);
+}
+
+/* Mensaje para cuando no hay datos en la tabla */
+.admin-no-data {
+  text-align: center;
+  color: var(--gray-dark);
+  padding: 30px;
+  font-style: italic;
+}
+
+
+/* Media Queries para Responsive */
+@media (max-width: 768px) {
+  .admin-panel {
+      padding: 20px; /* Menos padding */
+  }
+  .admin-form-buttons {
+    flex-direction: column; /* Apila botones */
+    align-items: stretch; /* Estira botones */
+  }
+  .admin-form-buttons button {
+      width: 100%; /* Botones ocupan todo el ancho */
+  }
+   .admin-tabs button {
+    font-size: 1rem;
+    padding: 12px 18px;
+  }
+  .admin-panel h1 {
+      font-size: 1.8rem;
+  }
+   .admin-tab-content h2 {
+       font-size: 1.5rem;
+   }
+   /* Quitar sticky header en móvil si causa problemas */
+   th {
+       position: static;
+   }
+}
+
+@media (max-width: 600px) {
+    th, td {
+        padding: 12px 15px; /* Menos padding en celdas */
+    }
+    .admin-panel h1 {
+        font-size: 1.6rem;
+    }
+    .admin-tab-content h2 {
+        font-size: 1.4rem;
+    }
+    .admin-tabs button {
+        font-size: 0.9rem;
+        padding: 10px 12px;
+    }
+}

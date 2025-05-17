@@ -1,0 +1,114 @@
+/* src/components/CanchaCard.css */
+.cancha-card-item {
+    background-color: var(--white);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative; /* Necesario para posicionar el precio absoluto */
+    display: flex;
+    flex-direction: column; /* Organiza el contenido verticalmente */
+    height: 100%; /* Asegura que las tarjetas tengan la misma altura en una cuadrícula */
+  }
+  
+  .cancha-card-item:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover); /* Usa la variable de sombra hover */
+  }
+  
+  .cancha-card-img {
+    width: 100%;
+    height: 200px; /* Altura consistente para la imagen */
+    object-fit: cover; /* Asegura que la imagen cubra el espacio sin distorsionarse */
+    border-bottom: 1px solid var(--gray-light);
+    background-color: var(--gray-light); /* Fondo por si la imagen falla */
+    display: block; /* Evita espacio extra debajo de la imagen */
+  }
+  
+  .cancha-card-price {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: var(--highlight);
+    color: #333; /* Texto más oscuro para fondo amarillo */
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    z-index: 2; /* Asegura que esté sobre la imagen */
+  }
+  
+  .cancha-card-content {
+    padding: 20px;
+    flex-grow: 1; /* Permite que esta sección crezca y empuje el botón hacia abajo */
+    display: flex;
+    flex-direction: column; /* Organiza el contenido interno verticalmente */
+  }
+  
+  .cancha-card-title {
+    margin: 0 0 10px 0;
+    color: var(--primary);
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  
+  .cancha-card-description,
+  .cancha-card-location,
+  .cancha-card-phone {
+    color: var(--text-light);
+    margin: 4px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  .cancha-card-description {
+    /* Opcional: Limitar número de líneas para consistencia */
+    /* display: -webkit-box; */
+    /* -webkit-line-clamp: 3; */
+    /* -webkit-box-orient: vertical;   */
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+    margin-bottom: 15px; /* Espacio antes del enlace/botón */
+  }
+  
+  .cancha-card-map-link {
+      display: inline-block; /* O block si quieres que ocupe toda la línea */
+      margin: 8px 0 12px 0; /* Espaciado */
+      color: var(--secondary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+  }
+  
+  .cancha-card-map-link:hover {
+      text-decoration: underline;
+  }
+  
+  .cancha-card-button {
+    margin-top: auto; /* Empuja el botón al final de la tarjeta */
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+    background-color: var(--primary);
+    color: white;
+    width: 100%; /* Ocupa todo el ancho disponible */
+    font-size: 1rem;
+    box-sizing: border-box; /* Incluye padding en el ancho */
+  }
+  
+  .cancha-card-button:hover:not(:disabled) {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px); /* Ligero efecto al pasar el mouse */
+  }
+  
+  .cancha-card-button:disabled {
+      background-color: var(--gray);
+      cursor: not-allowed;
+      color: var(--gray-dark);
+  }

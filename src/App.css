@@ -1,0 +1,135 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap");
+
+
+/* Definición de Variables CSS Globales */
+:root {
+  
+  --gray: #ccc;
+  --gray-lightest: #f7f7f7;
+  --primary: #34ac53;     /* Verde principal */
+  --primary-dark: #278841;  /* Verde más oscuro */
+  --primary-light: #4cbe6c; /* Verde más claro (añadido para consistencia) */
+  --secondary: #3b4cca;     /* Azul secundario */
+  --secondary-dark: #2a37a0; /* Azul más oscuro */
+  --background: #f8faff;   /* Fondo general de la página (muy claro) */
+  --white: #ffffff;         /* Blanco */
+  --gray-lightest: #f8f9fa; /* Gris extra claro */
+  --gray-light: #f1f3f5;   /* Gris claro */
+  --gray: #dcdfe3;         /* Gris medio */
+  --gray-dark: #6c757d;     /* Gris oscuro */
+  --text: #2f2f2f;          /* Color de texto principal */
+  --text-light: #555;       /* Color de texto más claro */
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Sombra por defecto */
+  --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.12); /* Sombra al pasar el mouse */
+  --highlight: #ffeaa7;      /* Amarillo para destacar (ej: precio) */
+  --danger: #e74c3c;         /* Rojo para errores/eliminar */
+  --danger-dark: #c0392b;
+  --info: #3498db;          /* Azul para información/admin */
+  --info-dark: #2980b9;
+  --warning: #f39c12;        /* Naranja para advertencias/pendiente */
+  --warning-dark: #e67e22;
+  --success: #2ecc71;        /* Verde para éxito/confirmado */
+  --success-dark: #27ae60;
+
+  /* Variables adicionales (ej: de Home.css) */
+  --accent: #ffcc00;      /* Acento (amarillo) */
+  --accent-light: #ffde59;
+  --radius: 8px;          /* Radio de borde estándar */
+  --radius-lg: 12px;        /* Radio de borde grande */
+  --max-width: 1200px;      /* Ancho máximo contenedor */
+
+
+  /* Transiciones CSS */
+  --transition-fast: all 0.2s ease-in-out;
+  --transition-medium: all 0.3s ease-in-out;
+  --transition: all 0.3s ease; /* Alias común */
+}
+
+/* Estilos base para el body */
+body {
+  background-color: var(--background);
+  margin: 0;
+  padding: 0;
+  /* MODIFICADO: Usar Montserrat globalmente */
+  font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Contenedor principal de la aplicación */
+.App {
+  margin: 0 auto;
+  padding: 0 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Estilos genéricos para botones */
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 30px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-medium);
+  text-decoration: none;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+/* ... (mantener .btn-primary, .btn-secondary, .btn-outline-primary) ... */
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px); /* Efecto hover */
+}
+.btn-secondary {
+  background-color: var(--secondary);
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: var(--secondary-dark);
+  transform: translateY(-2px);
+}
+.btn-outline-primary {
+  background-color: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+.btn-outline-primary:hover {
+  background-color: var(--primary);
+  color: white;
+}
+
+
+/* Estilos para mensajes de Carga y Error globales */
+.loading-message,
+.error-message {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.3rem;
+  color: var(--text-light);
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-message {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* Ajustes Responsive Generales */
+@media (max-width: 768px) {
+  .App {
+     padding: 0 15px 15px 15px;
+  }
+}

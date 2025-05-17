@@ -1,0 +1,54 @@
+.perfil-form-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background: #f8f8f8;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .perfil-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .perfil-form label {
+    display: block;
+    margin-bottom: 15px;
+  }
+  
+  .perfil-form input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  
+  .perfil-form button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  .perfil-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .mensaje {
+    color: green;
+    text-align: center;
+    margin-top: 10px;
+  }
+  
+  .error {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+  }
+  

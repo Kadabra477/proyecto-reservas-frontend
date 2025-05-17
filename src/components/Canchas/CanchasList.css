@@ -1,0 +1,40 @@
+/* src/features/canchas/CanchasList.css (NUEVO - Opcional) */
+/* Estilos para el contenedor de la lista/grid de CanchaCard */
+
+.canchas-list-container {
+    max-width: var(--max-width); /* Usar variable global */
+    margin: 30px auto; /* Centrado y con margen */
+    padding: 0 15px; /* Padding horizontal */
+  }
+  
+  .canchas-list-container h2 {
+    text-align: center;
+    color: var(--primary); /* Usar variable global */
+    margin-bottom: 30px;
+    font-size: 2rem;
+  }
+  
+  .canchas-grid {
+    display: grid;
+    /* Columnas automáticas que miden al menos 300px */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem; /* Espacio entre tarjetas */
+  }
+  
+  .no-canchas-message {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--text-light);
+    padding: 40px 20px;
+  }
+  
+  /* Ajustes responsivos si son necesarios más allá de auto-fit */
+  @media (max-width: 600px) {
+    .canchas-grid {
+      /* Cambiar a una sola columna en pantallas muy pequeñas */
+      grid-template-columns: 1fr;
+    }
+     .canchas-list-container h2 {
+         font-size: 1.6rem;
+     }
+  }

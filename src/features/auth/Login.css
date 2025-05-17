@@ -1,0 +1,14 @@
+/* src/components/Login.css */
+@import url("../../styles/AuthForm.css"); /* Importa los estilos compartidos */
+
+/* Estilos específicos para el fondo de Login */
+.login-background {
+  background: linear-gradient(to left, #283593, #1976d2); /* Gradiente azul específico */
+}
+
+/* Puedes añadir aquí otros estilos específicos o sobreescrituras para Login */
+/* Ejemplo:
+.login-form {
+  border-top-color: rgba(255, 255, 255, 0.5);
+}
+*/
