@@ -51,7 +51,7 @@ function Login({ onLoginSuccess, onGoToRegister }) {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/auth/login', {
+      const response = await api.post('/api/auth/login', {
         username: email,
         password: password,
       });

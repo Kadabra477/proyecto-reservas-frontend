@@ -39,7 +39,7 @@ function Register({ onGoToLogin }) {
     setIsLoading(true);
 
     try {
-      await api.post('/auth/register', {
+      await api.post('/api/auth/register', {
         nombreCompleto: nombreCompleto.trim(),
         username: email,
         password: password,
