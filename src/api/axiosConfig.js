@@ -4,6 +4,19 @@ const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
 });
 
+// Interceptor para agregar el token JWT en el header Authorization
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Interceptor para manejar respuestas, especialmente 401 Unauthorized
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -16,14 +29,11 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       const originalRequestUrl = error.config && error.config.url ? error.config.url : '';
 
-      // Evitar logout si la URL es login (o similar)
+      // No hacer logout si la llamada es al login para evitar bucles
       if (!originalRequestUrl.endsWith('/auth/login')) {
-        // Limpio datos de sesión local
         localStorage.removeItem('jwtToken');
         localStorage.removeItem('username');
         localStorage.removeItem('nombreCompleto');
-
-        // Redirecciono a login
         if (typeof window !== 'undefined') {
           window.location.assign('/login');
         }
