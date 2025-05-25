@@ -1,232 +1,331 @@
 import React, { useState, useEffect } from 'react';
-import {Link} from 'react-router-dom'; // Importar useNavigate si lo usas para redirección
+import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig'; // Asegúrate que esta ruta sea correcta
-import './DashboardUsuario.css'; // Asegúrate que esta ruta sea correcta
+import './DashboardUsuario.css';
 
 function DashboardUsuario() {
-  const [nombreUsuario, setNombreUsuario] = useState('');
-  const [username, setUsername] = useState(''); // Este es el email
-  const [edad, setEdad] = useState('');
-  const [ubicacion, setUbicacion] = useState('');
-  const [misReservas, setMisReservas] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [avatar, setAvatar] = useState('/avatar-default.png');
-  const [modalReserva, setModalReserva] = useState(null);
-  const [loadingReservas, setLoadingReservas] = useState(true);
-  const [errorReservas, setErrorReservas] = useState(null);
+    const [nombreCompleto, setNombreCompleto] = useState(''); // Estado para el nombre completo
+    const [email, setEmail] = useState(''); // Estado para el email (username)
+    const [edad, setEdad] = useState('');
+    const [ubicacion, setUbicacion] = useState('');
+    const [bio, setBio] = useState(''); // Nuevo campo para una pequeña biografía
+    const [profilePictureUrl, setProfilePictureUrl] = useState('/avatar-default.png'); // URL de la imagen de perfil
+    const [profileImageFile, setProfileImageFile] = useState(null); // Archivo de imagen seleccionado
+    const [misReservas, setMisReservas] = useState([]);
+    const [isEditing, setIsEditing] = useState(false); // Estado para controlar el modo de edición
+    const [modalReserva, setModalReserva] = useState(null);
+    const [loading, setLoading] = useState(true); // Nuevo estado para controlar la carga general
+    const [error, setError] = useState(null); // Nuevo estado para errores generales
 
-  useEffect(() => {
-    let isMounted = true; // Flag para evitar actualizaciones en componente desmontado
+    useEffect(() => {
+        let isMounted = true; // Flag para evitar actualizaciones en componente desmontado
 
-    const fetchUserDataAndReservas = async () => {
-      setLoadingReservas(true);
-      setErrorReservas(null);
+        const fetchUserDataAndReservas = async () => {
+            setLoading(true);
+            setError(null);
 
-      // 1. Intenta obtener datos del perfil desde localStorage
-      const nombreLS = localStorage.getItem('nombreCompleto');
-      const userLS = localStorage.getItem('username'); // Email
-      if (isMounted) {
-          setNombreUsuario(nombreLS || 'Usuario');
-          setUsername(userLS || ''); // Deja email vacío si no está? O intenta fetch?
-      }
+            try {
+                // 1. Fetch de los datos del perfil del usuario
+                // Necesitas crear este endpoint en tu backend Spring Boot: GET /api/users/me
+                const userProfileRes = await api.get('/users/me');
+                if (isMounted) {
+                    const userData = userProfileRes.data;
+                    setNombreCompleto(userData.nombreCompleto || '');
+                    setEmail(userData.email || '');
+                    setEdad(userData.edad || '');
+                    setUbicacion(userData.ubicacion || '');
+                    setBio(userData.bio || ''); // Asegúrate de que tu backend envíe este campo
+                    setProfilePictureUrl(userData.profilePictureUrl || '/avatar-default.png');
+                }
 
-      // --- Datos hardcodeados (reemplazar/eliminar si obtienes del backend) ---
-      if (isMounted) {
-        setEdad('24');
-        setUbicacion('San Martín, Mendoza');
-      }
-      // -------------------------------------------------------------------------
+                // 2. Fetch de las reservas del usuario
+                const reservasRes = await api.get('/reservas/usuario');
+                if (isMounted) {
+                    setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
+                }
 
-
-      // 2. Fetch de las reservas del usuario usando el endpoint CORRECTO
-      console.log('Dashboard UseEffect: Token ANTES de llamar API:', localStorage.getItem('jwtToken')); // Log para depurar token
-      try {
-        // *** CORRECCIÓN PRINCIPAL: Usar el endpoint correcto ***
-        const res = await api.get('/reservas/usuario'); // <-- LLAMAR A /api/reservas/usuario
-
-        if (isMounted) {
-          setMisReservas(Array.isArray(res.data) ? res.data : []);
-          console.log('Reservas obtenidas:', res.data);
-        }
-      } catch (err) {
-        console.error("Error al obtener mis reservas:", err);
-        if (isMounted) {
-            // El interceptor de Axios ya maneja la redirección del 401 globalmente.
-            // Aquí solo mostramos un mensaje si el error NO fue 401 (ya que seremos redirigidos).
-            if (!(err.response && err.response.status === 401)) {
-                setErrorReservas("No se pudieron cargar tus reservas. Intenta recargar la página.");
+            } catch (err) {
+                console.error("Error al cargar datos del dashboard:", err);
+                if (isMounted) {
+                    // El interceptor de Axios ya maneja la redirección del 401 globalmente.
+                    // Aquí solo mostramos un mensaje si el error NO fue 401.
+                    if (!(err.response && err.response.status === 401)) {
+                        setError("No se pudieron cargar los datos del perfil o las reservas. Intenta recargar la página.");
+                    }
+                    setMisReservas([]);
+                    // Limpiar datos del perfil también si hay error general
+                    setNombreCompleto('');
+                    setEmail('');
+                    setEdad('');
+                    setUbicacion('');
+                    setBio('');
+                    setProfilePictureUrl('/avatar-default.png');
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
-             setMisReservas([]); // Limpia las reservas en caso de error
-        }
-      } finally {
-        if (isMounted) {
-          setLoadingReservas(false);
-        }
-      }
+        };
 
-      // 3. (Opcional) Si el nombre o email no están en localStorage (ej. tras OAuth2),
-      // podrías hacer una llamada API aquí para obtenerlos desde /api/usuarios/mi-perfil (necesitas crear ese endpoint)
-      // if (isMounted && (!nombreLS || !userLS)) {
-      //   try {
-      //     const perfilRes = await api.get('/usuarios/mi-perfil'); // Endpoint de ejemplo
-      //     localStorage.setItem('nombreCompleto', perfilRes.data.nombreCompleto);
-      //     localStorage.setItem('username', perfilRes.data.email); // Asumiendo que devuelve email
-      //     setNombreUsuario(perfilRes.data.nombreCompleto);
-      //     setUsername(perfilRes.data.email);
-      //     // Actualiza otros datos si vienen del perfil: setEdad(perfilRes.data.edad), etc.
-      //   } catch (perfilErr) {
-      //     console.error("Error obteniendo datos del perfil:", perfilErr);
-      //     // No necesariamente un error crítico si ya tenemos token
-      //   }
-      // }
+        fetchUserDataAndReservas();
+
+        // Cleanup function
+        return () => {
+            isMounted = false;
+        };
+
+    }, []); // El array vacío asegura que useEffect se ejecute solo una vez al montar
+
+    // Maneja la selección de un nuevo archivo de avatar
+    const handleAvatarChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setProfileImageFile(file); // Guarda el archivo para enviarlo al backend
+            // Crea una URL temporal para la previsualización instantánea
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProfilePictureUrl(reader.result); // Actualiza la URL para mostrar la previsualización
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
-    fetchUserDataAndReservas();
+    // Función para guardar los cambios del perfil
+    const handleSaveChanges = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            // 1. Crear el objeto con los datos del perfil a enviar
+            const profileData = {
+                nombreCompleto,
+                edad: edad === '' ? null : Number(edad), // Asegurarse de enviar null si está vacío, y que sea número
+                ubicacion,
+                bio,
+                // Email no se suele editar desde el perfil de usuario, pero si fuera necesario:
+                // email: email,
+            };
 
-    // Cleanup function para evitar setear estado si el componente se desmonta
-    return () => {
-      isMounted = false;
+            // 2. Enviar los datos del perfil
+            // Necesitas crear este endpoint en tu backend Spring Boot: PUT /api/users/me
+            const updateProfileRes = await api.put('/users/me', profileData);
+            console.log('Perfil actualizado:', updateProfileRes.data);
+
+            // 3. Si hay un nuevo archivo de imagen, subirlo
+            if (profileImageFile) {
+                const formData = new FormData();
+                formData.append('file', profileImageFile); // 'file' debe coincidir con el nombre esperado en el backend
+
+                // Necesitas crear este endpoint en tu backend Spring Boot: POST /api/users/me/profile-picture
+                const uploadImageRes = await api.post('/users/me/profile-picture', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data', // Importante para subir archivos
+                    },
+                });
+                console.log('Imagen de perfil actualizada:', uploadImageRes.data);
+                setProfilePictureUrl(uploadImageRes.data.profilePictureUrl); // Actualizar con la URL final del backend
+                setProfileImageFile(null); // Limpiar el archivo después de subir
+            }
+
+            // Una vez que todo se guarda exitosamente
+            setIsEditing(false); // Sale del modo de edición
+            alert('¡Perfil actualizado exitosamente!'); // Mensaje de éxito
+        } catch (err) {
+            console.error("Error al guardar cambios en el perfil:", err);
+            setError("Error al guardar los cambios. Intenta de nuevo.");
+            // Si el error es 401, el interceptor de axios ya debería redirigir.
+            // Aquí manejar otros errores (ej. validación, red).
+            if (err.response && err.response.data && err.response.data.message) {
+                alert(`Error: ${err.response.data.message}`);
+            } else {
+                alert("Hubo un problema al guardar el perfil.");
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
-  }, []); // El array vacío asegura que useEffect se ejecute solo una vez al montar
 
-  // --- Resto de los handlers (handleAvatarChange, formatLocalDateTime, handleOpenModal, etc.) ---
-  // (Sin cambios respecto a la versión anterior que te pasé)
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setAvatar(reader.result);
-      reader.readAsDataURL(file);
-    }
-  };
+    // Función para formatear la fecha y hora de la reserva
+    const formatLocalDateTime = (dateTimeString) => {
+        if (!dateTimeString) return 'Fecha no disponible';
+        try {
+            const date = new Date(dateTimeString);
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+            return date.toLocaleString('es-AR', options);
+        } catch (e) {
+            console.error("Error formateando fecha:", dateTimeString, e);
+            return dateTimeString;
+        }
+    };
 
-  const formatLocalDateTime = (dateTimeString) => {
-    if (!dateTimeString) return 'Fecha no disponible';
-    try {
-      const date = new Date(dateTimeString);
-      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
-      return date.toLocaleString('es-AR', options);
-    } catch (e) {
-      console.error("Error formateando fecha:", dateTimeString, e);
-      return dateTimeString;
-    }
-  };
+    // Funciones para manejar el modal de reservas
+    const handleOpenModal = (reserva) => { setModalReserva(reserva); };
+    const handleCloseModal = () => { setModalReserva(null); };
 
-  const handleOpenModal = (reserva) => { setModalReserva(reserva); };
-  const handleCloseModal = () => { setModalReserva(null); };
-  const handleSaveChanges = () => { console.log("Guardando cambios:", { nombreUsuario, edad, ubicacion }); setIsEditing(false); };
 
-  // --- JSX de Renderizado (Sin cambios funcionales importantes respecto al anterior) ---
-  return (
-    <div className="dashboard-container">
-      {/* Sección de Perfil */}
-      <div className="perfil-container">
-        {/* ... (código de perfil sin cambios) ... */}
-         <div className="perfil-portada">
-             <img src="/portada-default.jpg" alt="Portada" className="portada-img" />
-           </div>
-           <div className="perfil-info-box">
-             <label htmlFor="avatar-upload" className="avatar-label">
-               <img src={avatar} alt="Avatar" className="perfil-avatar editable" title="Cambiar avatar"/>
-             </label>
-             <input type="file" id="avatar-upload" style={{ display: 'none' }} accept="image/*" onChange={handleAvatarChange}/>
-             {isEditing ? (
-               <div className="perfil-edicion">
-                 {/* ... inputs y botones de edición ... */}
-                 <input value={nombreUsuario} onChange={(e) => setNombreUsuario(e.target.value)} className="perfil-input" placeholder="Nombre Completo"/>
-                 <input value={edad} onChange={(e) => setEdad(e.target.value)} className="perfil-input" placeholder="Edad" type="number"/>
-                 <input value={ubicacion} onChange={(e) => setUbicacion(e.target.value)} className="perfil-input" placeholder="Ubicación"/>
-                 <button onClick={handleSaveChanges} className="btn btn-primary btn-guardar">Guardar</button>
-                 <button onClick={() => setIsEditing(false)} className="btn btn-secondary btn-cancelar">Cancelar</button>
-               </div>
-             ) : (
-               <div className="perfil-vista">
-                  {/* ... vista del perfil ... */}
-                 <h2 className="perfil-nombre">{nombreUsuario}</h2>
-                 <p className="perfil-dato"><strong>Edad:</strong> {edad} años</p>
-                 <p className="perfil-dato"><strong>Ubicación:</strong> {ubicacion}</p>
-                 <p className="perfil-dato"><strong>Email:</strong> {username}</p>
-                 <button onClick={() => setIsEditing(true)} className="btn btn-outline-primary btn-editar">Editar Perfil</button>
-               </div>
-             )}
-           </div>
-      </div>
-
-      {/* Sección de Mis Reservas */}
-      <div className="dashboard-card mis-reservas-card">
-        <h2>Mis Reservas</h2>
-        {loadingReservas ? (
-          <p>Cargando reservas...</p>
-        ) : errorReservas ? (
-          // Mostramos el error si no fue un 401 (ya que seremos redirigidos)
-          <p className="error-mensaje">{errorReservas}</p>
-        ) : misReservas.length > 0 ? (
-          <ul className="lista-reservas">
-            {misReservas.map((reserva) => (
-              <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
-                <p><strong>Cancha:</strong> {reserva.cancha?.nombre || 'N/A'}</p>
-                <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
-                {/* Aquí podrías mostrar el estado 'pagada' también si lo tienes */}
-                <p><strong>Estado:</strong> {reserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
-                 <p><strong>Pago:</strong> {reserva.pagada ? 'Pagada' : 'Pendiente'}</p> {/* Mostrar estado de pago */}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="dashboard-info">Aún no tenés reservas.</p>
-        )}
-        <Link to="/canchas" className="btn btn-primary btn-nueva-reserva">Hacer una Nueva Reserva</Link>
-      </div>
-
-      {/* Modal para Detalles de Reserva */}
-      {modalReserva && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            {/* ... (contenido del modal sin cambios, usando modalReserva) ... */}
-            <h3>Detalle de Reserva</h3>
-            <hr />
-            <p><strong>Cancha:</strong> {modalReserva.cancha?.nombre || 'N/A'}</p>
-            <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
-            <p><strong>Estado:</strong> {modalReserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
-            <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${modalReserva.metodoPago || '?'})` : 'Pendiente de Pago'}</p> {/* Mostrar estado de pago */}
-            <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
-            <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
-
-             {/* --- BOTÓN DE PAGO (Ejemplo) --- */}
-              {/* Mostrar solo si la reserva está confirmada Y NO pagada */}
-             {modalReserva.confirmada && !modalReserva.pagada && (
-                <button
-                  className="btn btn-success btn-pagar-mp"
-                  onClick={async () => {
-                      console.log(`Iniciando pago para reserva ID: ${modalReserva.id}`);
-                      try {
-                          const preferenciaResponse = await api.post(`/pagos/crear-preferencia/${modalReserva.id}`);
-                          const initPoint = preferenciaResponse.data.initPoint;
-                          if (initPoint) {
-                              window.location.href = initPoint; // Redirigir a Mercado Pago
-                          } else {
-                              alert("Error: No se pudo obtener el link de pago.");
-                          }
-                      } catch (error) {
-                           console.error("Error al crear preferencia de MP:", error);
-                           alert(`Error al iniciar el pago: ${error.response?.data || error.message}`);
-                      }
-                  }}
-                >
-                    Pagar con Mercado Pago
-                </button>
-             )}
-              {/* ----------------------------- */}
-
-            <div className="modal-actions">
-              <button className="btn btn-outline-primary" onClick={handleCloseModal}>Cerrar</button>
+    if (loading) {
+        return (
+            <div className="dashboard-container">
+                <p>Cargando datos del perfil y reservas...</p>
             </div>
-          </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="dashboard-container">
+                <p className="error-message">{error}</p>
+            </div>
+        );
+    }
+
+    // --- JSX de Renderizado ---
+    return (
+        <div className="dashboard-container">
+            {/* Sección de Perfil */}
+            <div className="perfil-container">
+                <div className="perfil-portada">
+                    {/* Puedes hacer que esta portada también sea editable si quieres */}
+                    <img src="/portada-default.jpg" alt="Portada" className="portada-img" />
+                </div>
+                <div className="perfil-info-box">
+                    <label htmlFor="avatar-upload" className="avatar-label">
+                        <img src={profilePictureUrl} alt="Avatar" className="perfil-avatar editable" title="Cambiar avatar" />
+                        {isEditing && (
+                            <span className="change-avatar-icon">
+                                <i className="fas fa-camera"></i> {/* Icono de cámara, si usas Font Awesome */}
+                            </span>
+                        )}
+                    </label>
+                    {/* Input de tipo file, visible solo en modo edición */}
+                    {isEditing && (
+                        <input
+                            type="file"
+                            id="avatar-upload"
+                            style={{ display: 'none' }}
+                            accept="image/*"
+                            onChange={handleAvatarChange}
+                        />
+                    )}
+
+                    {isEditing ? (
+                        <div className="perfil-edicion">
+                            <input
+                                value={nombreCompleto}
+                                onChange={(e) => setNombreCompleto(e.target.value)}
+                                className="perfil-input"
+                                placeholder="Nombre Completo"
+                            />
+                            <input
+                                value={edad}
+                                onChange={(e) => setEdad(e.target.value)}
+                                className="perfil-input"
+                                placeholder="Edad"
+                                type="number"
+                            />
+                            <input
+                                value={ubicacion}
+                                onChange={(e) => setUbicacion(e.target.value)}
+                                className="perfil-input"
+                                placeholder="Ubicación"
+                            />
+                             <textarea
+                                value={bio}
+                                onChange={(e) => setBio(e.target.value)}
+                                className="perfil-textarea"
+                                placeholder="Cuéntanos algo sobre ti..."
+                                rows="3"
+                            ></textarea>
+                            {/* El email generalmente no se edita por seguridad una vez registrado */}
+                            <p className="perfil-dato-editable"><strong>Email:</strong> {email}</p>
+
+                            <div className="perfil-acciones">
+                                <button onClick={handleSaveChanges} className="btn btn-primary btn-guardar">Guardar Cambios</button>
+                                <button onClick={() => {
+                                    setIsEditing(false);
+                                    // Opcional: recargar datos originales si se cancela la edición
+                                    // fetchUserDataAndReservas();
+                                }} className="btn btn-secondary btn-cancelar">Cancelar</button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="perfil-vista">
+                            <h2 className="perfil-nombre">{nombreCompleto || '¡Completa tu Perfil!'}</h2>
+                            <p className="perfil-dato"><strong>Edad:</strong> {edad ? `${edad} años` : 'No especificado'}</p>
+                            <p className="perfil-dato"><strong>Ubicación:</strong> {ubicacion || 'No especificada'}</p>
+                            <p className="perfil-dato"><strong>Email:</strong> {email || 'N/A'}</p>
+                            {bio && <p className="perfil-dato"><strong>Bio:</strong> {bio}</p>} {/* Solo mostrar si hay bio */}
+                            <button onClick={() => setIsEditing(true)} className="btn btn-outline-primary btn-editar">Editar Perfil</button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Sección de Mis Reservas */}
+            <div className="dashboard-card mis-reservas-card">
+                <h2>Mis Reservas</h2>
+                {misReservas.length > 0 ? (
+                    <ul className="lista-reservas">
+                        {misReservas.map((reserva) => (
+                            <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
+                                <p><strong>Cancha:</strong> {reserva.cancha?.nombre || 'N/A'}</p>
+                                <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
+                                <p><strong>Estado:</strong> {reserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
+                                <p><strong>Pago:</strong> {reserva.pagada ? 'Pagada' : 'Pendiente'}</p>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="dashboard-info">Aún no tenés reservas.</p>
+                )}
+                <Link to="/canchas" className="btn btn-primary btn-nueva-reserva">Hacer una Nueva Reserva</Link>
+            </div>
+
+            {/* Modal para Detalles de Reserva */}
+            {modalReserva && (
+                <div className="modal-overlay" onClick={handleCloseModal}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h3>Detalle de Reserva</h3>
+                        <hr />
+                        <p><strong>Cancha:</strong> {modalReserva.cancha?.nombre || 'N/A'}</p>
+                        <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
+                        <p><strong>Estado:</strong> {modalReserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
+                        <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${modalReserva.metodoPago || '?'})` : 'Pendiente de Pago'}</p>
+                        <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
+                        <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
+
+                        {modalReserva.confirmada && !modalReserva.pagada && (
+                            <button
+                                className="btn btn-success btn-pagar-mp"
+                                onClick={async () => {
+                                    console.log(`Iniciando pago para reserva ID: ${modalReserva.id}`);
+                                    try {
+                                        const preferenciaResponse = await api.post(`/pagos/crear-preferencia/${modalReserva.id}`);
+                                        const initPoint = preferenciaResponse.data.initPoint;
+                                        if (initPoint) {
+                                            window.location.href = initPoint;
+                                        } else {
+                                            alert("Error: No se pudo obtener el link de pago.");
+                                        }
+                                    } catch (error) {
+                                        console.error("Error al crear preferencia de MP:", error);
+                                        alert(`Error al iniciar el pago: ${error.response?.data || error.message}`);
+                                    }
+                                }}
+                            >
+                                Pagar con Mercado Pago
+                            </button>
+                        )}
+
+                        <div className="modal-actions">
+                            <button className="btn btn-outline-primary" onClick={handleCloseModal}>Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default DashboardUsuario;
