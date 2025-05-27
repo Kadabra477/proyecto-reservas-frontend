@@ -64,6 +64,7 @@ function App() {
             }
 
             try {
+                // Aquí usamos fetch directo, no api de axios, porque no queremos que el interceptor maneje un 401 para esta validación inicial.
                 const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/validate-token`, {
                     method: "GET",
                     headers: {
@@ -104,6 +105,7 @@ function App() {
 
     const ContenidoApp = () => {
         const navigate = useNavigate();
+        const location = useLocation(); // Hook para obtener la ruta actual
 
         // Mostrar un estado de carga mientras se verifica la autenticación
         if (isLoadingAuth) {
@@ -119,38 +121,54 @@ function App() {
             );
         }
 
+        // Determinar si la Navbar debe mostrarse en la ruta actual
+        // Por ejemplo, no mostrarla en /login, /register, etc.
+        const shouldShowNavbar = ![
+            '/login',
+            '/register',
+            '/forgot-password',
+            '/reset-password',
+            '/oauth2-success'
+        ].includes(location.pathname);
+
+
         return (
             <>
-                <Navbar
-                    isLoggedIn={estaAutenticado}
-                    nombreUsuario={nombreUsuario}
-                    onLogout={() => {
-                        handleLogout();
-                        navigate('/');
-                    }}
-                />
+                {/* Renderiza la Navbar solo si shouldShowNavbar es true */}
+                {shouldShowNavbar && (
+                    <Navbar
+                        isLoggedIn={estaAutenticado}
+                        nombreUsuario={nombreUsuario}
+                        onLogout={() => {
+                            handleLogout();
+                            navigate('/');
+                        }}
+                    />
+                )}
 
                 <Routes>
                     <Route path="/" element={<Home estaAutenticado={estaAutenticado} />} />
+                    {/* Rutas de autenticación sin Navbar */}
                     <Route path="/login" element={<RedireccionSiAutenticado><Login onLoginSuccess={handleLogin} /></RedireccionSiAutenticado>} />
                     <Route path="/register" element={<RedireccionSiAutenticado><Register /></RedireccionSiAutenticado>} />
-
                     <Route path="/forgot-password" element={<ForgotPasswordRequest />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/oauth2-success" element={<OAuth2Success onLoginSuccess={handleLogin} />} />
 
+                    {/* Rutas protegidas (que tendrán Navbar por defecto, ya que no están en la lista de exclusión) */}
                     <Route path="/dashboard" element={<RutaProtegida><DashboardUsuario /></RutaProtegida>} />
                     <Route path="/canchas" element={<RutaProtegida><Canchas /></RutaProtegida>} />
                     <Route path="/reservar/:canchaId" element={<RutaProtegida><ReservaForm /></RutaProtegida>} />
                     <Route path="/admin" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
-                    {/* Si PerfilForm es para la edición separada y quieres un link directo en el navbar, esta ruta sería útil */}
                     <Route path="/perfil" element={<RutaProtegida><PerfilForm /></RutaProtegida>} />
                     <Route path="/mis-reservas" element={<RutaProtegida><MisReservas /></RutaProtegida>} />
 
+                    {/* Rutas de pago */}
                     <Route path="/pago-exitoso" element={<PagoExitoso />} />
                     <Route path="/pago-fallido" element={<PagoFallido />} />
                     <Route path="/pago-pendiente" element={<PagoPendiente />} />
 
+                    {/* Redirección para rutas no encontradas */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </>

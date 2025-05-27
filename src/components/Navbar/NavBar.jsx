@@ -13,6 +13,7 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
     return (
         <header className="navbar">
             <div className="navbar-container">
+                {/* Logo con el nuevo nombre */}
                 <NavLink to="/" className="navbar-logo">¿DÓNDE JUEGO?</NavLink>
                 <nav className="navbar-menu">
                     {/* Links que siempre están visibles */}
@@ -26,19 +27,21 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
                     {/* Renderización condicional de links según el estado de autenticación */}
                     {isLoggedIn ? (
                         <>
-                            {/* Un único enlace al dashboard/perfil principal para evitar duplicados */}
+                            {/* Enlace al Dashboard */}
                             <NavLink
                                 to="/dashboard"
                                 className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
                             >
                                 Dashboard
                             </NavLink>
+                            {/* Enlace a Mis Reservas */}
                             <NavLink
                                 to="/mis-reservas"
                                 className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
                             >
                                 Mis Reservas
                             </NavLink>
+                            {/* Sección de usuario logueado */}
                             <div className="navbar-user-section">
                                 <span className="navbar-greeting">Hola, {nombreUsuario || 'Usuario'}!</span>
                                 <button onClick={handleLogoutClick} className="btn btn-outline-primary">

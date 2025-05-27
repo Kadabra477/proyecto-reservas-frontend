@@ -4,11 +4,11 @@ import api from '../../api/axiosConfig'; // Asegúrate que esta ruta sea correct
 import './DashboardUsuario.css';
 
 function DashboardUsuario() {
-    const [nombreCompleto, setNombreCompleto] = useState(''); // Estado para el nombre completo
+    const [nombreCompleto, setNombreCompleto] = useState(''); // Ahora vacío por defecto
     const [email, setEmail] = useState(''); // Estado para el email (username)
-    const [edad, setEdad] = useState('');
-    const [ubicacion, setUbicacion] = useState('');
-    const [bio, setBio] = useState(''); // Nuevo campo para una pequeña biografía
+    const [edad, setEdad] = useState(''); // Ahora vacío por defecto
+    const [ubicacion, setUbicacion] = useState(''); // Ahora vacío por defecto
+    const [bio, setBio] = useState(''); // Ahora vacío por defecto
     const [profilePictureUrl, setProfilePictureUrl] = useState('/avatar-default.png'); // URL de la imagen de perfil
     const [profileImageFile, setProfileImageFile] = useState(null); // Archivo de imagen seleccionado
     const [misReservas, setMisReservas] = useState([]);
@@ -26,7 +26,6 @@ function DashboardUsuario() {
 
             try {
                 // 1. Fetch de los datos del perfil del usuario
-                // Necesitas crear este endpoint en tu backend Spring Boot: GET /api/users/me
                 const userProfileRes = await api.get('/users/me');
                 if (isMounted) {
                     const userData = userProfileRes.data;
@@ -34,7 +33,7 @@ function DashboardUsuario() {
                     setEmail(userData.email || '');
                     setEdad(userData.edad || '');
                     setUbicacion(userData.ubicacion || '');
-                    setBio(userData.bio || ''); // Asegúrate de que tu backend envíe este campo
+                    setBio(userData.bio || ''); 
                     setProfilePictureUrl(userData.profilePictureUrl || '/avatar-default.png');
                 }
 
@@ -230,7 +229,7 @@ function DashboardUsuario() {
                                 className="perfil-input"
                                 placeholder="Ubicación"
                             />
-                             <textarea
+                            <textarea
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
                                 className="perfil-textarea"
@@ -251,6 +250,7 @@ function DashboardUsuario() {
                         </div>
                     ) : (
                         <div className="perfil-vista">
+                            {/* Los placeholders se muestran si el valor está vacío */}
                             <h2 className="perfil-nombre">{nombreCompleto || '¡Completa tu Perfil!'}</h2>
                             <p className="perfil-dato"><strong>Edad:</strong> {edad ? `${edad} años` : 'No especificado'}</p>
                             <p className="perfil-dato"><strong>Ubicación:</strong> {ubicacion || 'No especificada'}</p>
