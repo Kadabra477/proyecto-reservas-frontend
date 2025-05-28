@@ -41,7 +41,7 @@ function Login({ onLoginSuccess }) {
             setValidationMessage(message);
             setValidationMessageType(type);
         }
-    }, [searchParams]); // Dependencia actualizada a searchParams
+    }, [searchParams]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,19 +54,18 @@ function Login({ onLoginSuccess }) {
                 password: password,
             });
 
-            // Asumiendo que el backend ahora devuelve también el 'role' en la respuesta del login
             const { token, username, nombreCompleto, role, error: loginError } = response.data;
 
             if (loginError) {
                 setIsLoading(false);
                 setError(loginError);
-            } else if (token && username && nombreCompleto && role) { // Asegúrate de que 'role' también esté presente
+            } else if (token && username && nombreCompleto && role) {
                 localStorage.setItem('jwtToken', token);
                 localStorage.setItem('username', username);
-                localStorage.setItem('nombreComplepleto', nombreCompleto);
-                localStorage.setItem('userRole', role); // <-- Guarda el rol aquí
+                localStorage.setItem('nombreCompleto', nombreCompleto); // <-- ¡CORREGIDO! Antes era 'nombreComplepleto'
+                localStorage.setItem('userRole', role);
                 if (onLoginSuccess) {
-                    onLoginSuccess(token, username, nombreCompleto, role); // <-- Pasa el rol a onLoginSuccess
+                    onLoginSuccess(token, username, nombreCompleto, role);
                 }
             } else {
                 setIsLoading(false);
