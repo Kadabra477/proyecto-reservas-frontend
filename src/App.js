@@ -37,29 +37,56 @@ function RedireccionSiAutenticado({ children, destino = "/dashboard" }) {
     return children;
 }
 
-function RutaProtegida({ children }) {
+// NUEVA FUNCIÓN: Para verificar si el usuario tiene el rol requerido
+const hasRequiredRole = (userRole, requiredRoles) => {
+    if (!requiredRoles || requiredRoles.length === 0) {
+        return true; // No se requieren roles específicos, cualquier autenticado sirve
+    }
+    if (!userRole) {
+        return false; // No tiene rol definido
+    }
+    // Asegurarse de que el rol de usuario coincida con alguno de los roles requeridos
+    return requiredRoles.includes(userRole.toUpperCase());
+};
+
+// MODIFICADA: Ruta Protegida para manejar roles
+function RutaProtegida({ children, rolesRequeridos }) {
     const estaAutenticado = !!localStorage.getItem('jwtToken');
+    const userRole = localStorage.getItem('userRole'); // Obtener el rol del localStorage
     const location = useLocation();
+
     if (!estaAutenticado) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
+
+    // Si está autenticado pero no tiene el rol requerido, redirige a una página de acceso denegado o al dashboard
+    if (!hasRequiredRole(userRole, rolesRequeridos)) {
+        // Podrías redirigir a una página 403 (Acceso Denegado) o al dashboard
+        console.warn(`Acceso denegado: Rol ${userRole} no autorizado para ${location.pathname}. Roles requeridos: ${rolesRequeridos}`);
+        return <Navigate to="/dashboard" replace />; // Redirige al dashboard si no tiene permisos
+    }
+
     return children;
 }
+
 
 function App() {
     const [estaAutenticado, setEstaAutenticado] = useState(false);
     const [nombreUsuario, setNombreUsuario] = useState('');
+    const [userRole, setUserRole] = useState(null); // Nuevo estado para el rol del usuario
     const [isLoadingAuth, setIsLoadingAuth] = useState(true); // Nuevo estado para la carga de autenticación
 
     useEffect(() => {
         const verificarToken = async () => {
             const token = localStorage.getItem('jwtToken');
             const nombre = localStorage.getItem('nombreCompleto');
+            const role = localStorage.getItem('userRole'); // Recuperar el rol
 
             if (!token) {
                 setEstaAutenticado(false);
                 setNombreUsuario('');
-                setIsLoadingAuth(false); // Finaliza la carga si no hay token
+                setUserRole(null);
+                setIsLoadingAuth(false);
                 return;
             }
 
@@ -75,13 +102,16 @@ function App() {
                 if (!res.ok) throw new Error("Token inválido");
                 setEstaAutenticado(true);
                 setNombreUsuario(nombre || '');
+                setUserRole(role); // Establecer el rol
             } catch (error) {
                 console.log("Token inválido o expirado:", error);
                 localStorage.removeItem('jwtToken');
                 localStorage.removeItem('username');
                 localStorage.removeItem('nombreCompleto');
+                localStorage.removeItem('userRole'); // Limpiar el rol también
                 setEstaAutenticado(false);
                 setNombreUsuario('');
+                setUserRole(null);
             } finally {
                 setIsLoadingAuth(false); // Siempre finaliza la carga
             }
@@ -90,17 +120,23 @@ function App() {
         verificarToken();
     }, []);
 
-    const handleLogin = (token, username, nombreCompleto) => {
+    // MODIFICADA: handleLogin para guardar el rol
+    const handleLogin = (token, username, nombreCompleto, role) => {
         setEstaAutenticado(true);
         setNombreUsuario(nombreCompleto);
+        setUserRole(role); // Guardar el rol en el estado
+        localStorage.setItem('userRole', role); // Guardar el rol en localStorage
     };
 
+    // MODIFICADA: handleLogout para limpiar el rol
     const handleLogout = () => {
         localStorage.removeItem('jwtToken');
         localStorage.removeItem('username');
         localStorage.removeItem('nombreCompleto');
+        localStorage.removeItem('userRole'); // Limpiar el rol
         setEstaAutenticado(false);
         setNombreUsuario('');
+        setUserRole(null);
     };
 
     const ContenidoApp = () => {
@@ -153,13 +189,15 @@ function App() {
                     <Route path="/register" element={<RedireccionSiAutenticado><Register /></RedireccionSiAutenticado>} />
                     <Route path="/forgot-password" element={<ForgotPasswordRequest />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/oauth2-success" element={<OAuth2Success onLoginSuccess={handleLogin} />} />
+                    {/* A OAuth2Success se le pasa onLoginSuccess para que notifique a App.js y guarde el rol */}
+                    <Route path="/oauth2-success" element={<OAuth2Success onLoginSuccess={handleLogin} />} /> 
 
                     {/* Rutas protegidas (que tendrán Navbar por defecto, ya que no están en la lista de exclusión) */}
                     <Route path="/dashboard" element={<RutaProtegida><DashboardUsuario /></RutaProtegida>} />
                     <Route path="/canchas" element={<RutaProtegida><Canchas /></RutaProtegida>} />
                     <Route path="/reservar/:canchaId" element={<RutaProtegida><ReservaForm /></RutaProtegida>} />
-                    <Route path="/admin" element={<RutaProtegida><AdminPanel /></RutaProtegida>} />
+                    {/* Ruta de Admin ahora requiere el rol 'ADMIN' */}
+                    <Route path="/admin" element={<RutaProtegida rolesRequeridos={['ADMIN']}><AdminPanel /></RutaProtegida>} />
                     <Route path="/perfil" element={<RutaProtegida><PerfilForm /></RutaProtegida>} />
                     <Route path="/mis-reservas" element={<RutaProtegida><MisReservas /></RutaProtegida>} />
 

@@ -94,6 +94,14 @@ function DashboardUsuario() {
     const handleSaveChanges = async () => {
         setLoading(true);
         setError(null);
+
+        // Validación del nombre completo
+        if (!nombreCompleto.trim()) {
+            setError("El Nombre Completo es un campo obligatorio.");
+            setLoading(false);
+            return;
+        }
+
         try {
             // 1. Crear el objeto con los datos del perfil a enviar
             const profileData = {
@@ -101,12 +109,9 @@ function DashboardUsuario() {
                 edad: edad === '' ? null : Number(edad), // Asegurarse de enviar null si está vacío, y que sea número
                 ubicacion,
                 bio,
-                // Email no se suele editar desde el perfil de usuario, pero si fuera necesario:
-                // email: email,
             };
 
             // 2. Enviar los datos del perfil
-            // Necesitas crear este endpoint en tu backend Spring Boot: PUT /api/users/me
             const updateProfileRes = await api.put('/users/me', profileData);
             console.log('Perfil actualizado:', updateProfileRes.data);
 
@@ -115,7 +120,6 @@ function DashboardUsuario() {
                 const formData = new FormData();
                 formData.append('file', profileImageFile); // 'file' debe coincidir con el nombre esperado en el backend
 
-                // Necesitas crear este endpoint en tu backend Spring Boot: POST /api/users/me/profile-picture
                 const uploadImageRes = await api.post('/users/me/profile-picture', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data', // Importante para subir archivos
@@ -132,8 +136,6 @@ function DashboardUsuario() {
         } catch (err) {
             console.error("Error al guardar cambios en el perfil:", err);
             setError("Error al guardar los cambios. Intenta de nuevo.");
-            // Si el error es 401, el interceptor de axios ya debería redirigir.
-            // Aquí manejar otros errores (ej. validación, red).
             if (err.response && err.response.data && err.response.data.message) {
                 alert(`Error: ${err.response.data.message}`);
             } else {
@@ -215,6 +217,7 @@ function DashboardUsuario() {
                                 onChange={(e) => setNombreCompleto(e.target.value)}
                                 className="perfil-input"
                                 placeholder="Nombre Completo"
+                                required // Ahora este campo es obligatorio
                             />
                             <input
                                 value={edad}

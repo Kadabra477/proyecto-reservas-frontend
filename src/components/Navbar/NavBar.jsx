@@ -10,6 +10,12 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
         navigate('/');
     };
 
+    // Función para obtener solo el primer nombre
+    const getFirstName = (fullName) => {
+        if (!fullName) return 'Usuario';
+        return fullName.split(' ')[0];
+    };
+
     return (
         <header className="navbar">
             <div className="navbar-container">
@@ -43,7 +49,8 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
                             </NavLink>
                             {/* Sección de usuario logueado */}
                             <div className="navbar-user-section">
-                                <span className="navbar-greeting">Hola, {nombreUsuario || 'Usuario'}!</span>
+                                {/* Muestra solo el primer nombre */}
+                                <span className="navbar-greeting">Hola, {getFirstName(nombreUsuario)}!</span>
                                 <button onClick={handleLogoutClick} className="btn btn-outline-primary">
                                     Cerrar Sesión
                                 </button>

@@ -40,10 +40,8 @@ function Login({ onLoginSuccess }) {
         if (message) {
             setValidationMessage(message);
             setValidationMessageType(type);
-            // navigate('/login', { replace: true }); // opcional limpiar URL
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [searchParams]); // Dependencia actualizada a searchParams
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -56,21 +54,23 @@ function Login({ onLoginSuccess }) {
                 password: password,
             });
 
-            const { token, username, nombreCompleto, error: loginError } = response.data;
+            // Asumiendo que el backend ahora devuelve también el 'role' en la respuesta del login
+            const { token, username, nombreCompleto, role, error: loginError } = response.data;
 
             if (loginError) {
                 setIsLoading(false);
                 setError(loginError);
-            } else if (token && username && nombreCompleto) {
+            } else if (token && username && nombreCompleto && role) { // Asegúrate de que 'role' también esté presente
                 localStorage.setItem('jwtToken', token);
                 localStorage.setItem('username', username);
-                localStorage.setItem('nombreCompleto', nombreCompleto);
+                localStorage.setItem('nombreComplepleto', nombreCompleto);
+                localStorage.setItem('userRole', role); // <-- Guarda el rol aquí
                 if (onLoginSuccess) {
-                    onLoginSuccess(token, username, nombreCompleto);
+                    onLoginSuccess(token, username, nombreCompleto, role); // <-- Pasa el rol a onLoginSuccess
                 }
             } else {
                 setIsLoading(false);
-                setError('Respuesta inesperada del servidor.');
+                setError('Respuesta inesperada del servidor o datos incompletos.');
             }
         } catch (err) {
             console.error('Error en catch de handleSubmit:', err);
@@ -86,7 +86,6 @@ function Login({ onLoginSuccess }) {
     };
 
     return (
-        // Se mantiene la estructura para que ocupe el 100% del viewport
         <div className="auth-background login-background">
             <div className="auth-container">
 
