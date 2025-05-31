@@ -277,10 +277,10 @@ function DashboardUsuario() {
                             <p><strong>Jugadores:</strong> {modalReserva.jugadores.join(', ')}</p>
                         )}
                         {modalReserva.equipo1 && modalReserva.equipo1.length > 0 && (
-                            <p><strong>Equipo 1:</strong> {Array.from(modalReserva.equipo1).join(', ')}</p> // Asegúrate de Array.from() si es necesario
+                            <p><strong>Equipo 1:</strong> {Array.from(modalReserva.equipo1).join(', ')}</p>
                         )}
                         {modalReserva.equipo2 && modalReserva.equipo2.length > 0 && (
-                            <p><strong>Equipo 2:</strong> {Array.from(modalReserva.equipo2).join(', ')}</p> // Asegúrate de Array.from() si es necesario
+                            <p><strong>Equipo 2:</strong> {Array.from(modalReserva.equipo2).join(', ')}</p>
                         )}
 
                         {modalReserva.confirmada && !modalReserva.pagada && (
@@ -289,7 +289,15 @@ function DashboardUsuario() {
                                 onClick={async () => {
                                     console.log(`Iniciando pago para reserva ID: ${modalReserva.id}`);
                                     try {
-                                        const preferenciaResponse = await api.post(`/pagos/crear-preferencia/${modalReserva.id}`);
+                                        // MODIFICADO: Enviar el DTO en el cuerpo de la solicitud (POST con ID en la ruta)
+                                        const preferenciaResponse = await api.post(
+                                            `/pagos/crear-preferencia/${modalReserva.id}`, // ID en la ruta
+                                            { // Cuerpo de la solicitud (PagoDTO)
+                                                reservaId: modalReserva.id,
+                                                nombreCliente: modalReserva.cliente, // Usar el nombre del cliente de la reserva
+                                                monto: modalReserva.precio // Usar el precio de la reserva
+                                            }
+                                        );
                                         const initPoint = preferenciaResponse.data.initPoint;
                                         if (initPoint) {
                                             window.location.href = initPoint;
@@ -298,7 +306,9 @@ function DashboardUsuario() {
                                         }
                                     } catch (error) {
                                         console.error("Error al crear preferencia de MP:", error);
-                                        alert(`Error al iniciar el pago: ${error.response?.data || error.message}`);
+                                        // Acceder al mensaje de error del backend si existe
+                                        const errorMessage = error.response?.data?.error || error.message || "Error desconocido al crear preferencia.";
+                                        alert(`Error al iniciar el pago: ${errorMessage}`);
                                     }
                                 }}
                             >
