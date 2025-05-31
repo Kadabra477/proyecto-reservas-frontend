@@ -56,8 +56,8 @@ function AdminPanel() {
     setIsLoadingReservas(true);
     setMensaje({ text: '', type: '' }); // Limpiar mensaje
     try {
-      // CAMBIO AQUÍ: La ruta correcta del backend es /reservas/admin/todas
-      const res = await api.get('/reservas/admin/todas'); 
+      // Ruta corregida para el backend: /reservas/admin/todas
+      const res = await api.get('/reservas/admin/todas');
       setReservas(Array.isArray(res.data) ? res.data : []); // Asegurar que sea un array
     } catch (err) {
       console.error('Error al obtener reservas:', err);
@@ -70,7 +70,7 @@ function AdminPanel() {
     } finally {
       setIsLoadingReservas(false);
     }
-  }, []); // Sin dependencias, se crea una vez
+  }, []);
 
 
   // Efecto para cargar datos cuando cambia la pestaña activa
@@ -103,8 +103,8 @@ function AdminPanel() {
       : value; // Valor directo para otros inputs
 
     if (editingCancha) {
-      // Actualizar el estado de la cancha que se está editando
-      setCanchaToEdit({ ...editingCancha, [name]: newValue });
+      // CORRECCIÓN AQUÍ: Usar setEditingCancha en lugar de setCanchaToEdit
+      setEditingCancha({ ...editingCancha, [name]: newValue });
     } else {
       // Actualizar el estado del formulario para cancha nueva
       setNuevaCancha({ ...nuevaCancha, [name]: newValue });
