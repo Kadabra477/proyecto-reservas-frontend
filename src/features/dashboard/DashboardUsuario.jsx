@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../api/axiosConfig'; // Asegúrate que esta ruta sea correcta
+import api from '../../api/axiosConfig';
 import './DashboardUsuario.css';
 
 function DashboardUsuario() {
@@ -25,7 +25,6 @@ function DashboardUsuario() {
             setError(null);
 
             try {
-                // 1. Fetch de los datos del perfil del usuario
                 const userProfileRes = await api.get('/users/me');
                 if (isMounted) {
                     const userData = userProfileRes.data;
@@ -37,11 +36,8 @@ function DashboardUsuario() {
                     setProfilePictureUrl(userData.profilePictureUrl || '/avatar-default.png');
                 }
 
-                // 2. Fetch de las reservas del usuario
-                // ¡IMPORTANTE! Aquí se espera el nuevo ReservaDetalleDTO
                 const reservasRes = await api.get('/reservas/usuario');
                 if (isMounted) {
-                    // Asegúrate de que misReservas se establece como un array, incluso si la respuesta es nula o vacía
                     setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
                 }
 
@@ -52,7 +48,6 @@ function DashboardUsuario() {
                         setError("No se pudieron cargar los datos del perfil o las reservas. Intenta recargar la página.");
                     }
                     setMisReservas([]);
-                    // Limpiar datos del perfil también si hay error general
                     setNombreCompleto('');
                     setEmail('');
                     setEdad('');
@@ -75,7 +70,6 @@ function DashboardUsuario() {
 
     }, []);
 
-    // Maneja la selección de un nuevo archivo de avatar
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -88,7 +82,6 @@ function DashboardUsuario() {
         }
     };
 
-    // Función para guardar los cambios del perfil
     const handleSaveChanges = async () => {
         setLoading(true);
         setError(null);
@@ -139,8 +132,6 @@ function DashboardUsuario() {
         }
     };
 
-
-    // Función para formatear la fecha y hora de la reserva
     const formatLocalDateTime = (dateTimeString) => {
         if (!dateTimeString) return 'Fecha no disponible';
         try {
@@ -153,10 +144,8 @@ function DashboardUsuario() {
         }
     };
 
-    // Funciones para manejar el modal de reservas
     const handleOpenModal = (reserva) => { setModalReserva(reserva); };
     const handleCloseModal = () => { setModalReserva(null); };
-
 
     if (loading) {
         return (
@@ -174,10 +163,8 @@ function DashboardUsuario() {
         );
     }
 
-    // --- JSX de Renderizado ---
     return (
         <div className="dashboard-container">
-            {/* Sección de Perfil */}
             <div className="perfil-container">
                 <div className="perfil-portada">
                     <img src="/portada-default.jpg" alt="Portada" className="portada-img" />
@@ -252,19 +239,16 @@ function DashboardUsuario() {
                 </div>
             </div>
 
-            {/* Sección de Mis Reservas */}
             <div className="dashboard-card mis-reservas-card">
                 <h2>Mis Reservas</h2>
                 {misReservas.length > 0 ? (
                     <ul className="lista-reservas">
                         {misReservas.map((reserva) => (
                             <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
-                                {/* ¡Asegúrate de usar las propiedades del ReservaDetalleDTO aquí! */}
                                 <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p> 
                                 <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
                                 <p><strong>Estado:</strong> {reserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
                                 <p><strong>Pago:</strong> {reserva.pagada ? 'Pagada' : 'Pendiente'}</p>
-                                {/* Opcional: Mostrar jugadores si existen */}
                                 {reserva.jugadores && reserva.jugadores.length > 0 && (
                                     <p><strong>Jugadores:</strong> {reserva.jugadores.join(', ')}</p>
                                 )}
@@ -277,13 +261,11 @@ function DashboardUsuario() {
                 <Link to="/canchas" className="btn btn-primary btn-nueva-reserva">Hacer una Nueva Reserva</Link>
             </div>
 
-            {/* Modal para Detalles de Reserva */}
             {modalReserva && (
                 <div className="modal-overlay" onClick={handleCloseModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <h3>Detalle de Reserva</h3>
                         <hr />
-                        {/* Asegúrate de usar las propiedades del ReservaDetalleDTO aquí */}
                         <p><strong>Cancha:</strong> {modalReserva.canchaNombre || 'N/A'}</p>
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
                         <p><strong>Estado:</strong> {modalReserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
@@ -291,16 +273,14 @@ function DashboardUsuario() {
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
                         
-                        {/* Mostrar jugadores si existen */}
                         {modalReserva.jugadores && modalReserva.jugadores.length > 0 && (
                             <p><strong>Jugadores:</strong> {modalReserva.jugadores.join(', ')}</p>
                         )}
-                        {/* Mostrar equipos si existen */}
                         {modalReserva.equipo1 && modalReserva.equipo1.length > 0 && (
-                            <p><strong>Equipo 1:</strong> {modalReserva.equipo1.join(', ')}</p>
+                            <p><strong>Equipo 1:</strong> {Array.from(modalReserva.equipo1).join(', ')}</p> // Asegúrate de Array.from() si es necesario
                         )}
                         {modalReserva.equipo2 && modalReserva.equipo2.length > 0 && (
-                            <p><strong>Equipo 2:</strong> {modalReserva.equipo2.join(', ')}</p>
+                            <p><strong>Equipo 2:</strong> {Array.from(modalReserva.equipo2).join(', ')}</p> // Asegúrate de Array.from() si es necesario
                         )}
 
                         {modalReserva.confirmada && !modalReserva.pagada && (
