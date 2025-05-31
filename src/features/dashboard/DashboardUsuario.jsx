@@ -4,21 +4,21 @@ import api from '../../api/axiosConfig'; // Asegúrate que esta ruta sea correct
 import './DashboardUsuario.css';
 
 function DashboardUsuario() {
-    const [nombreCompleto, setNombreCompleto] = useState(''); // Ahora vacío por defecto
-    const [email, setEmail] = useState(''); // Estado para el email (username)
-    const [edad, setEdad] = useState(''); // Ahora vacío por defecto
-    const [ubicacion, setUbicacion] = useState(''); // Ahora vacío por defecto
-    const [bio, setBio] = useState(''); // Ahora vacío por defecto
-    const [profilePictureUrl, setProfilePictureUrl] = useState('/avatar-default.png'); // URL de la imagen de perfil
-    const [profileImageFile, setProfileImageFile] = useState(null); // Archivo de imagen seleccionado
+    const [nombreCompleto, setNombreCompleto] = useState('');
+    const [email, setEmail] = useState('');
+    const [edad, setEdad] = useState('');
+    const [ubicacion, setUbicacion] = useState('');
+    const [bio, setBio] = useState(''); 
+    const [profilePictureUrl, setProfilePictureUrl] = useState('/avatar-default.png');
+    const [profileImageFile, setProfileImageFile] = useState(null);
     const [misReservas, setMisReservas] = useState([]);
-    const [isEditing, setIsEditing] = useState(false); // Estado para controlar el modo de edición
+    const [isEditing, setIsEditing] = useState(false);
     const [modalReserva, setModalReserva] = useState(null);
-    const [loading, setLoading] = useState(true); // Nuevo estado para controlar la carga general
-    const [error, setError] = useState(null); // Nuevo estado para errores generales
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        let isMounted = true; // Flag para evitar actualizaciones en componente desmontado
+        let isMounted = true;
 
         const fetchUserDataAndReservas = async () => {
             setLoading(true);
@@ -38,16 +38,16 @@ function DashboardUsuario() {
                 }
 
                 // 2. Fetch de las reservas del usuario
+                // ¡IMPORTANTE! Aquí se espera el nuevo ReservaDetalleDTO
                 const reservasRes = await api.get('/reservas/usuario');
                 if (isMounted) {
+                    // Asegúrate de que misReservas se establece como un array, incluso si la respuesta es nula o vacía
                     setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
                 }
 
             } catch (err) {
                 console.error("Error al cargar datos del dashboard:", err);
                 if (isMounted) {
-                    // El interceptor de Axios ya maneja la redirección del 401 globalmente.
-                    // Aquí solo mostramos un mensaje si el error NO fue 401.
                     if (!(err.response && err.response.status === 401)) {
                         setError("No se pudieron cargar los datos del perfil o las reservas. Intenta recargar la página.");
                     }
@@ -69,22 +69,20 @@ function DashboardUsuario() {
 
         fetchUserDataAndReservas();
 
-        // Cleanup function
         return () => {
             isMounted = false;
         };
 
-    }, []); // El array vacío asegura que useEffect se ejecute solo una vez al montar
+    }, []);
 
     // Maneja la selección de un nuevo archivo de avatar
     const handleAvatarChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setProfileImageFile(file); // Guarda el archivo para enviarlo al backend
-            // Crea una URL temporal para la previsualización instantánea
+            setProfileImageFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
-                setProfilePictureUrl(reader.result); // Actualiza la URL para mostrar la previsualización
+                setProfilePictureUrl(reader.result);
             };
             reader.readAsDataURL(file);
         }
@@ -95,7 +93,6 @@ function DashboardUsuario() {
         setLoading(true);
         setError(null);
 
-        // Validación del nombre completo
         if (!nombreCompleto.trim()) {
             setError("El Nombre Completo es un campo obligatorio.");
             setLoading(false);
@@ -103,36 +100,32 @@ function DashboardUsuario() {
         }
 
         try {
-            // 1. Crear el objeto con los datos del perfil a enviar
             const profileData = {
                 nombreCompleto,
-                edad: edad === '' ? null : Number(edad), // Asegurarse de enviar null si está vacío, y que sea número
+                edad: edad === '' ? null : Number(edad),
                 ubicacion,
                 bio,
             };
 
-            // 2. Enviar los datos del perfil
             const updateProfileRes = await api.put('/users/me', profileData);
             console.log('Perfil actualizado:', updateProfileRes.data);
 
-            // 3. Si hay un nuevo archivo de imagen, subirlo
             if (profileImageFile) {
                 const formData = new FormData();
-                formData.append('file', profileImageFile); // 'file' debe coincidir con el nombre esperado en el backend
+                formData.append('file', profileImageFile);
 
                 const uploadImageRes = await api.post('/users/me/profile-picture', formData, {
                     headers: {
-                        'Content-Type': 'multipart/form-data', // Importante para subir archivos
+                        'Content-Type': 'multipart/form-data',
                     },
                 });
                 console.log('Imagen de perfil actualizada:', uploadImageRes.data);
-                setProfilePictureUrl(uploadImageRes.data.profilePictureUrl); // Actualizar con la URL final del backend
-                setProfileImageFile(null); // Limpiar el archivo después de subir
+                setProfilePictureUrl(uploadImageRes.data.profilePictureUrl);
+                setProfileImageFile(null);
             }
 
-            // Una vez que todo se guarda exitosamente
-            setIsEditing(false); // Sale del modo de edición
-            alert('¡Perfil actualizado exitosamente!'); // Mensaje de éxito
+            setIsEditing(false);
+            alert('¡Perfil actualizado exitosamente!');
         } catch (err) {
             console.error("Error al guardar cambios en el perfil:", err);
             setError("Error al guardar los cambios. Intenta de nuevo.");
@@ -187,7 +180,6 @@ function DashboardUsuario() {
             {/* Sección de Perfil */}
             <div className="perfil-container">
                 <div className="perfil-portada">
-                    {/* Puedes hacer que esta portada también sea editable si quieres */}
                     <img src="/portada-default.jpg" alt="Portada" className="portada-img" />
                 </div>
                 <div className="perfil-info-box">
@@ -195,11 +187,10 @@ function DashboardUsuario() {
                         <img src={profilePictureUrl} alt="Avatar" className="perfil-avatar editable" title="Cambiar avatar" />
                         {isEditing && (
                             <span className="change-avatar-icon">
-                                <i className="fas fa-camera"></i> {/* Icono de cámara, si usas Font Awesome */}
+                                <i className="fas fa-camera"></i>
                             </span>
                         )}
                     </label>
-                    {/* Input de tipo file, visible solo en modo edición */}
                     {isEditing && (
                         <input
                             type="file"
@@ -217,7 +208,7 @@ function DashboardUsuario() {
                                 onChange={(e) => setNombreCompleto(e.target.value)}
                                 className="perfil-input"
                                 placeholder="Nombre Completo"
-                                required // Ahora este campo es obligatorio
+                                required
                             />
                             <input
                                 value={edad}
@@ -239,26 +230,22 @@ function DashboardUsuario() {
                                 placeholder="Cuéntanos algo sobre ti..."
                                 rows="3"
                             ></textarea>
-                            {/* El email generalmente no se edita por seguridad una vez registrado */}
                             <p className="perfil-dato-editable"><strong>Email:</strong> {email}</p>
 
                             <div className="perfil-acciones">
                                 <button onClick={handleSaveChanges} className="btn btn-primary btn-guardar">Guardar Cambios</button>
                                 <button onClick={() => {
                                     setIsEditing(false);
-                                    // Opcional: recargar datos originales si se cancela la edición
-                                    // fetchUserDataAndReservas();
                                 }} className="btn btn-secondary btn-cancelar">Cancelar</button>
                             </div>
                         </div>
                     ) : (
                         <div className="perfil-vista">
-                            {/* Los placeholders se muestran si el valor está vacío */}
                             <h2 className="perfil-nombre">{nombreCompleto || '¡Completa tu Perfil!'}</h2>
                             <p className="perfil-dato"><strong>Edad:</strong> {edad ? `${edad} años` : 'No especificado'}</p>
                             <p className="perfil-dato"><strong>Ubicación:</strong> {ubicacion || 'No especificada'}</p>
                             <p className="perfil-dato"><strong>Email:</strong> {email || 'N/A'}</p>
-                            {bio && <p className="perfil-dato"><strong>Bio:</strong> {bio}</p>} {/* Solo mostrar si hay bio */}
+                            {bio && <p className="perfil-dato"><strong>Bio:</strong> {bio}</p>}
                             <button onClick={() => setIsEditing(true)} className="btn btn-outline-primary btn-editar">Editar Perfil</button>
                         </div>
                     )}
@@ -272,10 +259,15 @@ function DashboardUsuario() {
                     <ul className="lista-reservas">
                         {misReservas.map((reserva) => (
                             <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
-                                <p><strong>Cancha:</strong> {reserva.cancha?.nombre || 'N/A'}</p>
+                                {/* ¡Asegúrate de usar las propiedades del ReservaDetalleDTO aquí! */}
+                                <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p> 
                                 <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
                                 <p><strong>Estado:</strong> {reserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
                                 <p><strong>Pago:</strong> {reserva.pagada ? 'Pagada' : 'Pendiente'}</p>
+                                {/* Opcional: Mostrar jugadores si existen */}
+                                {reserva.jugadores && reserva.jugadores.length > 0 && (
+                                    <p><strong>Jugadores:</strong> {reserva.jugadores.join(', ')}</p>
+                                )}
                             </li>
                         ))}
                     </ul>
@@ -291,12 +283,25 @@ function DashboardUsuario() {
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <h3>Detalle de Reserva</h3>
                         <hr />
-                        <p><strong>Cancha:</strong> {modalReserva.cancha?.nombre || 'N/A'}</p>
+                        {/* Asegúrate de usar las propiedades del ReservaDetalleDTO aquí */}
+                        <p><strong>Cancha:</strong> {modalReserva.canchaNombre || 'N/A'}</p>
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
                         <p><strong>Estado:</strong> {modalReserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
                         <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${modalReserva.metodoPago || '?'})` : 'Pendiente de Pago'}</p>
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
+                        
+                        {/* Mostrar jugadores si existen */}
+                        {modalReserva.jugadores && modalReserva.jugadores.length > 0 && (
+                            <p><strong>Jugadores:</strong> {modalReserva.jugadores.join(', ')}</p>
+                        )}
+                        {/* Mostrar equipos si existen */}
+                        {modalReserva.equipo1 && modalReserva.equipo1.length > 0 && (
+                            <p><strong>Equipo 1:</strong> {modalReserva.equipo1.join(', ')}</p>
+                        )}
+                        {modalReserva.equipo2 && modalReserva.equipo2.length > 0 && (
+                            <p><strong>Equipo 2:</strong> {modalReserva.equipo2.join(', ')}</p>
+                        )}
 
                         {modalReserva.confirmada && !modalReserva.pagada && (
                             <button
