@@ -1,12 +1,9 @@
-// src/features/dashboard/DashboardUsuario.jsx
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './DashboardUsuario.css';
 
 function DashboardUsuario() {
-    // CORRECCIÓN AQUÍ: Cambiar 'setNombreComplepleto' a 'setNombreCompleto'
     const [nombreCompleto, setNombreCompleto] = useState(''); 
     const [email, setEmail] = useState('');
     const [edad, setEdad] = useState('');
@@ -20,7 +17,7 @@ function DashboardUsuario() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Función para recargar las reservas, útil después de una acción de pago
+    // Función para recargar las reservas, útil después de una acción de pago o confirmación
     const recargarReservas = async () => {
         setLoading(true);
         setError(null);
@@ -49,7 +46,6 @@ function DashboardUsuario() {
                 const userProfileRes = await api.get('/users/me');
                 if (isMounted) {
                     const userData = userProfileRes.data;
-                    // CORRECCIÓN AQUÍ: setNombreCompleto
                     setNombreCompleto(userData.nombreCompleto || '');
                     setEmail(userData.email || '');
                     setEdad(userData.edad || '');
@@ -70,7 +66,6 @@ function DashboardUsuario() {
                         setError("No se pudieron cargar los datos del perfil o las reservas. Intenta recargar la página.");
                     }
                     setMisReservas([]);
-                    // CORRECCIÓN AQUÍ: setNombreCompleto
                     setNombreCompleto('');
                     setEmail('');
                     setEdad('');
@@ -173,21 +168,19 @@ function DashboardUsuario() {
     // NUEVO: Manejador para descargar el PDF
     const handleDescargarPdf = async (reservaId) => {
         try {
-            // Llama al endpoint del backend para generar el PDF
             const response = await api.get(`/reservas/${reservaId}/pdf-comprobante`, {
-                responseType: 'blob' // Importante para recibir archivos binarios
+                responseType: 'blob'
             });
 
-            // Crea una URL para el blob y abre una nueva pestaña o descarga el archivo
             const fileURL = window.URL.createObjectURL(new Blob([response.data]));
             const fileLink = document.createElement('a');
             fileLink.href = fileURL;
-            fileLink.setAttribute('download', `comprobante_reserva_${reservaId}.pdf`); // Nombre del archivo
+            fileLink.setAttribute('download', `comprobante_reserva_${reservaId}.pdf`);
             document.body.appendChild(fileLink);
             fileLink.click();
-            fileLink.remove(); // Limpia el elemento después de usarlo
+            fileLink.remove();
 
-            setModalReserva(null); // Cierra el modal
+            setModalReserva(null);
             alert("Comprobante descargado.");
         } catch (error) {
             console.error("Error al descargar el PDF:", error);
@@ -295,10 +288,16 @@ function DashboardUsuario() {
                             <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
                                 <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p> 
                                 <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
-                                <p><strong>Estado:</strong> {reserva.confirmada ? 'Confirmada' : 'Pendiente'}</p>
+                                <p><strong>Estado:</strong> {reserva.estado}</p> {/* Mostrar el estado general */}
                                 <p><strong>Pago:</strong> {reserva.pagada ? 'Pagada' : 'Pendiente'}</p>
-                                {/* NUEVO: Mostrar método de pago */}
-                                {reserva.metodoPago && <p><strong>Método de Pago:</strong> {reserva.metodoPago}</p>}
+                                {/* NUEVO: Mostrar método de pago con ícono */}
+                                {reserva.metodoPago && (
+                                    <p>
+                                        <strong>Método de Pago:</strong> {reserva.metodoPago}
+                                        {reserva.metodoPago === 'mercadopago' && <img src="/imagenes/mercadopago-small.png" alt="Mercado Pago" className="payment-icon-small" />}
+                                        {reserva.metodoPago === 'efectivo' && <img src="/imagenes/efectivo-small.png" alt="Efectivo" className="payment-icon-small" />}
+                                    </p>
+                                )}
                                 {reserva.jugadores && reserva.jugadores.length > 0 && (
                                     <p><strong>Jugadores:</strong> {reserva.jugadores.join(', ')}</p>
                                 )}
@@ -334,7 +333,8 @@ function DashboardUsuario() {
                         )}
 
                         {/* NUEVO: Botones condicionales en el modal */}
-                        {modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && (
+                        {/* Regla: Solo si el admin confirmó la reserva y no está pagada */}
+                        {modalReserva.confirmada && !modalReserva.pagada && modalReserva.metodoPago === 'efectivo' && (
                             <button
                                 className="btn btn-info btn-mostrar-boleto"
                                 onClick={() => handleDescargarPdf(modalReserva.id)}
@@ -343,7 +343,7 @@ function DashboardUsuario() {
                             </button>
                         )}
 
-                        {modalReserva.metodoPago === 'mercadopago' && !modalReserva.pagada && modalReserva.estado !== 'rechazada_pago_mp' && (
+                        {modalReserva.confirmada && !modalReserva.pagada && modalReserva.metodoPago === 'mercadopago' && modalReserva.estado !== 'rechazada_pago_mp' && (
                             <button
                                 className="btn btn-success btn-pagar-mp"
                                 onClick={async () => {
@@ -374,6 +374,11 @@ function DashboardUsuario() {
                             </button>
                         )}
                         
+                        {/* Mensaje y botón si la reserva no está confirmada por el admin */}
+                        {!modalReserva.confirmada && (
+                            <p className="text-warning">Esta reserva está pendiente de confirmación por el administrador. Las opciones de pago/boleto aparecerán una vez confirmada.</p>
+                        )}
+
                         {/* Mensaje si el pago fue rechazado por MP */}
                         {modalReserva.estado === 'rechazada_pago_mp' && (
                              <p className="text-danger">Este pago fue rechazado por Mercado Pago. Contacta al administrador si deseas reintentar.</p>

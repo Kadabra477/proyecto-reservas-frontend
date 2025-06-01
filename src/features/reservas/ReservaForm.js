@@ -1,7 +1,12 @@
+// frontend/src/features/reservas/ReservaForm.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './ReservaForm.css';
+
+// Importar los logos directamente desde src/assets
+import mercadopagoIcon from '../../assets/mercadopago.png'; // Asegúrate que el nombre y ruta sean correctos
+import efectivoIcon from '../../assets/efectivo.png';     // Asegúrate que el nombre y ruta sean correctos
 
 function ReservaForm() {
     const { canchaId } = useParams();
@@ -55,7 +60,6 @@ function ReservaForm() {
         fetchCanchaDetails();
     }, [fetchCanchaDetails]);
 
-    // MODIFICADO: Incluir 'metodoPago' en el handleChange
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormulario(prevFormulario => ({
@@ -66,7 +70,7 @@ function ReservaForm() {
 
     const validarFormulario = () => {
         const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
+        hoy.setHours(0, 0, 0, 0); // Resetea a la medianoche para comparar solo la fecha
 
         const { nombre, apellido, dni, telefono, fecha, hora, metodoPago } = formulario;
 
@@ -82,24 +86,42 @@ function ReservaForm() {
             setMensaje({ type: 'error', text: 'El teléfono debe contener solo números.' });
             return false;
         }
+        
         const [year, month, day] = fecha.split('-').map(Number);
         const fechaSeleccionada = new Date(year, month - 1, day);
+
+        // Si la fecha seleccionada es ANTERIOR a hoy (solo día)
         if (fechaSeleccionada < hoy) {
             setMensaje({ type: 'error', text: 'La fecha de reserva no puede ser anterior a hoy.' });
             return false;
         }
-        const [hourPart] = hora.split(':').map(Number);
-        if (hourPart < 8 || hourPart >= 23) { // Rango de 08:00 a 22:xx
+
+        const [hourPart, minutePart] = hora.split(':').map(Number);
+        const ahora = new Date(); // Fecha y hora actual completa
+
+        // Si la fecha seleccionada es HOY, validar la hora
+        if (fechaSeleccionada.toDateString() === ahora.toDateString()) {
+            const horaActual = ahora.getHours();
+            const minutosActuales = ahora.getMinutes();
+            
+            // Si la hora seleccionada es ANTERIOR a la hora actual, o es la misma hora pero los minutos ya pasaron
+            if (hourPart < horaActual || (hourPart === horaActual && minutePart <= minutosActuales)) {
+                setMensaje({ type: 'error', text: 'Si reservas para hoy, la hora debe ser posterior a la actual.' });
+                return false;
+            }
+        }
+
+        // Validación de rango de horas (08:00 a 22:00)
+        if (hourPart < 8 || hourPart > 22) { // Rango de 08:00 a 22:xx, es decir, hasta las 22:59
             setMensaje({ type: 'error', text: 'La hora de reserva debe estar entre las 08:00 y las 22:00.' });
             return false;
         }
         return true;
     };
 
-    // MODIFICADO: handleSubmit para manejar la lógica de pago
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMensaje({ text: '', type: '' }); // Limpiar mensajes previos
+        setMensaje({ text: '', type: '' });
 
         if (!validarFormulario()) return;
         if (!cancha || !cancha.disponible) {
@@ -107,7 +129,7 @@ function ReservaForm() {
             return;
         }
 
-        setIsSubmitting(true); // Inicia el proceso general
+        setIsSubmitting(true);
 
         const reservaData = {
             canchaId: parseInt(canchaId, 10),
@@ -117,40 +139,37 @@ function ReservaForm() {
             telefono: formulario.telefono.trim(),
             fecha: formulario.fecha,
             hora: formulario.hora,
-            metodoPago: formulario.metodoPago, // Enviar el método de pago seleccionado
+            metodoPago: formulario.metodoPago,
         };
 
         try {
-            // 1. Crear la reserva en el backend
             const reservaResponse = await api.post("/reservas/crear", reservaData);
-            const reservaCreada = reservaResponse.data; // El backend devuelve la reserva creada (con ID)
+            const reservaCreada = reservaResponse.data;
 
             console.log("Reserva creada con ID:", reservaCreada.id, "Método de pago:", reservaCreada.metodoPago);
 
-            // Limpiar formulario aquí si quieres
             setFormulario({ nombre: '', apellido: '', dni: '', telefono: '', fecha: '', hora: '', metodoPago: 'mercadopago' });
 
-            // 2. Manejar la acción según el método de pago
             if (reservaCreada.metodoPago === 'mercadopago') {
                 setMensaje({ type: 'info', text: 'Reserva creada. Redirigiendo a Mercado Pago...' });
-                setIsCreatingPreference(true); // Indicar que estamos creando la preferencia
+                setIsCreatingPreference(true);
                 try {
                     const preferenciaResponse = await api.post(
-                        `/pagos/crear-preferencia/${reservaCreada.id}`, // ID en la ruta
-                        { // Cuerpo de la solicitud (PagoDTO)
+                        `/pagos/crear-preferencia/${reservaCreada.id}`,
+                        {
                             reservaId: reservaCreada.id,
-                            nombreCliente: reservaCreada.cliente, // Usar el nombre completo combinado
-                            monto: reservaCreada.precio // Usar el precio exacto de la reserva creada
+                            nombreCliente: reservaCreada.cliente,
+                            monto: reservaCreada.precio
                         }
                     );
-                    const initPoint = preferenciaResponse.data.initPoint; // Obtener la URL de pago
+                    const initPoint = preferenciaResponse.data.initPoint;
 
                     if (!initPoint) {
                         throw new Error("No se recibió el punto de inicio de Mercado Pago.");
                     }
 
                     console.log("Redirigiendo a Mercado Pago:", initPoint);
-                    window.location.href = initPoint; // Redirección del navegador
+                    window.location.href = initPoint;
 
                 } catch (pagoError) {
                     console.error("Error al crear la preferencia de Mercado Pago:", pagoError);
@@ -162,13 +181,10 @@ function ReservaForm() {
                     setIsSubmitting(false);
                 }
             } else if (reservaCreada.metodoPago === 'efectivo') {
-                // Si el método de pago es Efectivo
                 setMensaje({ type: 'success', text: `Reserva creada exitosamente (ID: ${reservaCreada.id}). Puedes ver los detalles en tu Dashboard.` });
                 setIsSubmitting(false);
-                // Redirigir al dashboard del usuario o a una página de confirmación de efectivo
-                navigate('/dashboard'); // O a /pago-efectivo-exitoso
+                navigate('/dashboard');
             } else {
-                // Si por alguna razón el método de pago no es reconocido
                 setMensaje({ type: 'warning', text: 'Reserva creada, pero el método de pago es desconocido. Revisa tu Dashboard.' });
                 setIsSubmitting(false);
                 navigate('/dashboard');
@@ -234,10 +250,10 @@ function ReservaForm() {
                 </div>
                 <div className="form-group">
                     <label htmlFor="hora">Hora:</label>
-                    <input type="time" id="hora" name="hora" value={formulario.hora} onChange={handleChange} required step="3600" min="08:00" max="23:00" disabled={isSubmitting || isCreatingPreference || !cancha.disponible} title="Horarios disponibles de 08:00 a 22:00" />
+                    <input type="time" id="hora" name="hora" value={formulario.hora} onChange={handleChange} required step="3600" min="08:00" max="22:00" disabled={isSubmitting || isCreatingPreference || !cancha.disponible} title="Horarios disponibles de 08:00 a 22:00" />
                 </div>
 
-                {/* NUEVO: Selección de Método de Pago */}
+                {/* Selección de Método de Pago */}
                 <div className="form-group payment-method-selection">
                     <p>Selecciona tu método de pago:</p>
                     <label>
@@ -250,7 +266,7 @@ function ReservaForm() {
                             disabled={isSubmitting || isCreatingPreference || !cancha.disponible}
                         />
                         Pagar con Mercado Pago
-                        <img src="/imagenes/mercadopago.png" alt="Mercado Pago" className="payment-icon" />
+                        <img src={mercadopagoIcon} alt="Mercado Pago" className="payment-icon" /> {/* IMAGEN CORREGIDA */}
                     </label>
                     <label>
                         <input
@@ -262,7 +278,7 @@ function ReservaForm() {
                             disabled={isSubmitting || isCreatingPreference || !cancha.disponible}
                         />
                         Pagar en Efectivo (al llegar a la cancha)
-                        <img src="/imagenes/efectivo.png" alt="Efectivo" className="payment-icon" />
+                        <img src={efectivoIcon} alt="Efectivo" className="payment-icon" /> {/* IMAGEN CORREGIDA */}
                     </label>
                 </div>
 

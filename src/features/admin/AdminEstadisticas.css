@@ -1,0 +1,132 @@
+/* frontend/src/features/admin/AdminEstadisticas.css (NUEVO ARCHIVO) */
+
+.admin-estadisticas-container {
+    padding: 30px;
+    max-width: 1400px;
+    margin: 40px auto;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.admin-estadisticas-title {
+    color: #2c3e50;
+    margin-bottom: 40px;
+    font-size: 3em;
+    font-weight: 800;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.estadisticas-resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px;
+}
+
+.resumen-card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-left: 5px solid; /* Borde lateral para color de énfasis */
+}
+
+.resumen-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.resumen-card h3 {
+    font-size: 1.5em;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.resumen-card p {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #007bff; /* Color por defecto */
+}
+
+.resumen-card.ingresos { border-left-color: #28a745; } /* Verde */
+.resumen-card.ingresos p { color: #28a745; }
+
+.resumen-card.reservas-confirmadas { border-left-color: #007bff; } /* Azul */
+.resumen-card.reservas-confirmadas p { color: #007bff; }
+
+.resumen-card.reservas-pendientes { border-left-color: #ffc107; } /* Amarillo */
+.resumen-card.reservas-pendientes p { color: #ffc107; }
+
+.resumen-card.reservas-canceladas { border-left-color: #dc3545; } /* Rojo */
+.resumen-card.reservas-canceladas p { color: #dc3545; }
+
+.estadisticas-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* Ajustado para 380px */
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.chart-item {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-item.full-width-chart {
+    grid-column: 1 / -1;
+    max-width: 900px; /* Un poco más estrecho para centrar mejor */
+    margin: 0 auto;
+}
+
+.back-to-admin-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 50px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.back-to-admin-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+.error-message {
+    color: #dc3545;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+}
+
+@media (max-width: 992px) {
+    .estadisticas-charts {
+        grid-template-columns: 1fr;
+    }
+    .chart-item.full-width-chart {
+        width: 90%;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-estadisticas-title {
+        font-size: 2.2em;
+    }
+    .estadisticas-resumen {
+        grid-template-columns: 1fr;
+    }
+}

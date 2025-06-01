@@ -1,93 +1,117 @@
-/* src/components/CanchaCard.css */
+/* frontend/src/components/CanchaCard/CanchaCard.css */
+
 .cancha-card-item {
-    background-color: var(--white);
+    background-color: var(--white, #ffffff); /* Usar var(--white) si está definida, o #ffffff */
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: var(--shadow);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    position: relative; /* Necesario para posicionar el precio absoluto */
+    position: relative;
     display: flex;
-    flex-direction: column; /* Organiza el contenido verticalmente */
-    height: 100%; /* Asegura que las tarjetas tengan la misma altura en una cuadrícula */
-  }
-  
-  .cancha-card-item:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-hover); /* Usa la variable de sombra hover */
-  }
-  
-  .cancha-card-img {
+    flex-direction: column;
+    height: 100%;
+}
+
+.cancha-card-item:hover {
+    transform: translateY(-8px); /* Más énfasis en el hover */
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); /* Sombra más intensa al hover */
+}
+
+.cancha-card-img {
     width: 100%;
-    height: 200px; /* Altura consistente para la imagen */
-    object-fit: cover; /* Asegura que la imagen cubra el espacio sin distorsionarse */
-    border-bottom: 1px solid var(--gray-light);
-    background-color: var(--gray-light); /* Fondo por si la imagen falla */
-    display: block; /* Evita espacio extra debajo de la imagen */
-  }
-  
-  .cancha-card-price {
+    height: 220px; /* Altura un poco mayor para las imágenes */
+    object-fit: cover;
+    border-bottom: 1px solid var(--gray-light, #f0f0f0);
+    background-color: var(--gray-light, #f0f0f0);
+    display: block;
+}
+
+.cancha-card-price {
     position: absolute;
     top: 15px;
     right: 15px;
-    background-color: var(--highlight);
-    color: #333; /* Texto más oscuro para fondo amarillo */
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    background-color: var(--highlight, #ffc107); /* Amarillo de Mercado Pago o similar */
+    color: #333;
+    padding: 8px 15px; /* Más padding */
+    border-radius: 25px; /* Más redondeado */
+    font-size: 1rem; /* Un poco más grande */
     font-weight: 700;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    z-index: 2; /* Asegura que esté sobre la imagen */
-  }
-  
-  .cancha-card-content {
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); /* Sombra para el precio */
+    z-index: 2;
+}
+
+.cancha-card-content {
     padding: 20px;
-    flex-grow: 1; /* Permite que esta sección crezca y empuje el botón hacia abajo */
+    flex-grow: 1;
     display: flex;
-    flex-direction: column; /* Organiza el contenido interno verticalmente */
-  }
-  
-  .cancha-card-title {
-    margin: 0 0 10px 0;
-    color: var(--primary);
-    font-size: 1.4rem;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cancha-card-title {
+    margin: 0 0 12px 0;
+    color: var(--primary, #007bff);
+    font-size: 1.6rem; /* Título un poco más grande */
     font-weight: 700;
-  }
-  
-  .cancha-card-description,
-  .cancha-card-location,
-  .cancha-card-phone {
-    color: var(--text-light);
+}
+
+.cancha-card-description {
+    color: var(--text-light, #666);
+    margin: 4px 0 15px 0;
+    font-size: 1em;
+    line-height: 1.6;
+    /* Para cortar la descripción si es muy larga */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Muestra hasta 3 líneas */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cancha-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas para detalles */
+    gap: 8px 15px; /* Espacio entre items */
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed var(--gray-light, #eee);
+}
+
+.cancha-details-grid p {
+    font-size: 0.95em;
+    color: var(--text-light, #555);
+    margin: 0;
+}
+
+.cancha-details-grid p strong {
+    color: var(--text, #333);
+}
+
+.cancha-card-location,
+.cancha-card-phone {
+    color: var(--text-light, #666);
     margin: 4px 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-  }
-  
-  .cancha-card-description {
-    /* Opcional: Limitar número de líneas para consistencia */
-    /* display: -webkit-box; */
-    /* -webkit-line-clamp: 3; */
-    /* -webkit-box-orient: vertical;   */
-    /* overflow: hidden; */
-    /* text-overflow: ellipsis; */
-    margin-bottom: 15px; /* Espacio antes del enlace/botón */
-  }
-  
-  .cancha-card-map-link {
-      display: inline-block; /* O block si quieres que ocupe toda la línea */
-      margin: 8px 0 12px 0; /* Espaciado */
-      color: var(--secondary);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-  }
-  
-  .cancha-card-map-link:hover {
-      text-decoration: underline;
-  }
-  
-  .cancha-card-button {
-    margin-top: auto; /* Empuja el botón al final de la tarjeta */
-    padding: 10px 20px;
+    font-size: 0.95em;
+}
+
+.cancha-card-map-link {
+    display: inline-block;
+    margin: 8px 0 15px 0;
+    color: var(--secondary, #6f42c1); /* Un color secundario para el mapa */
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95em;
+    transition: color 0.3s ease;
+}
+
+.cancha-card-map-link:hover {
+    text-decoration: underline;
+    color: var(--secondary-dark, #5a36a2);
+}
+
+.cancha-card-button {
+    margin-top: auto;
+    padding: 12px 20px; /* Más padding para el botón */
     border-radius: 30px;
     border: none;
     font-weight: 600;
@@ -95,20 +119,23 @@
     transition: all 0.3s ease;
     text-decoration: none;
     text-align: center;
-    background-color: var(--primary);
+    background-color: var(--primary, #007bff);
     color: white;
-    width: 100%; /* Ocupa todo el ancho disponible */
-    font-size: 1rem;
-    box-sizing: border-box; /* Incluye padding en el ancho */
-  }
-  
-  .cancha-card-button:hover:not(:disabled) {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px); /* Ligero efecto al pasar el mouse */
-  }
-  
-  .cancha-card-button:disabled {
-      background-color: var(--gray);
-      cursor: not-allowed;
-      color: var(--gray-dark);
-  }
+    width: 100%;
+    font-size: 1.1em; /* Botón un poco más grande */
+    box-sizing: border-box;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.cancha-card-button:hover:not(:disabled) {
+    background-color: var(--primary-dark, #0056b3);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
+}
+
+.cancha-card-button:disabled {
+    background-color: var(--gray, #cccccc);
+    cursor: not-allowed;
+    color: var(--gray-dark, #666666);
+    box-shadow: none;
+}

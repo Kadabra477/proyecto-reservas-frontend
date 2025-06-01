@@ -1,9 +1,8 @@
-// src/features/canchas/Canchas.jsx (Modificado)
+// frontend/src/features/canchas/Canchas.jsx
 import React, { useState, useEffect } from 'react';
-// import './canchas.css'; // ELIMINADO: Usaremos CanchaCard y sus estilos
 import api from '../../api/axiosConfig'; // Importar instancia de Axios
-import CanchaCard from '../../components/CanchaCard/CanchaCard'; // Importar el componente CanchaCard (ajusta ruta si es necesario)
-import './CanchasList.css'; // NUEVO: Crear un CSS simple para el contenedor si es necesario
+import CanchaCard from '../../components/CanchaCard/CanchaCard'; // Importar el componente CanchaCard
+import './CanchasList.css'; // Asegúrate que este archivo exista
 
 function Canchas() {
   const [canchas, setCanchas] = useState([]);
@@ -15,15 +14,12 @@ function Canchas() {
       setIsLoading(true);
       setError(null);
       try {
-        // Usar la instancia 'api' para obtener las canchas
         const response = await api.get('/canchas');
         if (Array.isArray(response.data)) {
-          // Filtrar opcionalmente canchas no disponibles si se desea
-          // setCanchas(response.data.filter(c => c.disponible));
           setCanchas(response.data);
         } else {
           console.error("La respuesta de la API no es un array:", response.data);
-          setCanchas([]); // Establecer array vacío si la respuesta no es válida
+          setCanchas([]);
         }
       } catch (err) {
         console.error("Error fetching canchas:", err);
@@ -34,28 +30,22 @@ function Canchas() {
     };
 
     fetchCanchas();
-  }, []); // El array vacío asegura que se ejecute solo una vez al montar
+  }, []);
 
-  // Renderizar estado de carga
   if (isLoading) {
-    // Puedes usar un componente Spinner aquí si tienes uno
-    return <div className="loading-message">Cargando canchas...</div>;
+    return <div className="canchas-list-container loading-message">Cargando canchas...</div>;
   }
 
-  // Renderizar estado de error
   if (error) {
-    return <div className="error-message">{error}</div>;
+    return <div className="canchas-list-container error-message">{error}</div>;
   }
 
-  // Renderizar lista de canchas o mensaje si no hay
   return (
-    // Usar un contenedor para aplicar estilos de layout (ej: grid)
     <div className="canchas-list-container">
-      <h2>Nuestras Canchas Disponibles</h2>
+      <h2 className="canchas-list-title">Nuestras Canchas Disponibles</h2>
       {canchas.length > 0 ? (
         <div className="canchas-grid">
           {canchas.map((cancha) => (
-            // Renderizar CanchaCard para cada cancha obtenida
             <CanchaCard key={cancha.id} cancha={cancha} />
           ))}
         </div>
