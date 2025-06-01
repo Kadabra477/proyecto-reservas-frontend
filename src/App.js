@@ -20,7 +20,6 @@ import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
 import OAuth2Success from './features/auth/OAuth2Success';
 import PerfilForm from './components/Perfil/PerfilForm';
-import MisReservas from './features/pages/MisReservas';
 
 import PagoExitoso from './features/pago/PagoExitoso';
 import PagoFallido from './features/pago/PagoFallido';
@@ -199,7 +198,6 @@ function App() {
                     {/* Ruta de Admin ahora requiere el rol 'ADMIN' */}
                     <Route path="/admin" element={<RutaProtegida rolesRequeridos={['ADMIN']}><AdminPanel /></RutaProtegida>} />
                     <Route path="/perfil" element={<RutaProtegida><PerfilForm /></RutaProtegida>} />
-                    <Route path="/mis-reservas" element={<RutaProtegida><MisReservas /></RutaProtegida>} />
 
                     {/* Rutas de pago */}
                     <Route path="/pago-exitoso" element={<PagoExitoso />} />
