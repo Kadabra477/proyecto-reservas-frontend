@@ -1,10 +1,13 @@
+// src/features/dashboard/DashboardUsuario.jsx
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './DashboardUsuario.css';
 
 function DashboardUsuario() {
-    const [nombreCompleto, setNombreComplepleto] = useState('');
+    // CORRECCIÓN AQUÍ: Cambiar 'setNombreComplepleto' a 'setNombreCompleto'
+    const [nombreCompleto, setNombreCompleto] = useState(''); 
     const [email, setEmail] = useState('');
     const [edad, setEdad] = useState('');
     const [ubicacion, setUbicacion] = useState('');
@@ -46,6 +49,7 @@ function DashboardUsuario() {
                 const userProfileRes = await api.get('/users/me');
                 if (isMounted) {
                     const userData = userProfileRes.data;
+                    // CORRECCIÓN AQUÍ: setNombreCompleto
                     setNombreCompleto(userData.nombreCompleto || '');
                     setEmail(userData.email || '');
                     setEdad(userData.edad || '');
@@ -66,6 +70,7 @@ function DashboardUsuario() {
                         setError("No se pudieron cargar los datos del perfil o las reservas. Intenta recargar la página.");
                     }
                     setMisReservas([]);
+                    // CORRECCIÓN AQUÍ: setNombreCompleto
                     setNombreCompleto('');
                     setEmail('');
                     setEdad('');
