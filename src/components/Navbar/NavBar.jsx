@@ -40,14 +40,7 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
                             >
                                 Dashboard
                             </NavLink>
-                            {/* Enlace a Mis Reservas */}
-                            <NavLink
-                                to="/mis-reservas"
-                                className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
-                            >
-                                Mis Reservas
-                            </NavLink>
-                            {/* Sección de usuario logueado */}
+                            {/* ELIMINADO: El enlace a "Mis Reservas" */}
                             <div className="navbar-user-section">
                                 {/* Muestra solo el primer nombre */}
                                 <span className="navbar-greeting">Hola, {getFirstName(nombreUsuario)}!</span>

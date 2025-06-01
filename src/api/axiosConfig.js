@@ -34,7 +34,7 @@ api.interceptors.response.use(
                 localStorage.removeItem('jwtToken');
                 localStorage.removeItem('username');
                 localStorage.removeItem('nombreCompleto');
-                localStorage.removeItem('userRole'); // Limpiar el rol también
+                localStorage.removeItem('userRole');
                 if (typeof window !== 'undefined') {
                     window.location.assign('/login');
                 }
