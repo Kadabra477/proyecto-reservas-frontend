@@ -6,7 +6,7 @@ import './ReservaDetail.css';
 
 // Importar los logos desde src/assets
 import mercadopagoLogo from '../../assets/mercadopago.png'; // <--- RUTA CORREGIDA
-import efectivoLogo from '../../assets/efectivo.png';     // <--- RUTA CORREGIDA
+import efectivoLogo from '../../assets/efectivo.png';     // <--- RUTA CORREGIDA
 
 const ReservaDetail = () => {
     const { id } = useParams();
@@ -128,13 +128,15 @@ const ReservaDetail = () => {
             <h2 className="reserva-detail-title">Detalle de la Reserva</h2>
             <div className="reserva-detail-card">
                 <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p>
-                <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
+                <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p> 
                 <p><strong>Precio Total:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
                 <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p> {/* Capitalizar y formatear estado */}
-                {/* <p><strong>Confirmación Admin:</strong> {isConfirmedByAdmin ? 'Sí' : 'No'}</p> Se elimina esta línea */}
+                {/* <p><strong>Confirmación Admin:</strong> {isConfirmedByAdmin ? 'Sí' : 'No'}</p>  ELIMINADA ESTA LÍNEA */}
                 <p><strong>Pago:</strong> {isPaid ? 'Pagada' : 'Pendiente'}</p>
                 {reserva.metodoPago && <p><strong>Método de Pago Seleccionado:</strong> {capitalizeFirstLetter(reserva.metodoPago)}</p>} {/* Capitalizar método de pago */}
-
+                <p><strong>Reservado a nombre de:</strong> {reserva.cliente}</p>
+                <p><strong>Teléfono de contacto:</strong> {reserva.telefono || '-'}</p>
+                
                 {/* Mostrar opciones de pago solo si la reserva está confirmada por el admin y NO está pagada */}
                 {isConfirmedByAdmin && !isPaid && (
                     <div className="payment-options">

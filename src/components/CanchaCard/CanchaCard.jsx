@@ -93,10 +93,10 @@ function CanchaCard({ cancha }) {
                 src={cancha.fotoUrl || getCanchaImage(cancha.tipoCancha)} // Prioriza fotoUrl, luego imagen por tipo
                 alt={`Cancha ${cancha.nombre}`}
                 className="cancha-card-img"
-                onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
+                onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }} // Maneja errores de carga de imagen
             />
             {(typeof cancha.precioPorHora === 'number' || typeof cancha.precioPorHora === 'string' && !isNaN(Number(cancha.precioPorHora)) ) && (
-                 <span className="cancha-card-price">{formatPrice(cancha.precioPorHora)}/hr</span>
+                    <span className="cancha-card-price">{formatPrice(cancha.precioPorHora)}/hr</span>
             )}
             <div className="cancha-card-content">
                 <h3 className="cancha-card-title">{cancha.nombre || 'Nombre no disponible'}</h3>

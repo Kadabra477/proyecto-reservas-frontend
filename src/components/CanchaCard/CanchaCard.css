@@ -22,7 +22,7 @@
     height: 220px;
     object-fit: cover; /* ¡CLAVE para que la imagen no se estire y cubra el área! */
     border-bottom: 1px solid var(--gray-light, #f0f0f0);
-    background-color: var(--gray-light, #f0f0f0);
+    background-color: var(--gray-light, #f0f0f0); /* Fondo para cuando la imagen no carga o no existe */
     display: block;
 }
 

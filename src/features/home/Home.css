@@ -193,10 +193,11 @@ h1, h2, h3, h4, h5, h6 {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
-    border: none;
+    border: none; /* Asegura que no haya un borde */
     cursor: pointer;
     /* QUITAMOS EL OUTLINE QUE CAUSA EL BORDE AZUL AL HACER FOCUS */
-    outline: none; /* <--- AÑADIDO: Elimina el borde de enfoque */
+    outline: none; /* <--- YA ESTABA, PERO LO MANTENGO Y APLICO UN BOX-SHADOW EN FOCUS-VISIBLE */
+    box-sizing: border-box; /* Incluye padding y border en el ancho/alto */
 }
 
 .btn-main:hover {
@@ -204,6 +205,15 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
 }
+
+/* Remueve el outline del foco de accesibilidad para este botón */
+.btn-main:focus-visible {
+    outline: none; /* Asegura que no haya outline por defecto */
+    /* Usar un box-shadow para el indicador de foco, sin afectar el tamaño */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5), /* Borde azul suave al hacer foco */
+                0 4px 15px rgba(0, 123, 255, 0.4); /* Mantener la sombra original */
+}
+
 
 /* Botón secundario específico de Hero */
 .btn-secondary {

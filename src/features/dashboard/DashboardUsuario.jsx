@@ -173,19 +173,54 @@ function DashboardUsuario() {
                 responseType: 'blob'
             });
 
-            const fileURL = window.URL.createObjectURL(new Blob([response.data]));
-            const fileLink = document.createElement('a');
-            fileLink.href = fileURL;
-            fileLink.setAttribute('download', `comprobante_reserva_${reservaId}.pdf`);
-            document.body.appendChild(fileLink);
-            fileLink.click();
-            fileLink.remove();
+            // Verificar si la respuesta es un PDF válido antes de intentar descargar
+            if (response.data.type === 'application/pdf') {
+                const fileURL = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                const fileLink = document.createElement('a');
+                fileLink.href = fileURL;
+                fileLink.setAttribute('download', `comprobante_reserva_${reservaId}.pdf`);
+                document.body.appendChild(fileLink);
+                fileLink.click();
+                fileLink.remove();
+                window.URL.revokeObjectURL(fileURL); // Liberar el objeto URL
 
-            setModalReserva(null);
-            alert("Comprobante descargado.");
+                setModalReserva(null);
+                // No mostrar alerta aquí, ya que la descarga es un éxito.
+            } else {
+                // Si el tipo de contenido no es PDF, puede ser un error del servidor o un HTML.
+                // Intentar leerlo como texto para un mensaje de error más específico.
+                const reader = new FileReader();
+                reader.onload = () => {
+                    console.error("Respuesta inesperada del servidor al descargar PDF:", reader.result);
+                    alert("Error: El servidor no envió un PDF válido. Por favor, revisa los logs del backend.");
+                };
+                reader.readAsText(response.data);
+            }
+
         } catch (error) {
-            console.error("Error al descargar el PDF:", error);
-            alert("No se pudo descargar el comprobante. Intenta de nuevo más tarde.");
+            console.error("Error al descargar el PDF:", error.response || error);
+            let errorMessage = "No se pudo descargar el comprobante. Intenta de nuevo más tarde.";
+            if (error.response && error.response.data) {
+                // Si el error.response.data es un Blob, intenta leerlo como texto.
+                if (error.response.data instanceof Blob) {
+                    const errorReader = new FileReader();
+                    errorReader.onload = (e) => {
+                        try {
+                            const errorJson = JSON.parse(e.target.result);
+                            errorMessage = errorJson.message || errorJson.error || errorMessage;
+                            alert(`Error al descargar el comprobante: ${errorMessage}`);
+                        } catch (parseError) {
+                            // Si no es JSON, mostrar el mensaje de error general
+                            alert(`Error al descargar el comprobante: ${e.target.result || errorMessage}`);
+                        }
+                    };
+                    errorReader.readAsText(error.response.data);
+                    return; // Salir para evitar la alerta duplicada
+                } else if (error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                }
+            }
+            alert(errorMessage);
         }
     };
 
@@ -346,7 +381,7 @@ function DashboardUsuario() {
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
                         <p><strong>Precio Total:</strong> ${modalReserva.precioTotal ? modalReserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
                         <p><strong>Estado:</strong> {formatReservaEstado(modalReserva.estado)}</p> {/* Capitalizar y formatear estado */}
-                        <p><strong>Confirmación Admin:</strong> {modalReserva.confirmada ? 'Sí' : 'No'}</p>
+                        {/* <p><strong>Confirmación Admin:</strong> {modalReserva.confirmada ? 'Sí' : 'No'}</p> ELIMINADA ESTA LÍNEA */}
                         <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${capitalizeFirstLetter(modalReserva.metodoPago || '?')})` : 'Pendiente de Pago'}</p>
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
@@ -362,8 +397,8 @@ function DashboardUsuario() {
                         )}
 
                         {/* Botones condicionales en el modal */}
-                        {/* Regla: Solo si el admin confirmó la reserva y no está pagada */}
-                        {modalReserva.confirmada && !modalReserva.pagada && modalReserva.metodoPago === 'efectivo' && (
+                        {/* Regla: Solo si la reserva está confirmada por el admin (o pagada si se auto-confirma) y NO está pagada, y es efectivo. */}
+                        {modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.confirmada && (
                             <button
                                 className="btn btn-info btn-mostrar-boleto"
                                 onClick={() => handleDescargarPdf(modalReserva.id)}
@@ -383,7 +418,7 @@ function DashboardUsuario() {
                                             {
                                                 reservaId: modalReserva.id,
                                                 nombreCliente: modalReserva.cliente,
-                                                monto: modalReserva.precio
+                                                monto: modalReserva.precioTotal // <-- CORREGIDO AQUÍ: Usar precioTotal
                                             }
                                         );
                                         const initPoint = preferenciaResponse.data.initPoint;
@@ -404,7 +439,7 @@ function DashboardUsuario() {
                         )}
                         
                         {/* Mensaje y botón si la reserva no está confirmada por el admin */}
-                        {!modalReserva.confirmada && (
+                        {!modalReserva.confirmada && modalReserva.estado === 'pendiente' && ( // Solo si el estado es 'pendiente'
                             <p className="text-warning">Esta reserva está pendiente de confirmación por el administrador. Las opciones de pago/boleto aparecerán una vez confirmada.</p>
                         )}
 
