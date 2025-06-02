@@ -97,7 +97,6 @@ function App() {
         localStorage.setItem('nombreCompleto', nombreCompletoData);
         localStorage.setItem('userRole', roleData);
         setEstaAutenticado(true);
-        setUsername(usernameData); // Este setUsername no es necesario si no se usa directamente
         setNombreUsuario(nombreCompletoData);
         setUserRole(roleData);
     }, []);
