@@ -69,10 +69,7 @@ const ReservaDetail = () => {
     };
 
     const handlePagarEnEfectivo = () => {
-        // En un caso real, esto solo actualizaría el estado en tu sistema a "pagada en efectivo"
-        // o generaría un comprobante de pago para el cliente.
         alert('Has seleccionado pagar en efectivo. Por favor, realiza el pago al llegar a la cancha.');
-        // Opcional: Podrías redirigir a una página de "Pago en Efectivo Confirmado"
         navigate('/mis-reservas');
     };
 
@@ -80,13 +77,36 @@ const ReservaDetail = () => {
         if (!dateTimeString) return 'Fecha no disponible';
         try {
             const date = new Date(dateTimeString);
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
             return date.toLocaleString('es-AR', options);
         } catch (e) {
             console.error("Error formateando fecha:", dateTimeString, e);
             return dateTimeString;
         }
     };
+
+    // Función para capitalizar la primera letra y manejar formatos de estado
+    const formatReservaEstado = (estado) => {
+        if (!estado) return 'Desconocido';
+        estado = estado.toLowerCase();
+        switch (estado) {
+            case 'pendiente': return 'Pendiente';
+            case 'confirmada': return 'Confirmada';
+            case 'confirmada_efectivo': return 'Confirmada (Efectivo)';
+            case 'pendiente_pago_mp': return 'Pendiente (Mercado Pago)';
+            case 'pagada': return 'Pagada';
+            case 'rechazada_pago_mp': return 'Rechazada (Mercado Pago)';
+            case 'cancelada': return 'Cancelada';
+            default: return estado.charAt(0).toUpperCase() + estado.slice(1);
+        }
+    };
+    
+    // Función para capitalizar la primera letra de una string simple
+    const capitalizeFirstLetter = (string) => {
+        if (!string) return '';
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    };
+
 
     if (loading) {
         return <div className="reserva-detail-container">Cargando detalles de la reserva...</div>;
@@ -101,7 +121,7 @@ const ReservaDetail = () => {
     }
 
     const isConfirmedByAdmin = reserva.confirmada;
-    const isPaid = reserva.pagada; // Asumo que el backend ya indica si está pagada
+    const isPaid = reserva.pagada;
 
     return (
         <div className="reserva-detail-container">
@@ -110,22 +130,22 @@ const ReservaDetail = () => {
                 <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p>
                 <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
                 <p><strong>Precio Total:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                <p><strong>Estado:</strong> {reserva.estado}</p>
-                <p><strong>Confirmación Admin:</strong> {isConfirmedByAdmin ? 'Sí' : 'No'}</p>
+                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p> {/* Capitalizar y formatear estado */}
+                {/* <p><strong>Confirmación Admin:</strong> {isConfirmedByAdmin ? 'Sí' : 'No'}</p> Se elimina esta línea */}
                 <p><strong>Pago:</strong> {isPaid ? 'Pagada' : 'Pendiente'}</p>
-                {reserva.metodoPago && <p><strong>Método de Pago Seleccionado:</strong> {reserva.metodoPago}</p>}
+                {reserva.metodoPago && <p><strong>Método de Pago Seleccionado:</strong> {capitalizeFirstLetter(reserva.metodoPago)}</p>} {/* Capitalizar método de pago */}
 
                 {/* Mostrar opciones de pago solo si la reserva está confirmada por el admin y NO está pagada */}
                 {isConfirmedByAdmin && !isPaid && (
                     <div className="payment-options">
                         <h3>Finaliza tu Pago:</h3>
-                        {reserva.metodoPago === 'mercadopago' && (
+                        {reserva.metodoPago && reserva.metodoPago.toLowerCase() === 'mercadopago' && (
                             <button className="payment-button mercadopago-button" onClick={handlePagoMercadoPago}>
                                 <img src={mercadopagoLogo} alt="Mercado Pago" className="payment-logo" />
                                 Pagar con Mercado Pago
                             </button>
                         )}
-                        {reserva.metodoPago === 'efectivo' && (
+                        {reserva.metodoPago && reserva.metodoPago.toLowerCase() === 'efectivo' && (
                             <button className="payment-button efectivo-button" onClick={handlePagarEnEfectivo}>
                                 <img src={efectivoLogo} alt="Efectivo" className="payment-logo" />
                                 Pagar en Efectivo

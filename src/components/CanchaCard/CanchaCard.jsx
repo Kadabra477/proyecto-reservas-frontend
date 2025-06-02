@@ -10,7 +10,8 @@ const placeholderImage = '/imagenes/default-cancha.png'; // Asegúrate que esta 
 // ¡IMPORTANTE! Reemplaza 'TU_API_KEY_DE_Maps' con tu clave real.
 // Necesitarás habilitar la "Maps Static API" en la consola de Google Cloud.
 const getStaticMapImageUrl = (ubicacionMaps) => {
-    const Maps_API_KEY = 'TU_API_KEY_DE_Maps'; // <<-- ¡REEMPLAZA ESTO!
+    // Es buena práctica obtener la API Key de una variable de entorno de Vercel (process.env.REACT_APP_...)
+    const Maps_API_KEY = process.env.REACT_APP_Maps_API_KEY || 'TU_API_KEY_DE_Maps'; // <<-- ¡REEMPLAZA ESTO!
 
     if (!ubicacionMaps || !Maps_API_KEY || Maps_API_KEY === 'TU_API_KEY_DE_Maps') {
         console.warn("API Key de Google Maps no configurada o ubicacionMaps inválida. No se mostrará el mapa.");
@@ -19,18 +20,24 @@ const getStaticMapImageUrl = (ubicacionMaps) => {
 
     // Intenta extraer coordenadas o un query para el mapa estático
     let center = '';
-    const mapUrl = new URL(ubicacionMaps);
-    if (mapUrl.pathname.includes("/place/")) {
-        const match = mapUrl.pathname.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-        if (match) {
-            center = `${match[1]},${match[2]}`;
+    try {
+        const mapUrl = new URL(ubicacionMaps);
+        if (mapUrl.pathname.includes("/place/")) {
+            const match = mapUrl.pathname.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+            if (match) {
+                center = `${match[1]},${match[2]}`;
+            } else {
+                // Si no hay coordenadas explícitas, usa el último segmento como posible lugar/query
+                center = mapUrl.pathname.substring(mapUrl.pathname.lastIndexOf('/') + 1);
+            }
+        } else if (mapUrl.searchParams.has("q")) {
+            center = mapUrl.searchParams.get("q");
         } else {
-            center = mapUrl.pathname.substring(mapUrl.pathname.lastIndexOf('/') + 1);
+            center = ubicacionMaps; // Fallback si no hay un formato claro, puede que funcione
         }
-    } else if (mapUrl.searchParams.has("q")) {
-        center = mapUrl.searchParams.get("q");
-    } else {
-        center = ubicacionMaps; // Fallback si no hay un formato claro, puede que funcione
+    } catch (e) {
+        console.error("Error al parsear ubicacionMaps URL:", ubicacionMaps, e);
+        center = ubicacionMaps; // Usar la URL tal cual como fallback si no se pudo parsear
     }
     
     // Codifica el centro para la URL

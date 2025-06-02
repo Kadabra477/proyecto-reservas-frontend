@@ -257,6 +257,29 @@ function AdminPanel() {
         }
     };
 
+    // Función para capitalizar la primera letra y manejar formatos de estado
+    const formatReservaEstado = (estado) => {
+        if (!estado) return 'Desconocido';
+        estado = estado.toLowerCase();
+        switch (estado) {
+            case 'pendiente': return 'Pendiente';
+            case 'confirmada': return 'Confirmada';
+            case 'confirmada_efectivo': return 'Confirmada (Efectivo)';
+            case 'pendiente_pago_mp': return 'Pendiente (Mercado Pago)';
+            case 'pagada': return 'Pagada';
+            case 'rechazada_pago_mp': return 'Rechazada (Mercado Pago)';
+            case 'cancelada': return 'Cancelada';
+            default: return estado.charAt(0).toUpperCase() + estado.slice(1);
+        }
+    };
+
+    // Función para capitalizar la primera letra de una string simple
+    const capitalizeFirstLetter = (string) => {
+        if (!string) return '';
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    };
+
+
     // Determina qué datos usar para el formulario (los de edición o los de nueva cancha)
     const currentFormData = editingCancha || nuevaCancha;
 
@@ -561,6 +584,7 @@ function AdminPanel() {
                                     </tr>
                                     </thead>
                                     <tbody>
+                                        {/* Modificación aquí para usar las funciones de formato */}
                                     {reservas.length > 0 ? reservas.map(r => (
                                         <tr key={r.id}>
                                         <td data-label="ID">{r.id}</td>
@@ -568,11 +592,11 @@ function AdminPanel() {
                                         <td data-label="Cliente">{r.cliente || 'N/A'}</td>
                                         <td data-label="Teléfono">{r.telefono || 'N/A'}</td>
                                         <td data-label="Fecha y Hora">{formatDate(r.fechaHora)}</td>
-                                        <td data-label="Precio Total">${r.precioTotal ? r.precioTotal.toLocaleString('es-AR') : 'N/A'}</td> {/* Mostrar precioTotal */}
-                                        <td data-label="Método Pago">{r.metodoPago || 'N/A'}</td> {/* Mostrar métodoPago */}
+                                        <td data-label="Precio Total">${r.precioTotal ? r.precioTotal.toLocaleString('es-AR') : 'N/A'}</td>
+                                        <td data-label="Método Pago">{capitalizeFirstLetter(r.metodoPago || 'N/A')}</td> {/* Capitalizar aquí */}
                                         <td data-label="Estado">
                                             <span className={`admin-badge ${r.confirmada ? 'confirmed' : 'pending'}`}>
-                                            {r.confirmada ? 'Confirmada' : 'Pendiente'}
+                                            {formatReservaEstado(r.estado)} {/* Formatear estado aquí */}
                                             </span>
                                         </td>
                                         <td data-label="Acciones">
