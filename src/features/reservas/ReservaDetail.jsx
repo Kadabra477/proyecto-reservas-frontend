@@ -5,8 +5,8 @@ import api from '../../api/axiosConfig';
 import './ReservaDetail.css';
 
 // Importar los logos desde src/assets
-import mercadopagoLogo from '../../assets/mercadopago.png'; // <--- RUTA CORREGIDA
-import efectivoLogo from '../../assets/efectivo.png';     // <--- RUTA CORREGIDA
+import mercadopagoLogo from '../../assets/mercadopago.png'; // RUTA CORREGIDA
+import efectivoLogo from '../../assets/efectivo.png';     // RUTA CORREGIDA
 
 const ReservaDetail = () => {
     const { id } = useParams();
@@ -130,14 +130,12 @@ const ReservaDetail = () => {
                 <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p>
                 <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p> 
                 <p><strong>Precio Total:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p> {/* Capitalizar y formatear estado */}
-                {/* <p><strong>Confirmación Admin:</strong> {isConfirmedByAdmin ? 'Sí' : 'No'}</p>  ELIMINADA ESTA LÍNEA */}
+                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p> 
                 <p><strong>Pago:</strong> {isPaid ? 'Pagada' : 'Pendiente'}</p>
-                {reserva.metodoPago && <p><strong>Método de Pago Seleccionado:</strong> {capitalizeFirstLetter(reserva.metodoPago)}</p>} {/* Capitalizar método de pago */}
+                {reserva.metodoPago && <p><strong>Método de Pago Seleccionado:</strong> {capitalizeFirstLetter(reserva.metodoPago)}</p>}
                 <p><strong>Reservado a nombre de:</strong> {reserva.cliente}</p>
                 <p><strong>Teléfono de contacto:</strong> {reserva.telefono || '-'}</p>
                 
-                {/* Mostrar opciones de pago solo si la reserva está confirmada por el admin y NO está pagada */}
                 {isConfirmedByAdmin && !isPaid && (
                     <div className="payment-options">
                         <h3>Finaliza tu Pago:</h3>
@@ -156,7 +154,6 @@ const ReservaDetail = () => {
                     </div>
                 )}
 
-                {/* Mensaje si la reserva está pendiente de confirmación */}
                 {!isConfirmedByAdmin && (
                     <p className="pending-confirmation-message">
                         Esta reserva está pendiente de confirmación por parte del administrador.
@@ -164,7 +161,6 @@ const ReservaDetail = () => {
                     </p>
                 )}
 
-                {/* Mensaje si la reserva ya está pagada */}
                 {isPaid && (
                     <p className="paid-confirmation-message">
                         ¡Esta reserva ya está pagada! Gracias por tu confirmación.
