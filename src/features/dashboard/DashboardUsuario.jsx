@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './DashboardUsuario.css';
@@ -9,7 +9,7 @@ function DashboardUsuario() {
     const [edad, setEdad] = useState('');
     const [ubicacion, setUbicacion] = useState('');
     const [bio, setBio] = useState(''); 
-    const [profilePictureUrl, setProfilePictureUrl] = useState('/avatar-default.png');
+    const [profilePictureUrl, setProfilePictureUrl] = useState(''); // Inicializar vacío o con un valor por defecto si es necesario
     const [profileImageFile, setProfileImageFile] = useState(null);
     const [misReservas, setMisReservas] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
@@ -51,7 +51,8 @@ function DashboardUsuario() {
                     setEdad(userData.edad || '');
                     setUbicacion(userData.ubicacion || '');
                     setBio(userData.bio || ''); 
-                    setProfilePictureUrl(userData.profilePictureUrl || '/avatar-default.png');
+                    // Usar la URL de la imagen de perfil del backend o el valor por defecto
+                    setProfilePictureUrl(userData.profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
 
                 const reservasRes = await api.get('/reservas/usuario');
@@ -71,7 +72,7 @@ function DashboardUsuario() {
                     setEdad('');
                     setUbicacion('');
                     setBio('');
-                    setProfilePictureUrl('/avatar-default.png');
+                    setProfilePictureUrl(`${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
             } finally {
                 if (isMounted) {
@@ -165,7 +166,7 @@ function DashboardUsuario() {
     const handleOpenModal = (reserva) => { setModalReserva(reserva); };
     const handleCloseModal = () => { setModalReserva(null); };
 
-    // NUEVO: Manejador para descargar el PDF
+    // Manejador para descargar el PDF
     const handleDescargarPdf = async (reservaId) => {
         try {
             const response = await api.get(`/reservas/${reservaId}/pdf-comprobante`, {
@@ -188,6 +189,29 @@ function DashboardUsuario() {
         }
     };
 
+    // Función para capitalizar la primera letra y manejar formatos de estado
+    const formatReservaEstado = (estado) => {
+        if (!estado) return 'Desconocido';
+        estado = estado.toLowerCase();
+        switch (estado) {
+            case 'pendiente': return 'Pendiente';
+            case 'confirmada': return 'Confirmada'; // Si el estado del backend es solo 'confirmada'
+            case 'confirmada_efectivo': return 'Confirmada (Efectivo)';
+            case 'pendiente_pago_mp': return 'Pendiente (Mercado Pago)';
+            case 'pagada': return 'Pagada';
+            case 'rechazada_pago_mp': return 'Rechazada (Mercado Pago)';
+            case 'cancelada': return 'Cancelada';
+            default: return estado.charAt(0).toUpperCase() + estado.slice(1); // Capitaliza el resto
+        }
+    };
+    
+    // Función para capitalizar la primera letra de una string simple (ej. método de pago)
+    const capitalizeFirstLetter = (string) => {
+        if (!string) return '';
+        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+    };
+
+
     if (loading) {
         return (
             <div className="dashboard-container">
@@ -208,11 +232,13 @@ function DashboardUsuario() {
         <div className="dashboard-container">
             <div className="perfil-container">
                 <div className="perfil-portada">
-                    <img src="/portada-default.jpg" alt="Portada" className="portada-img" />
+                    {/* Usar process.env.PUBLIC_URL para imágenes en la carpeta public */}
+                    <img src={`${process.env.PUBLIC_URL}/imagenes/portada-default.jpg`} alt="Portada" className="portada-img" />
                 </div>
                 <div className="perfil-info-box">
                     <label htmlFor="avatar-upload" className="avatar-label">
-                        <img src={profilePictureUrl} alt="Avatar" className="perfil-avatar editable" title="Cambiar avatar" />
+                        {/* Usar process.env.PUBLIC_URL para el avatar por defecto */}
+                        <img src={profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`} alt="Avatar" className="perfil-avatar editable" title="Cambiar avatar" />
                         {isEditing && (
                             <span className="change-avatar-icon">
                                 <i className="fas fa-camera"></i>
@@ -288,14 +314,15 @@ function DashboardUsuario() {
                             <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
                                 <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p> 
                                 <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
-                                <p><strong>Estado:</strong> {reserva.estado}</p> {/* Mostrar el estado general */}
+                                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p> {/* Capitalizar y formatear estado */}
                                 <p><strong>Pago:</strong> {reserva.pagada ? 'Pagada' : 'Pendiente'}</p>
                                 {/* NUEVO: Mostrar método de pago con ícono */}
                                 {reserva.metodoPago && (
                                     <p>
-                                        <strong>Método de Pago:</strong> {reserva.metodoPago}
-                                        {reserva.metodoPago === 'mercadopago' && <img src="/imagenes/mercadopago-small.png" alt="Mercado Pago" className="payment-icon-small" />}
-                                        {reserva.metodoPago === 'efectivo' && <img src="/imagenes/efectivo-small.png" alt="Efectivo" className="payment-icon-small" />}
+                                        <strong>Método de Pago:</strong> {capitalizeFirstLetter(reserva.metodoPago)} {/* Capitalizar método de pago */}
+                                        {/* Usar process.env.PUBLIC_URL para imágenes en public/imagenes */}
+                                        {reserva.metodoPago.toLowerCase() === 'mercadopago' && <img src={`${process.env.PUBLIC_URL}/imagenes/mercadopago-small.png`} alt="Mercado Pago" className="payment-icon-small" />}
+                                        {reserva.metodoPago.toLowerCase() === 'efectivo' && <img src={`${process.env.PUBLIC_URL}/imagenes/efectivo-small.png`} alt="Efectivo" className="payment-icon-small" />}
                                     </p>
                                 )}
                                 {reserva.jugadores && reserva.jugadores.length > 0 && (
@@ -317,8 +344,10 @@ function DashboardUsuario() {
                         <hr />
                         <p><strong>Cancha:</strong> {modalReserva.canchaNombre || 'N/A'}</p>
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
-                        <p><strong>Estado:</strong> {modalReserva.estado}</p>
-                        <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${modalReserva.metodoPago || '?'})` : 'Pendiente de Pago'}</p>
+                        <p><strong>Precio Total:</strong> ${modalReserva.precioTotal ? modalReserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
+                        <p><strong>Estado:</strong> {formatReservaEstado(modalReserva.estado)}</p> {/* Capitalizar y formatear estado */}
+                        <p><strong>Confirmación Admin:</strong> {modalReserva.confirmada ? 'Sí' : 'No'}</p>
+                        <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${capitalizeFirstLetter(modalReserva.metodoPago || '?')})` : 'Pendiente de Pago'}</p>
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
                         
@@ -332,7 +361,7 @@ function DashboardUsuario() {
                             <p><strong>Equipo 2:</strong> {Array.from(modalReserva.equipo2).join(', ')}</p>
                         )}
 
-                        {/* NUEVO: Botones condicionales en el modal */}
+                        {/* Botones condicionales en el modal */}
                         {/* Regla: Solo si el admin confirmó la reserva y no está pagada */}
                         {modalReserva.confirmada && !modalReserva.pagada && modalReserva.metodoPago === 'efectivo' && (
                             <button
@@ -381,7 +410,7 @@ function DashboardUsuario() {
 
                         {/* Mensaje si el pago fue rechazado por MP */}
                         {modalReserva.estado === 'rechazada_pago_mp' && (
-                             <p className="text-danger">Este pago fue rechazado por Mercado Pago. Contacta al administrador si deseas reintentar.</p>
+                               <p className="text-danger">Este pago fue rechazado por Mercado Pago. Contacta al administrador si deseas reintentar.</p>
                         )}
 
                         <div className="modal-actions">

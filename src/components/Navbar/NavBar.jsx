@@ -19,8 +19,10 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
     return (
         <header className="navbar">
             <div className="navbar-container">
-                {/* Logo con el nuevo nombre */}
-                <NavLink to="/" className="navbar-logo">¿DÓNDE JUEGO?</NavLink>
+                {/* Logo con el nuevo nombre y estructura para aplicar estilos */}
+                <NavLink to="/" className="navbar-logo">
+                    ¿DÓNDE <span className="navbar-logo-span">JUEGO?</span>
+                </NavLink>
                 <nav className="navbar-menu">
                     {/* Links que siempre están visibles */}
                     <NavLink
@@ -40,7 +42,6 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
                             >
                                 Dashboard
                             </NavLink>
-                            {/* ELIMINADO: El enlace a "Mis Reservas" */}
                             <div className="navbar-user-section">
                                 {/* Muestra solo el primer nombre */}
                                 <span className="navbar-greeting">Hola, {getFirstName(nombreUsuario)}!</span>

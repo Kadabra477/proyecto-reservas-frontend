@@ -195,6 +195,8 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
     border: none;
     cursor: pointer;
+    /* QUITAMOS EL OUTLINE QUE CAUSA EL BORDE AZUL AL HACER FOCUS */
+    outline: none; /* <--- AÑADIDO: Elimina el borde de enfoque */
 }
 
 .btn-main:hover {

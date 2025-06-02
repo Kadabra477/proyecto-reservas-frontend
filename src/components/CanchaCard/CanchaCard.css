@@ -1,10 +1,10 @@
 /* frontend/src/components/CanchaCard/CanchaCard.css */
 
 .cancha-card-item {
-    background-color: var(--white, #ffffff); /* Usar var(--white) si está definida, o #ffffff */
+    background-color: var(--white, #ffffff);
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* Sombra más pronunciada */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     display: flex;
@@ -13,14 +13,14 @@
 }
 
 .cancha-card-item:hover {
-    transform: translateY(-8px); /* Más énfasis en el hover */
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); /* Sombra más intensa al hover */
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
 }
 
 .cancha-card-img {
     width: 100%;
-    height: 220px; /* Altura un poco mayor para las imágenes */
-    object-fit: cover;
+    height: 220px;
+    object-fit: cover; /* ¡CLAVE para que la imagen no se estire y cubra el área! */
     border-bottom: 1px solid var(--gray-light, #f0f0f0);
     background-color: var(--gray-light, #f0f0f0);
     display: block;
@@ -30,13 +30,13 @@
     position: absolute;
     top: 15px;
     right: 15px;
-    background-color: var(--highlight, #ffc107); /* Amarillo de Mercado Pago o similar */
+    background-color: var(--highlight, #ffc107);
     color: #333;
-    padding: 8px 15px; /* Más padding */
-    border-radius: 25px; /* Más redondeado */
-    font-size: 1rem; /* Un poco más grande */
+    padding: 8px 15px;
+    border-radius: 25px;
+    font-size: 1rem;
     font-weight: 700;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); /* Sombra para el precio */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     z-index: 2;
 }
 
@@ -51,7 +51,7 @@
 .cancha-card-title {
     margin: 0 0 12px 0;
     color: var(--primary, #007bff);
-    font-size: 1.6rem; /* Título un poco más grande */
+    font-size: 1.6rem;
     font-weight: 700;
 }
 
@@ -60,9 +60,9 @@
     margin: 4px 0 15px 0;
     font-size: 1em;
     line-height: 1.6;
-    /* Para cortar la descripción si es muy larga */
+    /* Para cortar la descripción si es muy larga (opcional) */
     display: -webkit-box;
-    -webkit-line-clamp: 3; /* Muestra hasta 3 líneas */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -70,8 +70,8 @@
 
 .cancha-details-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Dos columnas para detalles */
-    gap: 8px 15px; /* Espacio entre items */
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 15px;
     margin-bottom: 15px;
     padding-bottom: 15px;
     border-bottom: 1px dashed var(--gray-light, #eee);
@@ -94,7 +94,50 @@
     font-size: 0.95em;
 }
 
+/* Estilos para el contenedor del mapa estático */
+.cancha-card-map-container {
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border-radius: var(--radius, 8px);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    line-height: 0; /* Elimina espacio extra debajo de la imagen */
+}
+
+.cancha-card-static-map {
+    width: 100%;
+    height: auto; /* Mantiene la proporción de la imagen 400x200 (si se usa ese tamaño en la URL) */
+    display: block;
+}
+
 .cancha-card-map-link {
+    display: block; /* Para que el enlace cubra toda la imagen */
+    position: relative;
+    text-decoration: none;
+    color: white; /* Color del texto del enlace */
+    font-weight: bold;
+    font-size: 1em;
+    text-align: center;
+}
+
+.cancha-card-map-link span {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.cancha-card-map-link:hover span {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Estilo para el enlace de "Ver en Google Maps" si no se muestra el mapa estático */
+.cancha-card-map-link-fallback {
     display: inline-block;
     margin: 8px 0 15px 0;
     color: var(--secondary, #6f42c1); /* Un color secundario para el mapa */
@@ -104,14 +147,15 @@
     transition: color 0.3s ease;
 }
 
-.cancha-card-map-link:hover {
+.cancha-card-map-link-fallback:hover {
     text-decoration: underline;
     color: var(--secondary-dark, #5a36a2);
 }
 
+
 .cancha-card-button {
     margin-top: auto;
-    padding: 12px 20px; /* Más padding para el botón */
+    padding: 12px 20px;
     border-radius: 30px;
     border: none;
     font-weight: 600;
@@ -122,7 +166,7 @@
     background-color: var(--primary, #007bff);
     color: white;
     width: 100%;
-    font-size: 1.1em; /* Botón un poco más grande */
+    font-size: 1.1em;
     box-sizing: border-box;
     box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }

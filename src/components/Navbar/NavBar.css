@@ -6,59 +6,64 @@
    position: sticky;
    top: 0;
    z-index: 1000;
- }
+}
  
- .navbar-container {
+.navbar-container {
    max-width: var(--max-width);
    margin: 0 auto;
    display: flex;
    justify-content: space-between;
    align-items: center;
- }
+}
  
- .navbar-logo {
-   font-size: 1.5rem;
-   font-weight: 800;
-   color: var(--primary);
+.navbar-logo {
+   font-size: 1.8rem; /* Aumentado a 1.8rem para que coincida con el Home */
+   font-weight: 800; /* Más audaz */
+   color: var(--text, #333); /* Color del texto por defecto */
    text-decoration: none;
- }
+   letter-spacing: 0.5px; /* Añadido espaciado de letras */
+}
+/* Estilo específico para el span dentro del logo (JUEGO?) */
+.navbar-logo-span {
+    color: var(--primary); /* Usar el color primario para el 'JUEGO?' */
+}
  
- .navbar-menu {
+.navbar-menu {
    display: flex;
    align-items: center;
    gap: 25px;
    flex-wrap: wrap;
- }
+}
  
- .navbar-link {
+.navbar-link {
    color: var(--text);
    text-decoration: none;
    font-weight: 500;
    font-size: 1rem;
    transition: var(--transition);
- }
+}
  
- .navbar-link:hover,
- .navbar-link.active {
+.navbar-link:hover,
+.navbar-link.active {
    color: var(--primary-dark);
- }
+}
  
- /* Usuario + Botón logout */
- .navbar-user-section {
+/* Usuario + Botón logout */
+.navbar-user-section {
    display: flex;
    align-items: center;
    gap: 15px;
    margin-left: auto;
- }
+}
  
- .navbar-greeting {
+.navbar-greeting {
    font-weight: 600;
    color: var(--text-light);
    white-space: nowrap;
- }
+}
  
- /* Responsive */
- @media (max-width: 768px) {
+/* Responsive */
+@media (max-width: 768px) {
    .navbar-menu {
      flex-direction: column;
      align-items: flex-start;
@@ -76,11 +81,11 @@
      width: 100%;
      text-align: center;
    }
- }
+}
  
- @media (max-width: 480px) {
+@media (max-width: 480px) {
    .navbar-logo {
-     font-size: 1.2rem;
+     font-size: 1.5rem; /* Ajuste para pantallas aún más pequeñas */
    }
  
    .navbar-link {
@@ -90,5 +95,4 @@
    .navbar-greeting {
      font-size: 0.9rem;
    }
- }
- 
+}
