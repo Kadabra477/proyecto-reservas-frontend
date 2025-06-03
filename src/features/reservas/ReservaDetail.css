@@ -76,10 +76,13 @@
 }
 
 .payment-button .payment-logo {
-    width: 30px; /* Tamaño del logo */
+    width: 30px; 
     height: 30px;
     margin-right: 12px;
     vertical-align: middle;
+    /* CLAVE: Ajustar la imagen para que no se estire */
+    object-fit: contain; /* Asegura que la imagen se escala dentro del contenedor manteniendo su proporción */
+    flex-shrink: 0; /* Evita que la imagen se encoja si el texto es muy largo */
 }
 
 .mercadopago-button {
@@ -180,6 +183,8 @@
         width: 25px;
         height: 25px;
         margin-right: 10px;
+        /* Reaplicar o ajustar object-fit para pantallas pequeñas si es necesario */
+        object-fit: contain; 
     }
     .back-button {
         padding: 10px 20px;

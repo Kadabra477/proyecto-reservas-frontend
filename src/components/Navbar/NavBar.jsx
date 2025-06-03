@@ -24,13 +24,15 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
                     ¿DÓNDE <span className="navbar-logo-span">JUEGO?</span>
                 </NavLink>
                 <nav className="navbar-menu">
-                    {/* Links que siempre están visibles */}
-                    <NavLink
-                        to="/canchas"
-                        className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
-                    >
-                        Canchas
-                    </NavLink>
+                    {/* Renderización condicional del enlace "Canchas" */}
+                    {isLoggedIn && ( // Solo muestra el enlace 'Canchas' si el usuario está logueado
+                        <NavLink
+                            to="/canchas"
+                            className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+                        >
+                            Canchas
+                        </NavLink>
+                    )}
 
                     {/* Renderización condicional de links según el estado de autenticación */}
                     {isLoggedIn ? (
