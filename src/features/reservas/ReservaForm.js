@@ -1,6 +1,6 @@
 // frontend/src/features/reservas/ReservaForm.jsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Ya no usamos useParams para canchaId aquí
 import api from '../../api/axiosConfig';
 import './ReservaForm.css';
 
@@ -9,29 +9,50 @@ import mercadopagoIcon from '../../assets/mercadopago.png';
 import efectivoIcon from '../../assets/efectivo.png'; 
 
 function ReservaForm() {
-    const { canchaId } = useParams();
+    // Ya no necesitamos canchaId de los params si reservamos por tipo
+    // const { canchaId } = useParams(); // ELIMINAR esta línea
+
     const navigate = useNavigate();
 
-    const [cancha, setCancha] = useState(null);
+    // Estado para el tipo de cancha seleccionado
+    const [selectedTipoCancha, setSelectedTipoCancha] = useState(''); 
+    // Estado para los tipos de cancha disponibles (para el selector)
+    const [tiposCanchaDisponibles, setTiposCanchaDisponibles] = useState([]); 
+
     const [formulario, setFormulario] = useState({
         nombre: '',
         apellido: '',
         dni: '',
         telefono: '',
         fecha: '',
-        hora: '', // Ahora será controlado por el backend
+        hora: '', 
         metodoPago: 'mercadopago',
     });
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
-    const [isLoadingCancha, setIsLoadingCancha] = useState(true);
+    // Estado para la carga inicial de tipos de cancha
+    const [isLoadingInitialData, setIsLoadingInitialData] = useState(true); 
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCreatingPreference, setIsCreatingPreference] = useState(false);
-    const [errorCancha, setErrorCancha] = useState('');
+    
+    // Estados para la disponibilidad por tipo/fecha/hora
+    const [availableCanchasCount, setAvailableCanchasCount] = useState(null); // Cantidad de canchas disponibles
+    const [isLoadingAvailability, setIsLoadingAvailability] = useState(false); // Indica si se está verificando disponibilidad
+    const [availabilityMessage, setAvailabilityMessage] = useState(''); // Mensaje sobre la disponibilidad
+    const [hoursOptions, setHoursOptions] = useState([]); // Opciones de horas fijas para el select
 
-    const [availableHours, setAvailableHours] = useState([]); // Nuevo estado para horas disponibles
-    const [isLoadingHours, setIsLoadingHours] = useState(false); // Nuevo estado para carga de horas
+    // Rellena las opciones del select de hora (10:00 a 23:00)
+    useEffect(() => {
+        const generateHours = () => {
+            const hours = [];
+            for (let i = 10; i <= 23; i++) { // De 10:00 a 23:00 (último slot para terminar a medianoche)
+                hours.push(`${String(i).padStart(2, '0')}:00`);
+            }
+            setHoursOptions(hours);
+        };
+        generateHours();
+    }, []);
 
-    // Determinar la fecha mínima para el input de fecha (hoy o mañana si ya es tarde)
+    // Función para obtener la fecha mínima para el input de fecha (hoy o mañana si ya es tarde)
     const getMinDate = () => {
         const today = new Date();
         const year = today.getFullYear();
@@ -40,77 +61,68 @@ function ReservaForm() {
         return `${year}-${month}-${day}`;
     };
 
-    const fetchCanchaDetails = useCallback(async () => {
-        if (!canchaId) {
-            setErrorCancha('ID de cancha no válido.');
-            setIsLoadingCancha(false);
+    // Cargar los tipos de cancha disponibles al inicio
+    useEffect(() => {
+        const fetchTiposCancha = async () => {
+            setIsLoadingInitialData(true);
+            try {
+                // Asumiendo que /canchas devuelve todas las canchas, y podemos extraer tipos únicos de ahí.
+                // Opcional: si tu backend tuviera un endpoint /canchas/tipos-disponibles, sería mejor.
+                const response = await api.get('/canchas'); 
+                const uniqueTypes = [...new Set(response.data.map(c => c.tipoCancha))].filter(Boolean); // Obtener tipos únicos no nulos
+                setTiposCanchaDisponibles(uniqueTypes);
+                // Si hay tipos, seleccionar el primero por defecto
+                if (uniqueTypes.length > 0) {
+                    setSelectedTipoCancha(uniqueTypes[0]); 
+                    setFormulario(prev => ({ ...prev, tipoCancha: uniqueTypes[0] }));
+                }
+            } catch (err) {
+                console.error("Error al obtener tipos de cancha:", err);
+                setMensaje({ type: 'error', text: 'Error al cargar los tipos de cancha disponibles.' });
+            } finally {
+                setIsLoadingInitialData(false);
+            }
+        };
+        fetchTiposCancha();
+    }, []);
+
+    // Función para consultar la disponibilidad por tipo de cancha, fecha y hora
+    const checkAvailability = useCallback(async () => {
+        const { fecha, hora } = formulario;
+        if (!selectedTipoCancha || !fecha || !hora) {
+            setAvailableCanchasCount(null); // Resetear el contador
+            setAvailabilityMessage('Selecciona un tipo de cancha, fecha y hora.');
             return;
         }
-        setIsLoadingCancha(true);
-        setErrorCancha('');
+
+        setIsLoadingAvailability(true);
+        setAvailabilityMessage('');
         try {
-            const response = await api.get(`/canchas/${canchaId}`);
-            if (!response.data) {
-                setErrorCancha('La cancha solicitada no existe.');
-                setCancha(null);
-            } else if (!response.data.disponible) {
-                setErrorCancha('Esta cancha no está disponible para reservas en este momento.');
-                setCancha(response.data);
+            // Llama al nuevo endpoint del backend
+            const response = await api.get(`/reservas/disponibilidad-por-tipo?tipoCancha=${selectedTipoCancha}&fecha=${fecha}&hora=${hora}`);
+            const count = response.data; // El backend devuelve un número entero
+            setAvailableCanchasCount(count);
+            if (count > 0) {
+                setAvailabilityMessage(`¡Hay ${count} canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}!`);
+                setMensaje({ text: '', type: '' }); // Limpiar mensaje de error si hay disponibles
             } else {
-                setCancha(response.data);
+                setAvailabilityMessage(`No hay canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}. Elige otro horario.`);
+                setMensaje({ type: 'error', text: 'Horario no disponible.' });
             }
         } catch (err) {
-            console.error("Error al obtener detalles de la cancha:", err);
-            setErrorCancha('Error al cargar los detalles de la cancha. Intenta de nuevo.');
-            setCancha(null);
+            console.error("Error al consultar disponibilidad:", err);
+            setAvailableCanchasCount(0);
+            setAvailabilityMessage('Error al verificar disponibilidad. Intenta de nuevo.');
+            setMensaje({ type: 'error', text: 'Error al verificar disponibilidad.' });
         } finally {
-            setIsLoadingCancha(false);
+            setIsLoadingAvailability(false);
         }
-    }, [canchaId]);
+    }, [formulario.fecha, formulario.hora, selectedTipoCancha]);
 
-    // NUEVO: Función para obtener y establecer las horas disponibles
-    const fetchAvailableHours = useCallback(async (date) => {
-        if (!date || !canchaId) {
-            setAvailableHours([]);
-            setFormulario(prev => ({ ...prev, hora: '' })); // Limpiar hora si la fecha es inválida
-            return;
-        }
-
-        setIsLoadingHours(true);
-        setMensaje({ text: '', type: '' }); // Limpiar mensajes al cargar horas
-        try {
-            const response = await api.get(`/reservas/${canchaId}/slots-disponibles?fecha=${date}`);
-            const hours = response.data.sort(); // Ordenar las horas
-            setAvailableHours(hours);
-            // Si la hora actual seleccionada no está disponible, o si no hay hora seleccionada, resetearla
-            if (!hours.includes(formulario.hora)) {
-                setFormulario(prev => ({ ...prev, hora: '' }));
-            }
-            if (hours.length === 0) {
-                setMensaje({ type: 'warning', text: 'No hay horarios disponibles para esta cancha en la fecha seleccionada.' });
-            }
-        } catch (err) {
-            console.error("Error al obtener horas disponibles:", err);
-            setMensaje({ type: 'error', text: 'Error al cargar los horarios disponibles. Intenta de nuevo.' });
-            setAvailableHours([]);
-            setFormulario(prev => ({ ...prev, hora: '' }));
-        } finally {
-            setIsLoadingHours(false);
-        }
-    }, [canchaId, formulario.hora]);
-
+    // Efecto para verificar disponibilidad cuando cambian los campos clave
     useEffect(() => {
-        fetchCanchaDetails();
-    }, [fetchCanchaDetails]);
-
-    // Efecto para cargar horas disponibles cuando cambia la fecha seleccionada
-    useEffect(() => {
-        if (formulario.fecha) {
-            fetchAvailableHours(formulario.fecha);
-        } else {
-            setAvailableHours([]); // Limpiar horas si no hay fecha
-        }
-    }, [formulario.fecha, fetchAvailableHours]);
+        checkAvailability();
+    }, [formulario.fecha, formulario.hora, selectedTipoCancha, checkAvailability]);
 
 
     const handleChange = (e) => {
@@ -119,13 +131,17 @@ function ReservaForm() {
             ...prevFormulario,
             [name]: value
         }));
+        // Si cambia el tipo de cancha, actualizar el estado
+        if (name === 'tipoCancha') {
+            setSelectedTipoCancha(value);
+        }
     };
 
     const validarFormulario = () => {
         setMensaje({ text: '', type: '' }); // Limpiar mensaje al revalidar
         const { nombre, apellido, dni, telefono, fecha, hora, metodoPago } = formulario;
 
-        if (!nombre.trim() || !apellido.trim() || !dni.trim() || !telefono.trim() || !fecha || !hora || !metodoPago) {
+        if (!selectedTipoCancha || !nombre.trim() || !apellido.trim() || !dni.trim() || !telefono.trim() || !fecha || !hora || !metodoPago) {
             setMensaje({ type: 'error', text: 'Todos los campos y el método de pago son obligatorios.' });
             return false;
         }
@@ -138,8 +154,6 @@ function ReservaForm() {
             return false;
         }
         
-        // La validación de fecha y hora ahora se centra en si el slot está en `availableHours`
-        // y si la fecha no es pasada. El backend hace la validación final.
         const selectedDateTime = new Date(`${fecha}T${hora}:00`);
         const now = new Date();
 
@@ -148,10 +162,10 @@ function ReservaForm() {
             return false;
         }
 
-        // Si la hora seleccionada no está en la lista de horas disponibles, es inválida
-        if (!availableHours.includes(hora)) {
-             setMensaje({ type: 'error', text: 'El horario seleccionado no está disponible. Por favor, elige uno de la lista.' });
-             return false;
+        // Se valida que haya canchas disponibles EN EL MOMENTO DE LA UI
+        if (availableCanchasCount === null || availableCanchasCount <= 0) {
+            setMensaje({ type: 'error', text: 'No hay canchas disponibles para este horario. Por favor, elige otro.' });
+            return false;
         }
 
         return true;
@@ -162,15 +176,11 @@ function ReservaForm() {
         setMensaje({ text: '', type: '' });
 
         if (!validarFormulario()) return;
-        if (!cancha || !cancha.disponible) {
-            setMensaje({ type: 'error', text: 'La cancha no está disponible o no se pudo cargar.' });
-            return;
-        }
-
+        
         setIsSubmitting(true);
 
         const reservaData = {
-            canchaId: parseInt(canchaId, 10),
+            tipoCancha: selectedTipoCancha, // Enviar el tipo de cancha al backend
             nombre: formulario.nombre.trim(),
             apellido: formulario.apellido.trim(),
             dni: formulario.dni.trim(),
@@ -178,16 +188,23 @@ function ReservaForm() {
             fecha: formulario.fecha,
             hora: formulario.hora,
             metodoPago: formulario.metodoPago,
+            // Puedes añadir jugadores y equipos si el formulario los recoge
+            // jugadores: formulario.jugadores,
+            // equipo1: formulario.equipo1,
+            // equipo2: formulario.equipo2,
         };
 
         try {
             const reservaResponse = await api.post("/reservas/crear", reservaData);
             const reservaCreada = reservaResponse.data;
 
-            console.log("Reserva creada con ID:", reservaCreada.id, "Método de pago:", reservaCreada.metodoPago);
+            console.log("Reserva creada con ID:", reservaCreada.id, "Método de pago:", reservaCreada.metodoPago, "Cancha asignada:", reservaCreada.canchaNombre);
 
+            // Resetear formulario y estados
             setFormulario({ nombre: '', apellido: '', dni: '', telefono: '', fecha: '', hora: '', metodoPago: 'mercadopago' });
-            setAvailableHours([]); // Limpiar horas disponibles después de la reserva
+            setAvailableCanchasCount(null);
+            setAvailabilityMessage('');
+            setSelectedTipoCancha(tiposCanchaDisponibles[0] || ''); // Restablecer el tipo seleccionado
 
             if (reservaCreada.metodoPago === 'mercadopago') {
                 setMensaje({ type: 'info', text: 'Reserva creada. Redirigiendo a Mercado Pago...' });
@@ -198,7 +215,7 @@ function ReservaForm() {
                         {
                             reservaId: reservaCreada.id,
                             nombreCliente: reservaCreada.cliente,
-                            monto: reservaCreada.precio
+                            monto: reservaCreada.precioTotal // Usar precioTotal del DTO de respuesta
                         }
                     );
                     const initPoint = preferenciaResponse.data.initPoint;
@@ -220,7 +237,8 @@ function ReservaForm() {
                     setIsSubmitting(false);
                 }
             } else if (reservaCreada.metodoPago === 'efectivo') {
-                setMensaje({ type: 'success', text: `Reserva creada exitosamente (ID: ${reservaCreada.id}). Puedes ver los detalles en tu Dashboard.` });
+                // Mensaje al usuario, incluyendo la cancha asignada
+                setMensaje({ type: 'success', text: `Reserva creada exitosamente (ID: ${reservaCreada.id}). Te asignamos la cancha: ${reservaCreada.canchaNombre || 'N/A'}. Puedes ver los detalles en tu Dashboard.` });
                 setIsSubmitting(false);
                 navigate('/dashboard');
             } else {
@@ -234,59 +252,48 @@ function ReservaForm() {
             if (reservaError.response?.data?.error) {
                 setMensaje({ type: 'error', text: `Error al crear reserva: ${reservaError.response.data.error}` });
             } else if (reservaError.response?.data) {
-                // Si el error es de tipo String directo del backend (como en la validación de conflicto)
                 setMensaje({ type: 'error', text: `Error al crear reserva: ${reservaError.response.data}` });
             } else if (reservaError.response?.status === 400) {
-                setMensaje({ type: 'error', text: 'Error en los datos de la reserva. Revisa la fecha y hora.' });
+                setMensaje({ type: 'error', text: 'Error en los datos de la reserva. Revisa los campos y la disponibilidad.' });
             } else if (reservaError.response?.status === 409) { // Capturar el conflicto de disponibilidad
                  setMensaje({ type: 'error', text: `Error: ${reservaError.response.data || 'El horario seleccionado ya no está disponible. Por favor, elige otro.'}` });
-            }
-            else {
+            } else {
                 setMensaje({ type: 'error', text: 'No se pudo crear la reserva. Intenta nuevamente.' });
             }
             setIsSubmitting(false);
         }
     };
 
-    if (isLoadingCancha) return <p className="loading-message">Cargando información de la cancha...</p>;
-    if (errorCancha) return <p className="error-message">{errorCancha}</p>;
-    if (!cancha) return <p className="error-message">No se encontró la cancha solicitada.</p>;
+    if (isLoadingInitialData) return <p className="loading-message">Cargando tipos de cancha...</p>;
+    if (tiposCanchaDisponibles.length === 0 && !isLoadingInitialData) return <p className="error-message">No hay tipos de cancha disponibles para reservar. Crea canchas en el panel de administrador.</p>;
 
     return (
         <div className="reserva-form-container">
-            <h2 className="reserva-form-title">Reserva para: {cancha.nombre}</h2>
-            <div className="reserva-cancha-details">
-                <img
-                    src={cancha.fotoUrl || '/imagenes/default-cancha.png'}
-                    alt={cancha.nombre}
-                    className="reserva-cancha-img"
-                    onError={(e) => { e.target.onerror = null; e.target.src='/imagenes/default-cancha.png'; }}
-                />
-                {cancha.descripcion && <p>{cancha.descripcion}</p>}
-                {cancha.ubicacion && <p><strong>Ubicación:</strong> {cancha.ubicacion}</p>}
-                {cancha.precioPorHora != null && <p><strong>Precio:</strong> {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(Number(cancha.precioPorHora))} / hora</p>}
-                {!cancha.disponible && <p style={{color: 'var(--danger)', fontWeight: 'bold'}}>Actualmente no disponible para reservas.</p>}
-            </div>
-
-            <h3 className="reserva-form-subtitle">Completa tus datos y selecciona método de pago</h3>
+            <h2 className="reserva-form-title">Reservar Cancha</h2>
+            
+            <h3 className="reserva-form-subtitle">Selecciona tipo, fecha y hora</h3>
             <form onSubmit={handleSubmit} className="reserva-formulario" noValidate>
-                {/* Inputs del formulario */}
+                {/* Selector de Tipo de Cancha */}
                 <div className="form-group">
-                    <label htmlFor="nombre">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" value={formulario.nombre} onChange={handleChange} required disabled={isSubmitting || isCreatingPreference || !cancha.disponible} />
+                    <label htmlFor="tipoCancha">Tipo de Cancha:</label>
+                    <select
+                        id="tipoCancha"
+                        name="tipoCancha"
+                        value={selectedTipoCancha}
+                        onChange={handleChange}
+                        required
+                        disabled={isSubmitting || isCreatingPreference || isLoadingInitialData || tiposCanchaDisponibles.length === 0}
+                    >
+                         {tiposCanchaDisponibles.length === 0 ? (
+                            <option value="">Cargando tipos...</option>
+                        ) : (
+                            tiposCanchaDisponibles.map(tipo => (
+                                <option key={tipo} value={tipo}>{tipo}</option>
+                            ))
+                        )}
+                    </select>
                 </div>
-                <div className="form-group">
-                    <label htmlFor="apellido">Apellido:</label>
-                    <input type="text" id="apellido" name="apellido" placeholder="Tu apellido" value={formulario.apellido} onChange={handleChange} required disabled={isSubmitting || isCreatingPreference || !cancha.disponible} />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="dni">DNI:</label>
-                    <input type="text" id="dni" name="dni" placeholder="Tu DNI (7-8 dígitos)" value={formulario.dni} onChange={handleChange} required pattern="\d{7,8}" title="Ingresa 7 u 8 dígitos sin puntos" disabled={isSubmitting || isCreatingPreference || !cancha.disponible} />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="telefono">Teléfono:</label>
-                    <input type="tel" id="telefono" name="telefono" placeholder="Tu teléfono (solo números)" value={formulario.telefono} onChange={handleChange} required pattern="\d+" title="Ingresa solo números" disabled={isSubmitting || isCreatingPreference || !cancha.disponible} />
-                </div>
+
                 <div className="form-group">
                     <label htmlFor="fecha">Fecha:</label>
                     <input
@@ -296,38 +303,62 @@ function ReservaForm() {
                         value={formulario.fecha}
                         onChange={handleChange}
                         required
-                        min={getMinDate()} // Usa la función para obtener la fecha mínima
-                        disabled={isSubmitting || isCreatingPreference || !cancha.disponible}
+                        min={getMinDate()} 
+                        disabled={isSubmitting || isCreatingPreference || isLoadingInitialData}
                     />
                 </div>
                 <div className="form-group">
                     <label htmlFor="hora">Hora:</label>
-                    <select
-                        id="hora"
-                        name="hora"
-                        value={formulario.hora}
-                        onChange={handleChange}
-                        required
-                        disabled={isSubmitting || isCreatingPreference || !cancha.disponible || isLoadingHours || availableHours.length === 0}
+                    <select 
+                        id="hora" 
+                        name="hora" 
+                        value={formulario.hora} 
+                        onChange={handleChange} 
+                        required 
+                        disabled={isSubmitting || isCreatingPreference || isLoadingInitialData || !formulario.fecha || hoursOptions.length === 0}
                     >
-                        <option value="">
-                            {isLoadingHours ? 'Cargando horas...' : (formulario.fecha ? 'Selecciona una hora' : 'Selecciona una fecha primero')}
-                        </option>
-                        {availableHours.map(hour => (
+                        <option value="">Selecciona una hora</option>
+                        {hoursOptions.map(hour => (
                             <option key={hour} value={hour}>
                                 {hour.substring(0, 5)} {/* Mostrar solo HH:MM */}
                             </option>
                         ))}
                     </select>
-                    {isLoadingHours && <p className="loading-small">Cargando horarios...</p>}
-                    {!isLoadingHours && formulario.fecha && availableHours.length === 0 && (
-                        <p className="no-hours-message">No hay horarios disponibles para la fecha seleccionada.</p>
-                    )}
+                </div>
+
+                {/* Mensaje de disponibilidad (cantidad de canchas disponibles) */}
+                {(formulario.fecha && formulario.hora && selectedTipoCancha) && (
+                    <div className={`availability-status ${availableCanchasCount > 0 ? 'available' : 'not-available'}`}>
+                        {isLoadingAvailability ? (
+                            <p>Verificando disponibilidad...</p>
+                        ) : (
+                            <p>{availabilityMessage}</p>
+                        )}
+                    </div>
+                )}
+                
+                {/* Campos de datos personales */}
+                <h3 className="reserva-form-subtitle">Completa tus datos personales</h3>
+                <div className="form-group">
+                    <label htmlFor="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" value={formulario.nombre} onChange={handleChange} required disabled={isSubmitting || isCreatingPreference || isLoadingInitialData} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="apellido">Apellido:</label>
+                    <input type="text" id="apellido" name="apellido" placeholder="Tu apellido" value={formulario.apellido} onChange={handleChange} required disabled={isSubmitting || isCreatingPreference || isLoadingInitialData} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="dni">DNI:</label>
+                    <input type="text" id="dni" name="dni" placeholder="Tu DNI (7-8 dígitos)" value={formulario.dni} onChange={handleChange} required pattern="\d{7,8}" title="Ingresa 7 u 8 dígitos sin puntos" disabled={isSubmitting || isCreatingPreference || isLoadingInitialData} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="Tu teléfono (solo números)" value={formulario.telefono} onChange={handleChange} required pattern="\d+" title="Ingresa solo números" disabled={isSubmitting || isCreatingPreference || isLoadingInitialData} />
                 </div>
 
                 {/* Selección de Método de Pago */}
+                <h3 className="reserva-form-subtitle">Selecciona tu método de pago</h3>
                 <div className="form-group payment-method-selection">
-                    <p>Selecciona tu método de pago:</p>
                     <label>
                         <input
                             type="radio"
@@ -335,7 +366,7 @@ function ReservaForm() {
                             value="mercadopago"
                             checked={formulario.metodoPago === 'mercadopago'}
                             onChange={handleChange}
-                            disabled={isSubmitting || isCreatingPreference || !cancha.disponible}
+                            disabled={isSubmitting || isCreatingPreference || isLoadingInitialData}
                         />
                         Pagar con Mercado Pago
                         <img src={mercadopagoIcon} alt="Mercado Pago" className="payment-icon" /> 
@@ -347,14 +378,19 @@ function ReservaForm() {
                             value="efectivo"
                             checked={formulario.metodoPago === 'efectivo'}
                             onChange={handleChange}
-                            disabled={isSubmitting || isCreatingPreference || !cancha.disponible}
+                            disabled={isSubmitting || isCreatingPreference || isLoadingInitialData}
                         />
                         Pagar en Efectivo (al llegar a la cancha)
                         <img src={efectivoIcon} alt="Efectivo" className="payment-icon" />
                     </label>
                 </div>
 
-                <button type="submit" className="reserva-submit-button" disabled={isSubmitting || isCreatingPreference || !cancha.disponible || availableHours.length === 0}>
+                <button 
+                    type="submit" 
+                    className="reserva-submit-button" 
+                    // Deshabilitado si está enviando, cargando, o no hay canchas disponibles
+                    disabled={isSubmitting || isCreatingPreference || isLoadingInitialData || availableCanchasCount <= 0}
+                >
                     {isSubmitting ? (formulario.metodoPago === 'mercadopago' ? 'Iniciando Pago...' : 'Creando Reserva...') : 'Confirmar Reserva'}
                 </button>
             </form>

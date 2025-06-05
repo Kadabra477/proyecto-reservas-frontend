@@ -4,72 +4,56 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
-    Navigate,
+    Navigate, // Asegúrate de importar Navigate
     useNavigate,
     useLocation,
 } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode'; // Asegúrate de tener 'jwt-decode' instalado
 
 import Navbar from './components/Navbar/NavBar';
 import Login from './features/auth/Login';
 import Register from './features/auth/Register';
 import Home from './features/home/Home';
-import ReservaForm from './features/reservas/ReservaForm';
-import ReservaDetail from './features/reservas/ReservaDetail'; // Importa el nuevo ReservaDetail
+import ReservaForm from './features/reservas/ReservaForm'; // Importar el componente ReservaForm
+import ReservaDetail from './features/reservas/ReservaDetail'; 
 import AdminPanel from './features/admin/AdminPanel';
-import Canchas from './components/Canchas/Canchas';
+import Canchas from './features/canchas/Canchas'; // Asegúrate de que esta ruta sea correcta
 import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
 import OAuth2Success from './features/auth/OAuth2Success';
-import PerfilForm from './components/Perfil/PerfilForm'; // Este es el componente que se usa para el perfil
+// import PerfilForm from './components/Perfil/PerfilForm'; // Si usas PerfilForm como una página separada
 
 import PagoExitoso from './features/pago/PagoExitoso';
 import PagoFallido from './features/pago/PagoFallido';
 import PagoPendiente from './features/pago/PagoPendiente';
 
-import './App.css'; // Tu archivo CSS global
+import './App.css'; 
 
 // Helper: Redirecciona si ya está autenticado
 function RedireccionSiAutenticado({ children, destino = "/dashboard" }) {
     const estaAutenticado = !!localStorage.getItem('jwtToken');
     const location = useLocation();
     if (estaAutenticado) {
-        // Redirigir a la página de origen si existe, de lo contrario al destino predeterminado
         const from = location.state?.from?.pathname || destino;
         return <Navigate to={from} replace />;
     }
     return children;
 }
 
-// Helper: Para verificar si el usuario tiene el rol requerido
-const hasRequiredRole = (userRole, requiredRoles) => {
-    if (!requiredRoles || requiredRoles.length === 0) {
-        return true; // No se requieren roles específicos, cualquier autenticado sirve
-    }
-    if (!userRole) {
-        return false; // No tiene rol definido
-    }
-    // Asegurarse de que el rol de usuario coincida con alguno de los roles requeridos
-    return requiredRoles.includes(userRole.toUpperCase());
-};
-
 // Helper: Ruta Protegida para manejar roles
 function RutaProtegida({ children, rolesRequeridos }) {
     const estaAutenticado = !!localStorage.getItem('jwtToken');
-    const userRole = localStorage.getItem('userRole'); // Obtener el rol del localStorage
+    const userRole = localStorage.getItem('userRole'); 
     const location = useLocation();
 
     if (!estaAutenticado) {
-        // Redirige al login y guarda la ubicación actual para volver después de iniciar sesión
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // Si está autenticado pero no tiene el rol requerido, redirige a una página de acceso denegado o al dashboard
-    if (!hasRequiredRole(userRole, rolesRequeridos)) {
+    if (rolesRequeridos && !rolesRequeridos.includes(userRole)) {
         console.warn(`Acceso denegado: Rol ${userRole} no autorizado para ${location.pathname}. Roles requeridos: ${rolesRequeridos}`);
-        // Puedes redirigir a una página 403 (Acceso Denegado) o al dashboard
-        return <Navigate to="/dashboard" replace />; // Redirige al dashboard si no tiene permisos
+        return <Navigate to="/dashboard" replace />; 
     }
 
     return children;
@@ -138,7 +122,7 @@ function App() {
                 setUserRole(role);
             } catch (error) {
                 console.log("Token inválido o expirado:", error);
-                handleLogout(); // Limpiar todo en caso de error
+                handleLogout(); 
             } finally {
                 setIsLoadingAuth(false);
             }
@@ -148,17 +132,14 @@ function App() {
     }, [handleLogout]);
 
     const ContenidoApp = () => {
-        const navigate = useNavigate();
         const location = useLocation();
 
         if (isLoadingAuth) {
             return (
                 <>
-                    {/* Puedes mostrar una Navbar básica o un placeholder mientras carga */}
                     <Navbar isLoggedIn={false} nombreUsuario="" onLogout={() => {}} />
                     <div className="loading-message">
                         <p>Verificando sesión...</p>
-                        {/* <div className="spinner"></div> */} {/* Si tienes un spinner */}
                     </div>
                 </>
             );
@@ -169,7 +150,7 @@ function App() {
             '/register',
             '/forgot-password',
             '/reset-password',
-            '/oauth2-success' // Mantener fuera de la Navbar
+            '/oauth2/redirect' // Mantenemos esta también si es una página de "procesando"
         ].includes(location.pathname);
 
         return (
@@ -180,13 +161,14 @@ function App() {
                         nombreUsuario={nombreUsuario}
                         onLogout={() => {
                             handleLogout();
-                            navigate('/');
+                            // Puedes redirigir a Home o Login después del logout
+                            // navigate('/'); // No usar navigate directamente aquí
                         }}
                     />
                 )}
 
                 <Routes>
-                    <Route path="/" element={<Home estaAutenticado={estaAutenticado} />} />
+                    <Route path="/" element={<Home />} />
                     
                     {/* Rutas de autenticación sin Navbar */}
                     <Route path="/login" element={<RedireccionSiAutenticado><Login onLoginSuccess={handleLoginSuccess} /></RedireccionSiAutenticado>} />
@@ -196,12 +178,18 @@ function App() {
                     <Route path="/oauth2/redirect" element={<OAuth2Success onLoginSuccess={handleLoginSuccess} />} /> 
 
                     {/* Rutas protegidas (que tendrán Navbar por defecto) */}
-                    <Route path="/canchas" element={<Canchas />} /> {/* Canchas puede ser pública, pero reservar no */}
-                    <Route path="/reservar/:canchaId" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><ReservaForm /></RutaProtegida>} />
-                    <Route path="/mis-reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><ReservaDetail /></RutaProtegida>} /> {/* Nueva ruta para ReservaDetail */}
-                    <Route path="/dashboard" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><DashboardUsuario /></RutaProtegida>} />
-                    <Route path="/perfil" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><PerfilForm /></RutaProtegida>} />
+                    <Route path="/canchas" element={<Canchas />} /> 
+                    
+                    {/* RUTA MODIFICADA: Ahora ReservaForm no necesita un ID de cancha en la URL */}
+                    <Route path="/reservar" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><ReservaForm /></RutaProtegida>} /> 
+                    
+                    {/* Ruta para ver el detalle de una reserva específica (mantiene el ID) */}
+                    {/* Usamos 'reservas/:id' para consistencia con el backend */}
+                    <Route path="/reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><ReservaDetail /></RutaProtegida>} />
 
+                    <Route path="/dashboard" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><DashboardUsuario /></RutaProtegida>} />
+                    {/* Si tienes un PerfilForm como página separada */}
+                    {/* <Route path="/perfil" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><PerfilForm /></RutaProtegida>} /> */}
 
                     {/* Rutas de pago (generalmente no protegidas para el callback del MP) */}
                     <Route path="/pago-exitoso" element={<PagoExitoso />} />
@@ -210,10 +198,7 @@ function App() {
                     
                     {/* Rutas de Administración Protegidas por Rol 'ADMIN' */}
                     <Route path="/admin" element={<RutaProtegida rolesRequeridos={['ADMIN']}><AdminPanel /></RutaProtegida>} />
-                    {/* No necesitas rutas separadas como /admin/crear-cancha o /admin/editar-cancha/:id si AdminPanel las maneja internamente con tabs */}
-                    {/* Si decides tener rutas directas a estadísticas, sería así: */}
-                    {/* <Route path="/admin/estadisticas" element={<RutaProtegida rolesRequeridos={['ADMIN']}><AdminEstadisticas /></RutaProtegida>} /> */}
-
+                    
                     {/* Ruta de fallback para 404 - redirige a home */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

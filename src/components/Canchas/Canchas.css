@@ -61,3 +61,27 @@
 .cancha-card button:hover {
   background-color: #218838;
 }
+
+.btn-main-reserve {
+    background-color: var(--primary, #007bff); /* O tu color principal */
+    color: white;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-bottom: 30px; /* Espacio debajo del botón */
+    display: block; /* Para que ocupe su propia línea */
+    width: fit-content; /* Ajusta el ancho al contenido */
+    margin-left: auto;
+    margin-right: auto; /* Centrar el botón */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.btn-main-reserve:hover {
+    background-color: var(--primary-dark, #0056b3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
