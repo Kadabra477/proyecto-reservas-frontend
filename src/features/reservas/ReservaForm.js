@@ -5,8 +5,8 @@ import api from '../../api/axiosConfig';
 import './ReservaForm.css';
 
 // Importar los logos directamente desde src/assets
-import mercadopagoIcon from '../../assets/mercadopago.png'; // Asegúrate que el nombre y ruta sean correctos
-import efectivoIcon from '../../assets/efectivo.png';     // Asegúrate que el nombre y ruta sean correctos
+import mercadopagoIcon from '../../assets/mercadopago.png'; 
+import efectivoIcon from '../../assets/efectivo.png'; 
 
 function ReservaForm() {
     const { canchaId } = useParams();
@@ -19,14 +19,26 @@ function ReservaForm() {
         dni: '',
         telefono: '',
         fecha: '',
-        hora: '',
-        metodoPago: 'mercadopago', // Nuevo: estado inicial para el método de pago
+        hora: '', // Ahora será controlado por el backend
+        metodoPago: 'mercadopago',
     });
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
     const [isLoadingCancha, setIsLoadingCancha] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false); // Para creación de reserva
-    const [isCreatingPreference, setIsCreatingPreference] = useState(false); // Para crear preferencia MP
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isCreatingPreference, setIsCreatingPreference] = useState(false);
     const [errorCancha, setErrorCancha] = useState('');
+
+    const [availableHours, setAvailableHours] = useState([]); // Nuevo estado para horas disponibles
+    const [isLoadingHours, setIsLoadingHours] = useState(false); // Nuevo estado para carga de horas
+
+    // Determinar la fecha mínima para el input de fecha (hoy o mañana si ya es tarde)
+    const getMinDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     const fetchCanchaDetails = useCallback(async () => {
         if (!canchaId) {
@@ -56,9 +68,50 @@ function ReservaForm() {
         }
     }, [canchaId]);
 
+    // NUEVO: Función para obtener y establecer las horas disponibles
+    const fetchAvailableHours = useCallback(async (date) => {
+        if (!date || !canchaId) {
+            setAvailableHours([]);
+            setFormulario(prev => ({ ...prev, hora: '' })); // Limpiar hora si la fecha es inválida
+            return;
+        }
+
+        setIsLoadingHours(true);
+        setMensaje({ text: '', type: '' }); // Limpiar mensajes al cargar horas
+        try {
+            const response = await api.get(`/reservas/${canchaId}/slots-disponibles?fecha=${date}`);
+            const hours = response.data.sort(); // Ordenar las horas
+            setAvailableHours(hours);
+            // Si la hora actual seleccionada no está disponible, o si no hay hora seleccionada, resetearla
+            if (!hours.includes(formulario.hora)) {
+                setFormulario(prev => ({ ...prev, hora: '' }));
+            }
+            if (hours.length === 0) {
+                setMensaje({ type: 'warning', text: 'No hay horarios disponibles para esta cancha en la fecha seleccionada.' });
+            }
+        } catch (err) {
+            console.error("Error al obtener horas disponibles:", err);
+            setMensaje({ type: 'error', text: 'Error al cargar los horarios disponibles. Intenta de nuevo.' });
+            setAvailableHours([]);
+            setFormulario(prev => ({ ...prev, hora: '' }));
+        } finally {
+            setIsLoadingHours(false);
+        }
+    }, [canchaId, formulario.hora]);
+
     useEffect(() => {
         fetchCanchaDetails();
     }, [fetchCanchaDetails]);
+
+    // Efecto para cargar horas disponibles cuando cambia la fecha seleccionada
+    useEffect(() => {
+        if (formulario.fecha) {
+            fetchAvailableHours(formulario.fecha);
+        } else {
+            setAvailableHours([]); // Limpiar horas si no hay fecha
+        }
+    }, [formulario.fecha, fetchAvailableHours]);
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -69,9 +122,7 @@ function ReservaForm() {
     };
 
     const validarFormulario = () => {
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0); // Resetea a la medianoche para comparar solo la fecha
-
+        setMensaje({ text: '', type: '' }); // Limpiar mensaje al revalidar
         const { nombre, apellido, dni, telefono, fecha, hora, metodoPago } = formulario;
 
         if (!nombre.trim() || !apellido.trim() || !dni.trim() || !telefono.trim() || !fecha || !hora || !metodoPago) {
@@ -87,35 +138,22 @@ function ReservaForm() {
             return false;
         }
         
-        const [year, month, day] = fecha.split('-').map(Number);
-        const fechaSeleccionada = new Date(year, month - 1, day);
+        // La validación de fecha y hora ahora se centra en si el slot está en `availableHours`
+        // y si la fecha no es pasada. El backend hace la validación final.
+        const selectedDateTime = new Date(`${fecha}T${hora}:00`);
+        const now = new Date();
 
-        // Si la fecha seleccionada es ANTERIOR a hoy (solo día)
-        if (fechaSeleccionada < hoy) {
-            setMensaje({ type: 'error', text: 'La fecha de reserva no puede ser anterior a hoy.' });
+        if (selectedDateTime <= now) {
+            setMensaje({ type: 'error', text: 'No se puede reservar en el pasado. Selecciona una fecha y hora futura.' });
             return false;
         }
 
-        const [hourPart, minutePart] = hora.split(':').map(Number);
-        const ahora = new Date(); // Fecha y hora actual completa
-
-        // Si la fecha seleccionada es HOY, validar la hora
-        if (fechaSeleccionada.toDateString() === ahora.toDateString()) {
-            const horaActual = ahora.getHours();
-            const minutosActuales = ahora.getMinutes();
-            
-            // Si la hora seleccionada es ANTERIOR a la hora actual, o es la misma hora pero los minutos ya pasaron
-            if (hourPart < horaActual || (hourPart === horaActual && minutePart <= minutosActuales)) {
-                setMensaje({ type: 'error', text: 'Si reservas para hoy, la hora debe ser posterior a la actual.' });
-                return false;
-            }
+        // Si la hora seleccionada no está en la lista de horas disponibles, es inválida
+        if (!availableHours.includes(hora)) {
+             setMensaje({ type: 'error', text: 'El horario seleccionado no está disponible. Por favor, elige uno de la lista.' });
+             return false;
         }
 
-        // Validación de rango de horas (08:00 a 22:00)
-        if (hourPart < 8 || hourPart > 22) { // Rango de 08:00 a 22:xx, es decir, hasta las 22:59
-            setMensaje({ type: 'error', text: 'La hora de reserva debe estar entre las 08:00 y las 22:00.' });
-            return false;
-        }
         return true;
     };
 
@@ -149,6 +187,7 @@ function ReservaForm() {
             console.log("Reserva creada con ID:", reservaCreada.id, "Método de pago:", reservaCreada.metodoPago);
 
             setFormulario({ nombre: '', apellido: '', dni: '', telefono: '', fecha: '', hora: '', metodoPago: 'mercadopago' });
+            setAvailableHours([]); // Limpiar horas disponibles después de la reserva
 
             if (reservaCreada.metodoPago === 'mercadopago') {
                 setMensaje({ type: 'info', text: 'Reserva creada. Redirigiendo a Mercado Pago...' });
@@ -195,10 +234,14 @@ function ReservaForm() {
             if (reservaError.response?.data?.error) {
                 setMensaje({ type: 'error', text: `Error al crear reserva: ${reservaError.response.data.error}` });
             } else if (reservaError.response?.data) {
+                // Si el error es de tipo String directo del backend (como en la validación de conflicto)
                 setMensaje({ type: 'error', text: `Error al crear reserva: ${reservaError.response.data}` });
             } else if (reservaError.response?.status === 400) {
                 setMensaje({ type: 'error', text: 'Error en los datos de la reserva. Revisa la fecha y hora.' });
-            } else {
+            } else if (reservaError.response?.status === 409) { // Capturar el conflicto de disponibilidad
+                 setMensaje({ type: 'error', text: `Error: ${reservaError.response.data || 'El horario seleccionado ya no está disponible. Por favor, elige otro.'}` });
+            }
+            else {
                 setMensaje({ type: 'error', text: 'No se pudo crear la reserva. Intenta nuevamente.' });
             }
             setIsSubmitting(false);
@@ -246,11 +289,40 @@ function ReservaForm() {
                 </div>
                 <div className="form-group">
                     <label htmlFor="fecha">Fecha:</label>
-                    <input type="date" id="fecha" name="fecha" value={formulario.fecha} onChange={handleChange} required min={new Date().toISOString().split('T')[0]} disabled={isSubmitting || isCreatingPreference || !cancha.disponible} />
+                    <input
+                        type="date"
+                        id="fecha"
+                        name="fecha"
+                        value={formulario.fecha}
+                        onChange={handleChange}
+                        required
+                        min={getMinDate()} // Usa la función para obtener la fecha mínima
+                        disabled={isSubmitting || isCreatingPreference || !cancha.disponible}
+                    />
                 </div>
                 <div className="form-group">
                     <label htmlFor="hora">Hora:</label>
-                    <input type="time" id="hora" name="hora" value={formulario.hora} onChange={handleChange} required step="3600" min="08:00" max="22:00" disabled={isSubmitting || isCreatingPreference || !cancha.disponible} title="Horarios disponibles de 08:00 a 22:00" />
+                    <select
+                        id="hora"
+                        name="hora"
+                        value={formulario.hora}
+                        onChange={handleChange}
+                        required
+                        disabled={isSubmitting || isCreatingPreference || !cancha.disponible || isLoadingHours || availableHours.length === 0}
+                    >
+                        <option value="">
+                            {isLoadingHours ? 'Cargando horas...' : (formulario.fecha ? 'Selecciona una hora' : 'Selecciona una fecha primero')}
+                        </option>
+                        {availableHours.map(hour => (
+                            <option key={hour} value={hour}>
+                                {hour.substring(0, 5)} {/* Mostrar solo HH:MM */}
+                            </option>
+                        ))}
+                    </select>
+                    {isLoadingHours && <p className="loading-small">Cargando horarios...</p>}
+                    {!isLoadingHours && formulario.fecha && availableHours.length === 0 && (
+                        <p className="no-hours-message">No hay horarios disponibles para la fecha seleccionada.</p>
+                    )}
                 </div>
 
                 {/* Selección de Método de Pago */}
@@ -266,7 +338,7 @@ function ReservaForm() {
                             disabled={isSubmitting || isCreatingPreference || !cancha.disponible}
                         />
                         Pagar con Mercado Pago
-                        <img src={mercadopagoIcon} alt="Mercado Pago" className="payment-icon" /> {/* IMAGEN CORREGIDA */}
+                        <img src={mercadopagoIcon} alt="Mercado Pago" className="payment-icon" /> 
                     </label>
                     <label>
                         <input
@@ -278,11 +350,11 @@ function ReservaForm() {
                             disabled={isSubmitting || isCreatingPreference || !cancha.disponible}
                         />
                         Pagar en Efectivo (al llegar a la cancha)
-                        <img src={efectivoIcon} alt="Efectivo" className="payment-icon" /> {/* IMAGEN CORREGIDA */}
+                        <img src={efectivoIcon} alt="Efectivo" className="payment-icon" />
                     </label>
                 </div>
 
-                <button type="submit" className="reserva-submit-button" disabled={isSubmitting || isCreatingPreference || !cancha.disponible}>
+                <button type="submit" className="reserva-submit-button" disabled={isSubmitting || isCreatingPreference || !cancha.disponible || availableHours.length === 0}>
                     {isSubmitting ? (formulario.metodoPago === 'mercadopago' ? 'Iniciando Pago...' : 'Creando Reserva...') : 'Confirmar Reserva'}
                 </button>
             </form>
