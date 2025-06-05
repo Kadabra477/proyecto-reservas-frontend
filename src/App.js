@@ -4,7 +4,7 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
-    Navigate, // Asegúrate de importar Navigate
+    Navigate, 
     useNavigate,
     useLocation,
 } from 'react-router-dom';
@@ -14,10 +14,11 @@ import Navbar from './components/Navbar/NavBar';
 import Login from './features/auth/Login';
 import Register from './features/auth/Register';
 import Home from './features/home/Home';
-import ReservaForm from './features/reservas/ReservaForm'; // Importar el componente ReservaForm
+import ReservaForm from './features/reservas/ReservaForm'; 
 import ReservaDetail from './features/reservas/ReservaDetail'; 
 import AdminPanel from './features/admin/AdminPanel';
-import Canchas from './features/canchas/Canchas'; // Asegúrate de que esta ruta sea correcta
+// CORRECCIÓN DE RUTA AQUÍ:
+import Canchas from './components/Canchas/Canchas'; // RUTA CORREGIDA para el componente Canchas
 import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
@@ -150,7 +151,7 @@ function App() {
             '/register',
             '/forgot-password',
             '/reset-password',
-            '/oauth2/redirect' // Mantenemos esta también si es una página de "procesando"
+            '/oauth2/redirect' 
         ].includes(location.pathname);
 
         return (
@@ -161,8 +162,6 @@ function App() {
                         nombreUsuario={nombreUsuario}
                         onLogout={() => {
                             handleLogout();
-                            // Puedes redirigir a Home o Login después del logout
-                            // navigate('/'); // No usar navigate directamente aquí
                         }}
                     />
                 )}
@@ -184,11 +183,10 @@ function App() {
                     <Route path="/reservar" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><ReservaForm /></RutaProtegida>} /> 
                     
                     {/* Ruta para ver el detalle de una reserva específica (mantiene el ID) */}
-                    {/* Usamos 'reservas/:id' para consistencia con el backend */}
                     <Route path="/reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><ReservaDetail /></RutaProtegida>} />
 
                     <Route path="/dashboard" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><DashboardUsuario /></RutaProtegida>} />
-                    {/* Si tienes un PerfilForm como página separada */}
+                    {/* Si usas PerfilForm como una página separada */}
                     {/* <Route path="/perfil" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><PerfilForm /></RutaProtegida>} /> */}
 
                     {/* Rutas de pago (generalmente no protegidas para el callback del MP) */}
