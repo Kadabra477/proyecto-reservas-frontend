@@ -1,36 +1,36 @@
 // frontend/src/features/reservas/ReservaForm.jsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // Ya no usamos useParams para canchaId aquí
+import { useNavigate, useLocation } from 'react-router-dom'; // Importar useLocation
 import api from '../../api/axiosConfig';
-import './ReservaForm.css';
+import './ReservaForm.css'; // Asegúrate de que tus estilos estén actualizados para la nueva UI
 
 // Importar los logos directamente desde src/assets
 import mercadopagoIcon from '../../assets/mercadopago.png'; 
 import efectivoIcon from '../../assets/efectivo.png'; 
 
 function ReservaForm() {
-    // Ya no necesitamos canchaId de los params si reservamos por tipo
-    // const { canchaId } = useParams(); // ELIMINAR esta línea
-
+    // Ya no necesitamos canchaId de los params. Usaremos location.state para el complejoId preseleccionado
+    // const { canchaId } = useParams(); 
     const navigate = useNavigate();
+    const location = useLocation(); // Para acceder al estado de la navegación
 
-    // Estado para el tipo de cancha seleccionado
-    const [selectedTipoCancha, setSelectedTipoCancha] = useState(''); 
-    // Estado para los tipos de cancha disponibles (para el selector)
-    const [tiposCanchaDisponibles, setTiposCanchaDisponibles] = useState([]); 
-
+    const [complejo, setComplejo] = useState(null); // Estado para el complejo seleccionado
+    const [complejosDisponibles, setComplejosDisponibles] = useState([]); // Para el selector de complejos
+    const [selectedComplejoId, setSelectedComplejoId] = useState(''); // ID del complejo seleccionado
+    
+    const [tiposCanchaDisponiblesDelComplejo, setTiposCanchaDisponiblesDelComplejo] = useState([]); // Tipos de cancha para el complejo elegido
+    const [selectedTipoCancha, setSelectedTipoCancha] = useState(''); // Tipo de cancha seleccionado
+    
     const [formulario, setFormulario] = useState({
-        nombre: '',
-        apellido: '',
-        dni: '',
+        nombreCompleto: '', // nombreCompleto es para el perfil del usuario
+        email: '',         // Email para el registro o login (username en el backend)
         telefono: '',
         fecha: '',
         hora: '', 
         metodoPago: 'mercadopago',
     });
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
-    // Estado para la carga inicial de tipos de cancha
-    const [isLoadingInitialData, setIsLoadingInitialData] = useState(true); 
+    const [isLoadingInitialData, setIsLoadingInitialData] = useState(true); // Para cargar complejos y tipos
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCreatingPreference, setIsCreatingPreference] = useState(false);
     
@@ -40,7 +40,7 @@ function ReservaForm() {
     const [availabilityMessage, setAvailabilityMessage] = useState(''); // Mensaje sobre la disponibilidad
     const [hoursOptions, setHoursOptions] = useState([]); // Opciones de horas fijas para el select
 
-    // Rellena las opciones del select de hora (10:00 a 23:00)
+    // Genera las opciones de hora (10:00 a 23:00 para slots de 1 hora)
     useEffect(() => {
         const generateHours = () => {
             const hours = [];
@@ -52,7 +52,7 @@ function ReservaForm() {
         generateHours();
     }, []);
 
-    // Función para obtener la fecha mínima para el input de fecha (hoy o mañana si ya es tarde)
+    // Función para obtener la fecha mínima para el input de fecha
     const getMinDate = () => {
         const today = new Date();
         const year = today.getFullYear();
@@ -61,45 +61,89 @@ function ReservaForm() {
         return `${year}-${month}-${day}`;
     };
 
-    // Cargar los tipos de cancha disponibles al inicio
+    // Cargar todos los complejos disponibles al inicio
     useEffect(() => {
-        const fetchTiposCancha = async () => {
+        const fetchComplejos = async () => {
             setIsLoadingInitialData(true);
             try {
-                // Asumiendo que /canchas devuelve todas las canchas, y podemos extraer tipos únicos de ahí.
-                // Opcional: si tu backend tuviera un endpoint /canchas/tipos-disponibles, sería mejor.
-                const response = await api.get('/canchas'); 
-                const uniqueTypes = [...new Set(response.data.map(c => c.tipoCancha))].filter(Boolean); // Obtener tipos únicos no nulos
-                setTiposCanchaDisponibles(uniqueTypes);
-                // Si hay tipos, seleccionar el primero por defecto
-                if (uniqueTypes.length > 0) {
-                    setSelectedTipoCancha(uniqueTypes[0]); 
-                    setFormulario(prev => ({ ...prev, tipoCancha: uniqueTypes[0] }));
+                const response = await api.get('/api/complejos'); // Endpoint para listar todos los complejos
+                setComplejosDisponibles(response.data);
+                
+                let initialComplejoId = '';
+                // Intenta preseleccionar un complejo si viene en el estado de la navegación (ej. desde Canchas.jsx)
+                if (location.state && location.state.preselectedComplejoId) {
+                    initialComplejoId = location.state.preselectedComplejoId;
+                } else if (response.data.length > 0) {
+                    // Si no viene preseleccionado, elige el primero por defecto
+                    initialComplejoId = response.data[0].id;
                 }
+
+                if (initialComplejoId) {
+                    setSelectedComplejoId(initialComplejoId);
+                    // Buscar el objeto complejo completo para setComplejo
+                    const foundComplejo = response.data.find(c => c.id === initialComplejoId);
+                    setComplejo(foundComplejo);
+
+                    // Extraer los tipos de cancha de ese complejo para el selector
+                    if (foundComplejo && foundComplejo.canchaCounts) {
+                        const types = Object.keys(foundComplejo.canchaCounts);
+                        setTiposCanchaDisponiblesDelComplejo(types);
+                        if (types.length > 0) {
+                            setSelectedTipoCancha(types[0]); // Seleccionar el primer tipo por defecto
+                        }
+                    }
+                }
+
             } catch (err) {
-                console.error("Error al obtener tipos de cancha:", err);
-                setMensaje({ type: 'error', text: 'Error al cargar los tipos de cancha disponibles.' });
+                console.error("Error al cargar complejos:", err);
+                setMensaje({ type: 'error', text: 'Error al cargar los complejos disponibles.' });
             } finally {
                 setIsLoadingInitialData(false);
             }
         };
-        fetchTiposCancha();
-    }, []);
+        fetchComplejos();
+    }, [location.state]); // Dependencia para reaccionar a la navegación con estado
 
-    // Función para consultar la disponibilidad por tipo de cancha, fecha y hora
+
+    // Efecto para actualizar los tipos de cancha cuando cambia el complejo seleccionado
+    useEffect(() => {
+        if (selectedComplejoId) {
+            const currentComplejo = complejosDisponibles.find(c => c.id === selectedComplejoId);
+            setComplejo(currentComplejo); // Asegura que el estado 'complejo' sea el objeto completo
+            if (currentComplejo && currentComplejo.canchaCounts) {
+                const types = Object.keys(currentComplejo.canchaCounts);
+                setTiposCanchaDisponiblesDelComplejo(types);
+                // Si el tipo de cancha seleccionado ya no existe en el nuevo complejo, o si no hay ninguno
+                if (!types.includes(selectedTipoCancha) || !selectedTipoCancha && types.length > 0) {
+                    setSelectedTipoCancha(types[0]); // Seleccionar el primero del nuevo complejo
+                } else if (types.length === 0) {
+                    setSelectedTipoCancha(''); // Si no hay tipos, limpiar
+                }
+            } else {
+                setTiposCanchaDisponiblesDelComplejo([]);
+                setSelectedTipoCancha('');
+            }
+        } else {
+            setTiposCanchaDisponiblesDelComplejo([]);
+            setSelectedTipoCancha('');
+        }
+    }, [selectedComplejoId, complejosDisponibles, selectedTipoCancha]);
+
+
+    // Función para consultar la disponibilidad por complejo, tipo de cancha, fecha y hora
     const checkAvailability = useCallback(async () => {
         const { fecha, hora } = formulario;
-        if (!selectedTipoCancha || !fecha || !hora) {
+        if (!selectedComplejoId || !selectedTipoCancha || !fecha || !hora) {
             setAvailableCanchasCount(null); // Resetear el contador
-            setAvailabilityMessage('Selecciona un tipo de cancha, fecha y hora.');
+            setAvailabilityMessage('Selecciona un complejo, tipo de cancha, fecha y hora.');
             return;
         }
 
         setIsLoadingAvailability(true);
         setAvailabilityMessage('');
         try {
-            // Llama al nuevo endpoint del backend
-            const response = await api.get(`/reservas/disponibilidad-por-tipo?tipoCancha=${selectedTipoCancha}&fecha=${fecha}&hora=${hora}`);
+            // Llama al nuevo endpoint del backend que cuenta canchas por tipo
+            const response = await api.get(`/api/reservas/disponibilidad-por-tipo?complejoId=${selectedComplejoId}&tipoCancha=${selectedTipoCancha}&fecha=${fecha}&hora=${hora}`);
             const count = response.data; // El backend devuelve un número entero
             setAvailableCanchasCount(count);
             if (count > 0) {
@@ -117,12 +161,12 @@ function ReservaForm() {
         } finally {
             setIsLoadingAvailability(false);
         }
-    }, [formulario.fecha, formulario.hora, selectedTipoCancha]);
+    }, [formulario.fecha, formulario.hora, selectedComplejoId, selectedTipoCancha]);
 
-    // Efecto para verificar disponibilidad cuando cambian los campos clave
+    // Efecto para verificar disponibilidad cuando cambian los campos clave de la reserva
     useEffect(() => {
         checkAvailability();
-    }, [formulario.fecha, formulario.hora, selectedTipoCancha, checkAvailability]);
+    }, [formulario.fecha, formulario.hora, selectedComplejoId, selectedTipoCancha, checkAvailability]);
 
 
     const handleChange = (e) => {
@@ -131,27 +175,47 @@ function ReservaForm() {
             ...prevFormulario,
             [name]: value
         }));
+        // Si cambia el ID del complejo, actualizar el estado
+        if (name === 'complejoId') {
+            setSelectedComplejoId(parseInt(value, 10)); // Convertir a número
+            setSelectedTipoCancha(''); // Limpiar el tipo de cancha al cambiar de complejo
+            setAvailableCanchasCount(null); // Limpiar disponibilidad
+            setAvailabilityMessage('');
+        }
         // Si cambia el tipo de cancha, actualizar el estado
         if (name === 'tipoCancha') {
             setSelectedTipoCancha(value);
+            setAvailableCanchasCount(null); // Limpiar disponibilidad
+            setAvailabilityMessage('');
         }
     };
 
-    const validarFormulario = () => {
-        setMensaje({ text: '', type: '' }); // Limpiar mensaje al revalidar
-        const { nombre, apellido, dni, telefono, fecha, hora, metodoPago } = formulario;
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setMensaje({ text: '', type: '' });
 
-        if (!selectedTipoCancha || !nombre.trim() || !apellido.trim() || !dni.trim() || !telefono.trim() || !fecha || !hora || !metodoPago) {
-            setMensaje({ type: 'error', text: 'Todos los campos y el método de pago son obligatorios.' });
-            return false;
+        // Validaciones del lado del cliente antes de enviar
+        const { nombreCompleto, email, telefono, fecha, hora, metodoPago } = formulario;
+
+        if (!selectedComplejoId) {
+            setMensaje({ type: 'error', text: 'Debes seleccionar un complejo.' });
+            return;
         }
-        if (!/^\d{7,8}$/.test(dni.trim())) {
-            setMensaje({ type: 'error', text: 'El DNI debe contener 7 u 8 números (sin puntos).' });
-            return false;
+        if (!selectedTipoCancha) {
+            setMensaje({ type: 'error', text: 'Debes seleccionar un tipo de cancha.' });
+            return;
+        }
+        if (!nombreCompleto.trim() || !email.trim() || !telefono.trim() || !fecha || !hora || !metodoPago) {
+            setMensaje({ type: 'error', text: 'Todos los campos personales, fecha, hora y método de pago son obligatorios.' });
+            return;
+        }
+        if (!/\S+@\S+\.\S+/.test(email.trim())) {
+            setMensaje({ type: 'error', text: 'Por favor, ingresa un correo electrónico válido.' });
+            return;
         }
         if (!/^\d+$/.test(telefono.trim())) {
             setMensaje({ type: 'error', text: 'El teléfono debe contener solo números.' });
-            return false;
+            return;
         }
         
         const selectedDateTime = new Date(`${fecha}T${hora}:00`);
@@ -159,52 +223,42 @@ function ReservaForm() {
 
         if (selectedDateTime <= now) {
             setMensaje({ type: 'error', text: 'No se puede reservar en el pasado. Selecciona una fecha y hora futura.' });
-            return false;
+            return;
         }
 
-        // Se valida que haya canchas disponibles EN EL MOMENTO DE LA UI
         if (availableCanchasCount === null || availableCanchasCount <= 0) {
             setMensaje({ type: 'error', text: 'No hay canchas disponibles para este horario. Por favor, elige otro.' });
-            return false;
+            return;
         }
 
-        return true;
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setMensaje({ text: '', type: '' });
-
-        if (!validarFormulario()) return;
-        
         setIsSubmitting(true);
 
         const reservaData = {
-            tipoCancha: selectedTipoCancha, // Enviar el tipo de cancha al backend
-            nombre: formulario.nombre.trim(),
-            apellido: formulario.apellido.trim(),
-            dni: formulario.dni.trim(),
-            telefono: formulario.telefono.trim(),
-            fecha: formulario.fecha,
-            hora: formulario.hora,
-            metodoPago: formulario.metodoPago,
-            // Puedes añadir jugadores y equipos si el formulario los recoge
-            // jugadores: formulario.jugadores,
-            // equipo1: formulario.equipo1,
-            // equipo2: formulario.equipo2,
+            complejoId: selectedComplejoId, // ID del complejo seleccionado
+            tipoCancha: selectedTipoCancha, // Tipo de cancha seleccionado
+            nombre: nombreCompleto.trim(), // Nombre completo para el backend
+            email: email.trim(),           // Email para el backend
+            telefono: telefono.trim(),
+            fecha: fecha,
+            hora: hora,
+            metodoPago: metodoPago,
         };
 
         try {
-            const reservaResponse = await api.post("/reservas/crear", reservaData);
+            const reservaResponse = await api.post("/api/reservas/crear", reservaData);
             const reservaCreada = reservaResponse.data;
 
-            console.log("Reserva creada con ID:", reservaCreada.id, "Método de pago:", reservaCreada.metodoPago, "Cancha asignada:", reservaCreada.canchaNombre);
+            console.log("Reserva creada con ID:", reservaCreada.id, "Método de pago:", reservaCreada.metodoPago, "Complejo:", reservaCreada.complejoNombre, "Cancha asignada:", reservaCreada.nombreCanchaAsignada);
 
             // Resetear formulario y estados
-            setFormulario({ nombre: '', apellido: '', dni: '', telefono: '', fecha: '', hora: '', metodoPago: 'mercadopago' });
+            setFormulario({ nombreCompleto: '', email: '', telefono: '', fecha: '', hora: '', metodoPago: 'mercadopago' });
+            setSelectedComplejoId('');
+            setSelectedTipoCancha('');
+            setComplejo(null);
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
-            setSelectedTipoCancha(tiposCanchaDisponibles[0] || ''); // Restablecer el tipo seleccionado
+            // Podrías recargar complejos o limpiar si es necesario
+            // fetchComplejos(); 
 
             if (reservaCreada.metodoPago === 'mercadopago') {
                 setMensaje({ type: 'info', text: 'Reserva creada. Redirigiendo a Mercado Pago...' });
@@ -215,7 +269,7 @@ function ReservaForm() {
                         {
                             reservaId: reservaCreada.id,
                             nombreCliente: reservaCreada.cliente,
-                            monto: reservaCreada.precioTotal // Usar precioTotal del DTO de respuesta
+                            monto: reservaCreada.precioTotal 
                         }
                     );
                     const initPoint = preferenciaResponse.data.initPoint;
@@ -237,8 +291,7 @@ function ReservaForm() {
                     setIsSubmitting(false);
                 }
             } else if (reservaCreada.metodoPago === 'efectivo') {
-                // Mensaje al usuario, incluyendo la cancha asignada
-                setMensaje({ type: 'success', text: `Reserva creada exitosamente (ID: ${reservaCreada.id}). Te asignamos la cancha: ${reservaCreada.canchaNombre || 'N/A'}. Puedes ver los detalles en tu Dashboard.` });
+                setMensaje({ type: 'success', text: `Reserva creada exitosamente (ID: ${reservaCreada.id}). Te asignamos la cancha: ${reservaCreada.nombreCanchaAsignada || 'N/A'}. Puedes ver los detalles en tu Dashboard.` });
                 setIsSubmitting(false);
                 navigate('/dashboard');
             } else {
@@ -249,50 +302,69 @@ function ReservaForm() {
 
         } catch (reservaError) {
             console.error("Error al crear la reserva:", reservaError);
+            let errorMessage = 'Error al crear la reserva.';
             if (reservaError.response?.data?.error) {
-                setMensaje({ type: 'error', text: `Error al crear reserva: ${reservaError.response.data.error}` });
-            } else if (reservaError.response?.data) {
-                setMensaje({ type: 'error', text: `Error al crear reserva: ${reservaError.response.data}` });
+                errorMessage = reservaError.response.data.error;
+            } else if (typeof reservaError.response?.data === 'string') { // Si el backend envía un string de error directo
+                errorMessage = reservaError.response.data;
             } else if (reservaError.response?.status === 400) {
-                setMensaje({ type: 'error', text: 'Error en los datos de la reserva. Revisa los campos y la disponibilidad.' });
-            } else if (reservaError.response?.status === 409) { // Capturar el conflicto de disponibilidad
-                 setMensaje({ type: 'error', text: `Error: ${reservaError.response.data || 'El horario seleccionado ya no está disponible. Por favor, elige otro.'}` });
+                errorMessage = 'Error en los datos de la reserva. Revisa los campos y la disponibilidad.';
+            } else if (reservaError.response?.status === 409) { 
+                 errorMessage = `Error: ${reservaError.response.data || 'El horario seleccionado ya no está disponible. Por favor, elige otro.'}`;
             } else {
-                setMensaje({ type: 'error', text: 'No se pudo crear la reserva. Intenta nuevamente.' });
+                errorMessage = 'No se pudo crear la reserva. Intenta nuevamente.';
             }
+            setMensaje({ type: 'error', text: errorMessage });
             setIsSubmitting(false);
         }
     };
 
-    if (isLoadingInitialData) return <p className="loading-message">Cargando tipos de cancha...</p>;
-    if (tiposCanchaDisponibles.length === 0 && !isLoadingInitialData) return <p className="error-message">No hay tipos de cancha disponibles para reservar. Crea canchas en el panel de administrador.</p>;
+    if (isLoadingInitialData) return <p className="loading-message">Cargando información de complejos...</p>;
+    if (complejosDisponibles.length === 0 && !isLoadingInitialData) return <p className="error-message">No hay complejos disponibles para reservar. Contacta al administrador.</p>;
 
     return (
         <div className="reserva-form-container">
-            <h2 className="reserva-form-title">Reservar Cancha</h2>
+            <h2 className="reserva-form-title">Realizar Nueva Reserva</h2>
             
-            <h3 className="reserva-form-subtitle">Selecciona tipo, fecha y hora</h3>
+            <h3 className="reserva-form-subtitle">1. Selecciona Complejo, Tipo de Cancha, Fecha y Hora</h3>
             <form onSubmit={handleSubmit} className="reserva-formulario" noValidate>
-                {/* Selector de Tipo de Cancha */}
+                {/* Selector de Complejo */}
                 <div className="form-group">
-                    <label htmlFor="tipoCancha">Tipo de Cancha:</label>
+                    <label htmlFor="complejoId">Complejo:</label>
                     <select
-                        id="tipoCancha"
-                        name="tipoCancha"
-                        value={selectedTipoCancha}
+                        id="complejoId"
+                        name="complejoId"
+                        value={selectedComplejoId}
                         onChange={handleChange}
                         required
-                        disabled={isSubmitting || isCreatingPreference || isLoadingInitialData || tiposCanchaDisponibles.length === 0}
+                        disabled={isSubmitting || isLoadingInitialData || complejosDisponibles.length === 0}
                     >
-                         {tiposCanchaDisponibles.length === 0 ? (
-                            <option value="">Cargando tipos...</option>
-                        ) : (
-                            tiposCanchaDisponibles.map(tipo => (
-                                <option key={tipo} value={tipo}>{tipo}</option>
-                            ))
-                        )}
+                        <option value="">Selecciona un complejo</option>
+                        {complejosDisponibles.map(comp => (
+                            <option key={comp.id} value={comp.id}>{comp.nombre}</option>
+                        ))}
                     </select>
                 </div>
+
+                {/* Selector de Tipo de Cancha (solo si hay un complejo seleccionado) */}
+                {selectedComplejoId && (
+                    <div className="form-group">
+                        <label htmlFor="tipoCancha">Tipo de Cancha:</label>
+                        <select
+                            id="tipoCancha"
+                            name="tipoCancha"
+                            value={selectedTipoCancha}
+                            onChange={handleChange}
+                            required
+                            disabled={isSubmitting || isLoadingInitialData || tiposCanchaDisponiblesDelComplejo.length === 0}
+                        >
+                            <option value="">Selecciona un tipo de cancha</option>
+                            {tiposCanchaDisponiblesDelComplejo.map(tipo => (
+                                <option key={tipo} value={tipo}>{tipo}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
 
                 <div className="form-group">
                     <label htmlFor="fecha">Fecha:</label>
@@ -304,7 +376,7 @@ function ReservaForm() {
                         onChange={handleChange}
                         required
                         min={getMinDate()} 
-                        disabled={isSubmitting || isCreatingPreference || isLoadingInitialData}
+                        disabled={isSubmitting || isLoadingInitialData}
                     />
                 </div>
                 <div className="form-group">
@@ -315,7 +387,7 @@ function ReservaForm() {
                         value={formulario.hora} 
                         onChange={handleChange} 
                         required 
-                        disabled={isSubmitting || isCreatingPreference || isLoadingInitialData || !formulario.fecha || hoursOptions.length === 0}
+                        disabled={isSubmitting || isLoadingInitialData || !formulario.fecha || hoursOptions.length === 0}
                     >
                         <option value="">Selecciona una hora</option>
                         {hoursOptions.map(hour => (
@@ -327,7 +399,7 @@ function ReservaForm() {
                 </div>
 
                 {/* Mensaje de disponibilidad (cantidad de canchas disponibles) */}
-                {(formulario.fecha && formulario.hora && selectedTipoCancha) && (
+                {(formulario.fecha && formulario.hora && selectedComplejoId && selectedTipoCancha) && (
                     <div className={`availability-status ${availableCanchasCount > 0 ? 'available' : 'not-available'}`}>
                         {isLoadingAvailability ? (
                             <p>Verificando disponibilidad...</p>
@@ -337,28 +409,23 @@ function ReservaForm() {
                     </div>
                 )}
                 
-                {/* Campos de datos personales */}
-                <h3 className="reserva-form-subtitle">Completa tus datos personales</h3>
+                <h3 className="reserva-form-subtitle">2. Completa tus datos personales y método de pago</h3>
                 <div className="form-group">
-                    <label htmlFor="nombre">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" value={formulario.nombre} onChange={handleChange} required disabled={isSubmitting || isCreatingPreference || isLoadingInitialData} />
+                    <label htmlFor="nombreCompleto">Nombre completo:</label>
+                    <input type="text" id="nombreCompleto" name="nombreCompleto" placeholder="Tu nombre completo" value={formulario.nombreCompleto} onChange={handleChange} required disabled={isSubmitting || isLoadingInitialData} />
                 </div>
                 <div className="form-group">
-                    <label htmlFor="apellido">Apellido:</label>
-                    <input type="text" id="apellido" name="apellido" placeholder="Tu apellido" value={formulario.apellido} onChange={handleChange} required disabled={isSubmitting || isCreatingPreference || isLoadingInitialData} />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="dni">DNI:</label>
-                    <input type="text" id="dni" name="dni" placeholder="Tu DNI (7-8 dígitos)" value={formulario.dni} onChange={handleChange} required pattern="\d{7,8}" title="Ingresa 7 u 8 dígitos sin puntos" disabled={isSubmitting || isCreatingPreference || isLoadingInitialData} />
+                    <label htmlFor="email">Correo electrónico:</label>
+                    <input type="email" id="email" name="email" placeholder="Tu correo electrónico" value={formulario.email} onChange={handleChange} required disabled={isSubmitting || isLoadingInitialData} />
                 </div>
                 <div className="form-group">
                     <label htmlFor="telefono">Teléfono:</label>
-                    <input type="tel" id="telefono" name="telefono" placeholder="Tu teléfono (solo números)" value={formulario.telefono} onChange={handleChange} required pattern="\d+" title="Ingresa solo números" disabled={isSubmitting || isCreatingPreference || isLoadingInitialData} />
+                    <input type="tel" id="telefono" name="telefono" placeholder="Tu teléfono (solo números)" value={formulario.telefono} onChange={handleChange} required pattern="\d+" title="Ingresa solo números" disabled={isSubmitting || isLoadingInitialData} />
                 </div>
 
                 {/* Selección de Método de Pago */}
-                <h3 className="reserva-form-subtitle">Selecciona tu método de pago</h3>
                 <div className="form-group payment-method-selection">
+                    <p>Selecciona tu método de pago:</p>
                     <label>
                         <input
                             type="radio"
@@ -366,7 +433,7 @@ function ReservaForm() {
                             value="mercadopago"
                             checked={formulario.metodoPago === 'mercadopago'}
                             onChange={handleChange}
-                            disabled={isSubmitting || isCreatingPreference || isLoadingInitialData}
+                            disabled={isSubmitting || isLoadingInitialData}
                         />
                         Pagar con Mercado Pago
                         <img src={mercadopagoIcon} alt="Mercado Pago" className="payment-icon" /> 
@@ -378,9 +445,9 @@ function ReservaForm() {
                             value="efectivo"
                             checked={formulario.metodoPago === 'efectivo'}
                             onChange={handleChange}
-                            disabled={isSubmitting || isCreatingPreference || isLoadingInitialData}
+                            disabled={isSubmitting || isLoadingInitialData}
                         />
-                        Pagar en Efectivo (al llegar a la cancha)
+                        Pagar en Efectivo (al llegar al complejo)
                         <img src={efectivoIcon} alt="Efectivo" className="payment-icon" />
                     </label>
                 </div>
@@ -388,8 +455,7 @@ function ReservaForm() {
                 <button 
                     type="submit" 
                     className="reserva-submit-button" 
-                    // Deshabilitado si está enviando, cargando, o no hay canchas disponibles
-                    disabled={isSubmitting || isCreatingPreference || isLoadingInitialData || availableCanchasCount <= 0}
+                    disabled={isSubmitting || isLoadingInitialData || availableCanchasCount <= 0}
                 >
                     {isSubmitting ? (formulario.metodoPago === 'mercadopago' ? 'Iniciando Pago...' : 'Creando Reserva...') : 'Confirmar Reserva'}
                 </button>
