@@ -6,7 +6,7 @@ import './Login.css';
 import '../../styles/AuthForm.css';
 
 function Login({ onLoginSuccess }) {
-    const [email, setEmail] = useState('');
+    const [usernameInput, setUsernameInput] = useState(''); // Cambiado a usernameInput para claridad
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -50,23 +50,25 @@ function Login({ onLoginSuccess }) {
 
         try {
             const response = await api.post('/auth/login', {
-                username: email,
+                username: usernameInput, // Envía el valor del input como username
                 password: password,
             });
 
             const { token, username, nombreCompleto, role, error: loginError } = response.data;
 
-            if (loginError) {
+            if (loginError) { // Si el backend devuelve un campo 'error' explícito
                 setIsLoading(false);
                 setError(loginError);
             } else if (token && username && nombreCompleto && role) {
                 localStorage.setItem('jwtToken', token);
-                localStorage.setItem('username', username);
-                localStorage.setItem('nombreCompleto', nombreCompleto); // <-- ¡CORREGIDO! Antes era 'nombreComplepleto'
+                localStorage.setItem('username', username); // Este es el username corto o el email de login
+                localStorage.setItem('nombreCompleto', nombreCompleto);
                 localStorage.setItem('userRole', role);
                 if (onLoginSuccess) {
                     onLoginSuccess(token, username, nombreCompleto, role);
                 }
+                // Redirigir al dashboard después del login exitoso
+                navigate('/dashboard'); 
             } else {
                 setIsLoading(false);
                 setError('Respuesta inesperada del servidor o datos incompletos.');
@@ -76,8 +78,12 @@ function Login({ onLoginSuccess }) {
             let errorMessage = 'Error de conexión o respuesta inesperada.';
             if (err.response?.data?.error) {
                 errorMessage = err.response.data.error;
+            } else if (err.response?.data) { // Si el backend envía un string de error directo
+                 errorMessage = err.response.data;
             } else if (err.response?.status === 401) {
                 errorMessage = 'Credenciales incorrectas o cuenta no activa.';
+            } else {
+                errorMessage = 'Error desconocido al iniciar sesión.';
             }
             setIsLoading(false);
             setError(errorMessage);
@@ -99,10 +105,10 @@ function Login({ onLoginSuccess }) {
 
                     <input
                         className="auth-input"
-                        type="email"
-                        placeholder="Correo electrónico"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        type="text" // Cambiado a type="text" para permitir username o email como entrada
+                        placeholder="Nombre de usuario o correo electrónico" // Placeholder más flexible
+                        value={usernameInput} // Usar el nuevo estado
+                        onChange={(e) => setUsernameInput(e.target.value)} // Actualizar el nuevo estado
                         required
                         disabled={isLoading}
                     />
