@@ -6,7 +6,7 @@ import './Login.css';
 import '../../styles/AuthForm.css';
 
 function Login({ onLoginSuccess }) {
-    const [usernameInput, setUsernameInput] = useState(''); // Cambiado a usernameInput para claridad
+    const [emailInput, setEmailInput] = useState(''); // Ahora este input es para el email (que es el username de login)
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -50,24 +50,24 @@ function Login({ onLoginSuccess }) {
 
         try {
             const response = await api.post('/auth/login', {
-                username: usernameInput, // Envía el valor del input como username
+                username: emailInput, // Envía el email del input como username para el backend
                 password: password,
             });
 
-            const { token, username, nombreCompleto, role, error: loginError } = response.data;
+            const { token, username, nombreCompleto, role, error: loginError } = response.data; // Recibe username (email) y nombreCompleto
 
-            if (loginError) { // Si el backend devuelve un campo 'error' explícito
+            if (loginError) {
                 setIsLoading(false);
                 setError(loginError);
             } else if (token && username && nombreCompleto && role) {
                 localStorage.setItem('jwtToken', token);
-                localStorage.setItem('username', username); // Este es el username corto o el email de login
-                localStorage.setItem('nombreCompleto', nombreCompleto);
+                localStorage.setItem('username', username); // Guarda el email (que es el username de login)
+                localStorage.setItem('nombreCompleto', nombreCompleto); // Guarda el nombre completo
                 localStorage.setItem('userRole', role);
+                
                 if (onLoginSuccess) {
-                    onLoginSuccess(token, username, nombreCompleto, role);
+                    onLoginSuccess(token, username, nombreCompleto, role); // Pasa username (email) y nombreCompleto
                 }
-                // Redirigir al dashboard después del login exitoso
                 navigate('/dashboard'); 
             } else {
                 setIsLoading(false);
@@ -78,7 +78,7 @@ function Login({ onLoginSuccess }) {
             let errorMessage = 'Error de conexión o respuesta inesperada.';
             if (err.response?.data?.error) {
                 errorMessage = err.response.data.error;
-            } else if (err.response?.data) { // Si el backend envía un string de error directo
+            } else if (err.response?.data) { 
                  errorMessage = err.response.data;
             } else if (err.response?.status === 401) {
                 errorMessage = 'Credenciales incorrectas o cuenta no activa.';
@@ -105,10 +105,10 @@ function Login({ onLoginSuccess }) {
 
                     <input
                         className="auth-input"
-                        type="text" // Cambiado a type="text" para permitir username o email como entrada
-                        placeholder="Nombre de usuario o correo electrónico" // Placeholder más flexible
-                        value={usernameInput} // Usar el nuevo estado
-                        onChange={(e) => setUsernameInput(e.target.value)} // Actualizar el nuevo estado
+                        type="email" // Pedimos explícitamente el email
+                        placeholder="Correo electrónico"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
                         required
                         disabled={isLoading}
                     />

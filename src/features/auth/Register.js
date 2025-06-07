@@ -7,8 +7,7 @@ import '../../styles/AuthForm.css';
 
 function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente, puedes quitarlo
     const [nombreCompleto, setNombreCompleto] = useState('');
-    const [username, setUsername] = useState(''); // NUEVO ESTADO para el nombre de usuario
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(''); // El email será ahora el username para el backend
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
@@ -20,19 +19,12 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
         setError('');
         setSuccessMessage('');
 
+        // Validaciones del lado del cliente
         if (!nombreCompleto.trim()) {
             setError('El nombre completo es obligatorio.');
             return;
         }
-        if (!username.trim()) { // Validar que el username no esté vacío
-            setError('El nombre de usuario es obligatorio.');
-            return;
-        }
-        if (username.length > 20) { // Validar longitud del username antes de enviar
-            setError('El nombre de usuario no puede exceder los 20 caracteres.');
-            return;
-        }
-        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        if (!email || !/\S+@\S+\.\S+/.test(email)) { // Validar formato de email
             setError('Por favor, ingresa un correo electrónico válido.');
             return;
         }
@@ -50,20 +42,13 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
         try {
             await api.post('/auth/register', {
                 nombreCompleto: nombreCompleto.trim(),
-                username: username.trim(), // <-- ¡CORREGIDO! Enviar el nuevo estado 'username'
-                email: email.trim(), // <-- ¡CORREGIDO! Enviar el email al campo 'email'
+                email: email.trim(), // CAMBIO CLAVE: El email se envía al campo 'email' del DTO, y el backend lo usará como username
                 password: password,
-                // Puedes añadir otros campos como ubicacion, edad, telefono, bio si se recogen en este form
-                // ubicacion: 'alguna ubicacion',
-                // edad: 30,
-                // telefono: '123456789',
-                // bio: 'Mi biografia'
             });
 
             setSuccessMessage(`✅ ¡Registro casi completo! Revisa tu correo (${email}) para validar tu cuenta.`);
             setError('');
             setNombreCompleto('');
-            setUsername(''); // Limpiar el nuevo campo
             setEmail('');
             setPassword('');
             setConfirmPassword('');
@@ -71,7 +56,6 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
             console.error('Error al registrar:', err);
             let errorMessage = 'Error al registrar la cuenta.';
             if (err.response?.data) {
-                // Si el backend envía un string de error, úsalo.
                 if (typeof err.response.data === 'string') {
                     errorMessage = err.response.data;
                 } else if (err.response.data.error) {
@@ -79,8 +63,8 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
                 } else if (err.response.data.message) {
                     errorMessage = err.response.data.message;
                 }
-            } else if (err.response?.status === 409) {
-                errorMessage = '❌ El correo electrónico o nombre de usuario ya está registrado.';
+            } else if (err.response?.status === 409) { // El 409 es para duplicados (username/email)
+                errorMessage = '❌ El correo electrónico ya está registrado.';
             } else {
                 errorMessage = 'Error de conexión o respuesta inesperada.';
             }
@@ -119,15 +103,7 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
                                 required
                                 disabled={isLoading}
                             />
-                            <input
-                                className="auth-input"
-                                type="text" // Campo para el username corto
-                                placeholder="Nombre de usuario (máx. 20 caracteres)"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
+                            {/* CAMBIO CLAVE: Este input ahora es solo para el email (que será el username) */}
                             <input
                                 className="auth-input"
                                 type="email"
