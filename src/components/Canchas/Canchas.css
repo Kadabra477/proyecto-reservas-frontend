@@ -1,69 +1,33 @@
-/* canchas.css */
+/* frontend/src/features/canchas/Canchas.css */
 
 .canchas-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 2rem;
-  padding: 2rem;
-  background-color: #f7f7f7;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 30px 20px;
+    background-color: var(--background-light, #f9f9f9);
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-.cancha-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  width: 300px;
-  text-align: center;
-  transition: transform 0.2s ease;
+.canchas-title {
+    font-size: 2.8em;
+    color: var(--primary-dark, #0056b3);
+    margin-bottom: 40px;
+    font-weight: 800;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.cancha-card:hover {
-  transform: translateY(-5px);
-}
-
-.cancha-card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 15px;
-}
-
-.cancha-card h3 {
-  margin-top: 1rem;
-  font-size: 1.3rem;
-  color: #333;
-}
-
-.cancha-card a {
-  display: inline-block;
-  margin: 0.5rem 0;
-  color: #007bff;
-  text-decoration: none;
-}
-
-.cancha-card a:hover {
-  text-decoration: underline;
-}
-
-.cancha-card button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-top: 0.5rem;
-}
-
-.cancha-card button:hover {
-  background-color: #218838;
+/* Esta es la clase para la grilla de complejos (no canchas) */
+.complejos-grid { 
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    gap: 30px; 
+    justify-items: center; 
 }
 
 .btn-main-reserve {
-    background-color: var(--primary, #007bff); /* O tu color principal */
+    background-color: var(--primary, #007bff); 
     color: white;
     padding: 15px 30px;
     font-size: 1.2em;
@@ -72,11 +36,11 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-bottom: 30px; /* Espacio debajo del botón */
-    display: block; /* Para que ocupe su propia línea */
-    width: fit-content; /* Ajusta el ancho al contenido */
+    margin-bottom: 30px; 
+    display: block; 
+    width: fit-content; 
     margin-left: auto;
-    margin-right: auto; /* Centrar el botón */
+    margin-right: auto; 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -84,4 +48,47 @@
     background-color: var(--primary-dark, #0056b3);
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.no-canchas-message { /* Renombrado de no-canchas a no-complejos-message */
+    grid-column: 1 / -1; 
+    font-size: 1.3em;
+    color: var(--text-light, #777);
+    padding: 40px;
+    background-color: var(--white, #ffffff);
+    border-radius: 10px;
+    border: 2px dashed var(--gray, #cccccc);
+    margin-top: 20px;
+}
+
+.loading-message, .error-message {
+    text-align: center;
+    font-size: 1.2em;
+    padding: 20px;
+    color: var(--text, #333);
+}
+
+.error-message {
+    color: var(--danger, #dc3545);
+    font-weight: bold;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .canchas-list-title {
+        font-size: 2.2em;
+    }
+    .canchas-container {
+        padding: 20px 15px;
+        margin: 30px auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .canchas-list-title {
+        font-size: 1.8em;
+    }
+    .complejos-grid {
+        grid-template-columns: 1fr; 
+    }
 }

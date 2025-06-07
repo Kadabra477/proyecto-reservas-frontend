@@ -4,11 +4,11 @@ import {
     BrowserRouter as Router,
     Routes,
     Route,
-    Navigate, 
+    Navigate,
     useNavigate,
     useLocation,
 } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode'; // Asegúrate de tener 'jwt-decode' instalado
+import { jwtDecode } from 'jwt-decode'; 
 
 import Navbar from './components/Navbar/NavBar';
 import Login from './features/auth/Login';
@@ -17,13 +17,12 @@ import Home from './features/home/Home';
 import ReservaForm from './features/reservas/ReservaForm'; 
 import ReservaDetail from './features/reservas/ReservaDetail'; 
 import AdminPanel from './features/admin/AdminPanel';
-// CORRECCIÓN DE RUTA AQUÍ:
-import Canchas from './components/Canchas/Canchas'; // RUTA CORREGIDA para el componente Canchas
+// Cambiado para que Canchas.jsx liste complejos
+import Canchas from './features/canchas/Canchas'; 
 import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
 import OAuth2Success from './features/auth/OAuth2Success';
-// import PerfilForm from './components/Perfil/PerfilForm'; // Si usas PerfilForm como una página separada
 
 import PagoExitoso from './features/pago/PagoExitoso';
 import PagoFallido from './features/pago/PagoFallido';
@@ -68,28 +67,28 @@ function App() {
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem('jwtToken');
-        localStorage.removeItem('username');
-        localStorage.removeItem('nombreCompleto');
+        localStorage.removeItem('username'); // Esto ahora es el email
+        localStorage.removeItem('nombreCompleto'); // Se usará para el perfil
         localStorage.removeItem('userRole');
         setEstaAutenticado(false);
         setNombreUsuario('');
         setUserRole(null);
     }, []);
 
-    const handleLoginSuccess = useCallback((token, usernameData, nombreCompletoData, roleData) => {
+    const handleLoginSuccess = useCallback((token, usernameFromJwt, nombreCompletoFromJwt, roleFromJwt) => {
         localStorage.setItem('jwtToken', token);
-        localStorage.setItem('username', usernameData);
-        localStorage.setItem('nombreCompleto', nombreCompletoData);
-        localStorage.setItem('userRole', roleData);
+        localStorage.setItem('username', usernameFromJwt); // El email del usuario
+        localStorage.setItem('nombreCompleto', nombreCompletoFromJwt); // El nombre completo para mostrar
+        localStorage.setItem('userRole', roleFromJwt);
         setEstaAutenticado(true);
-        setNombreUsuario(nombreCompletoData);
-        setUserRole(roleData);
+        setNombreUsuario(nombreCompletoFromJwt);
+        setUserRole(roleFromJwt);
     }, []);
 
     useEffect(() => {
         const verificarToken = async () => {
             const token = localStorage.getItem('jwtToken');
-            const nombre = localStorage.getItem('nombreCompleto');
+            const nombre = localStorage.getItem('nombreCompleto'); // El nombre completo
             const role = localStorage.getItem('userRole');
 
             if (!token) {
@@ -101,8 +100,8 @@ function App() {
             }
 
             try {
-                // Validación del token en el backend
-                const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/validate-token`, {
+                // Validar token en el backend
+                const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/validate-token`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`
@@ -111,7 +110,6 @@ function App() {
 
                 if (!res.ok) throw new Error("Token inválido o expirado");
                 
-                // Si el token es válido, decodificar para verificar expiración (doble chequeo)
                 const decodedToken = jwtDecode(token);
                 const currentTime = Date.now() / 1000;
                 if (decodedToken.exp < currentTime) {
@@ -169,27 +167,27 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Home />} />
                     
-                    {/* Rutas de autenticación sin Navbar */}
+                    {/* Rutas de autenticación */}
                     <Route path="/login" element={<RedireccionSiAutenticado><Login onLoginSuccess={handleLoginSuccess} /></RedireccionSiAutenticado>} />
                     <Route path="/register" element={<RedireccionSiAutenticado><Register /></RedireccionSiAutenticado>} />
                     <Route path="/forgot-password" element={<ForgotPasswordRequest />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/oauth2/redirect" element={<OAuth2Success onLoginSuccess={handleLoginSuccess} />} /> 
 
-                    {/* Rutas protegidas (que tendrán Navbar por defecto) */}
-                    <Route path="/canchas" element={<Canchas />} /> 
+                    {/* Rutas principales adaptadas a Complejos */}
+                    <Route path="/complejos" element={<Canchas />} /> {/* Canchas.jsx ahora lista Complejos */}
                     
-                    {/* RUTA MODIFICADA: Ahora ReservaForm no necesita un ID de cancha en la URL */}
+                    {/* RUTA MODIFICADA: ReservaForm ahora recibe un ComplejoId preseleccionado (opcional) */}
                     <Route path="/reservar" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><ReservaForm /></RutaProtegida>} /> 
                     
                     {/* Ruta para ver el detalle de una reserva específica (mantiene el ID) */}
                     <Route path="/reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><ReservaDetail /></RutaProtegida>} />
 
+                    {/* Rutas de usuario autenticado */}
                     <Route path="/dashboard" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><DashboardUsuario /></RutaProtegida>} />
-                    {/* Si usas PerfilForm como una página separada */}
                     {/* <Route path="/perfil" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN']}><PerfilForm /></RutaProtegida>} /> */}
 
-                    {/* Rutas de pago (generalmente no protegidas para el callback del MP) */}
+                    {/* Rutas de pago */}
                     <Route path="/pago-exitoso" element={<PagoExitoso />} />
                     <Route path="/pago-fallido" element={<PagoFallido />} />
                     <Route path="/pago-pendiente" element={<PagoPendiente />} />
@@ -197,7 +195,7 @@ function App() {
                     {/* Rutas de Administración Protegidas por Rol 'ADMIN' */}
                     <Route path="/admin" element={<RutaProtegida rolesRequeridos={['ADMIN']}><AdminPanel /></RutaProtegida>} />
                     
-                    {/* Ruta de fallback para 404 - redirige a home */}
+                    {/* Ruta de fallback para 404 */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </>
