@@ -17,8 +17,7 @@ import Home from './features/home/Home';
 import ReservaForm from './features/reservas/ReservaForm'; 
 import ReservaDetail from './features/reservas/ReservaDetail'; 
 import AdminPanel from './features/admin/AdminPanel';
-// Cambiado para que Canchas.jsx liste complejos
-import Canchas from './features/canchas/Canchas'; 
+import Canchas from './components/Canchas/Canchas'; 
 import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
