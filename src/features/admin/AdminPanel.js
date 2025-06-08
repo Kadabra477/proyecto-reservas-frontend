@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axiosConfig';
 import AdminEstadisticas from './AdminEstadisticas';
-import './AdminPanel.css'; // Asegúrate de tener los estilos actualizados
+import './AdminPanel.css';
 
 // Estado inicial para un formulario de COMPLEJO nuevo
 const estadoInicialComplejo = {
@@ -12,16 +12,16 @@ const estadoInicialComplejo = {
     telefono: '',
     horarioApertura: '10:00', // Formato HH:MM
     horarioCierre: '23:00',   // Formato HH:MM
-    canchaCounts: {},         // Mapa de tipo -> cantidad
-    canchaPrices: {},         // Mapa de tipo -> precio
-    canchaSurfaces: {},       // Mapa de tipo -> superficie
-    canchaIluminacion: {},    // Mapa de tipo -> booleano
-    canchaTecho: {},          // Mapa de tipo -> booleano
+    canchaCounts: {},
+    canchaPrices: {},
+    canchaSurfaces: {},
+    canchaIluminacion: {},
+    canchaTecho: {},
 };
 
 // Estado inicial para un nuevo Tipo de Cancha dentro de un complejo
 const estadoInicialTipoCancha = {
-    tipo: '', // Ej: "Fútbol 5"
+    tipo: '',
     cantidad: '',
     precio: '',
     superficie: '',
@@ -35,16 +35,19 @@ function AdminPanel() {
     const [activeTab, setActiveTab] = useState('complejos');
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
     const [isLoadingData, setIsLoadingData] = useState(false);
-    const [editingComplejo, setEditingComplejo] = useState(null); // Complejo que se está editando
-    const [nuevoComplejo, setNuevoComplejo] = useState(estadoInicialComplejo); // Para crear nuevo complejo
+    const [editingComplejo, setEditingComplejo] = useState(null);
+    const [nuevoComplejo, setNuevoComplejo] = useState(estadoInicialComplejo);
 
-    // Estados para la gestión de tipos de cancha dentro de un complejo (cuando se edita un complejo)
-    const [editingTipoCancha, setEditingTipoCancha] = useState(null); // Tipo de cancha en edición
-    const [nuevoTipoCancha, setNuevoTipoCancha] = useState(estadoInicialTipoCancha); // Nuevo tipo de cancha
+    const [editingTipoCancha, setEditingTipoCancha] = useState(null);
+    const [nuevoTipoCancha, setNuevoTipoCancha] = useState(estadoInicialTipoCancha);
 
-    const userRole = localStorage.getItem('userRole'); // Rol del usuario logueado
+    const userRole = localStorage.getItem('userRole');
 
-    // Efecto para limpiar el mensaje después de unos segundos
+    // Mueve la declaración de currentComplejoFormData aquí, al inicio del componente
+    const currentComplejoFormData = editingComplejo || nuevoComplejo;
+    const currentTipoCanchaFormData = editingTipoCancha || nuevoTipoCancha;
+
+
     useEffect(() => {
         let timer;
         if (mensaje.text) {
@@ -55,16 +58,15 @@ function AdminPanel() {
         return () => clearTimeout(timer);
     }, [mensaje]);
 
-    // Fetch Complejos (filtrado por rol en el backend)
     const fetchComplejos = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
             let res;
             if (userRole === 'ADMIN') {
-                res = await api.get('/complejos'); // ADMIN ve todos
+                res = await api.get('/complejos');
             } else if (userRole === 'COMPLEX_OWNER') {
-                res = await api.get('/complejos/mis-complejos'); // Dueño ve solo los suyos
+                res = await api.get('/complejos/mis-complejos');
             } else {
                 setComplejos([]);
                 setIsLoadingData(false);
@@ -80,12 +82,11 @@ function AdminPanel() {
         }
     }, [userRole]);
 
-    // Fetch Reservas (filtrado por rol en el backend)
     const fetchReservas = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            const res = await api.get('/reservas/admin/todas'); // Backend ya filtra por rol
+            const res = await api.get('/reservas/admin/todas');
             setReservas(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Error al obtener reservas:', err);
@@ -121,18 +122,16 @@ function AdminPanel() {
         e.preventDefault();
         setMensaje({ text: '', type: '' });
 
-        const complejoDataToSave = { ...(editingComplejo || nuevoComplejo) };
+        const complejoDataToSave = { ...currentComplejoFormData }; // Usa la variable ya declarada
 
         if (!complejoDataToSave.nombre?.trim() || !complejoDataToSave.ubicacion?.trim() || !complejoDataToSave.horarioApertura || !complejoDataToSave.horarioCierre) {
             setMensaje({ text: 'Los campos obligatorios de Complejo (Nombre, Ubicación, Horarios) son obligatorios.', type: 'error' });
             return;
         }
 
-        // Asegurar formato HH:MM
         complejoDataToSave.horarioApertura = complejoDataToSave.horarioApertura.substring(0, 5);
         complejoDataToSave.horarioCierre = complejoDataToSave.horarioCierre.substring(0, 5);
 
-        // Envía los mapas de canchas, incluso si están vacíos al crear un nuevo complejo
         complejoDataToSave.canchaCounts = complejoDataToSave.canchaCounts || {};
         complejoDataToSave.canchaPrices = complejoDataToSave.canchaPrices || {};
         complejoDataToSave.canchaSurfaces = complejoDataToSave.canchaSurfaces || {};
@@ -182,10 +181,8 @@ function AdminPanel() {
     const startEditingComplejo = (complejoParaEditar) => {
         setEditingComplejo({
             ...complejoParaEditar,
-            // Asegurar que los horarios estén en formato HH:MM
             horarioApertura: complejoParaEditar.horarioApertura ? complejoParaEditar.horarioApertura.substring(0, 5) : '10:00',
             horarioCierre: complejoParaEditar.horarioCierre ? complejoParaEditar.horarioCierre.substring(0, 5) : '23:00',
-            // Asegurar que los mapas no sean nulos si no vienen del backend
             canchaCounts: complejoParaEditar.canchaCounts || {},
             canchaPrices: complejoParaEditar.canchaPrices || {},
             canchaSurfaces: complejoParaEditar.canchaSurfaces || {},
@@ -193,8 +190,8 @@ function AdminPanel() {
             canchaTecho: complejoParaEditar.canchaTecho || {},
         });
         setNuevoComplejo(estadoInicialComplejo);
-        setEditingTipoCancha(null); // Limpiar edición de tipo de cancha
-        setNuevoTipoCancha(estadoInicialTipoCancha); // Limpiar nuevo tipo de cancha
+        setEditingTipoCancha(null);
+        setNuevoTipoCancha(estadoInicialTipoCancha);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -222,9 +219,8 @@ function AdminPanel() {
             return;
         }
 
-        const tipoCanchaData = { ...(editingTipoCancha || nuevoTipoCancha) };
+        const tipoCanchaData = { ...currentTipoCanchaFormData }; // Usa la variable ya declarada
 
-        // Validaciones del tipo de cancha
         const cantidadNum = parseInt(tipoCanchaData.cantidad, 10);
         const precioNum = parseFloat(tipoCanchaData.precio);
 
@@ -235,7 +231,6 @@ function AdminPanel() {
 
         const updatedComplejo = { ...editingComplejo };
 
-        // Actualizar los mapas del complejo
         updatedComplejo.canchaCounts = { ...updatedComplejo.canchaCounts, [tipoCanchaData.tipo]: cantidadNum };
         updatedComplejo.canchaPrices = { ...updatedComplejo.canchaPrices, [tipoCanchaData.tipo]: precioNum };
         updatedComplejo.canchaSurfaces = { ...updatedComplejo.canchaSurfaces, [tipoCanchaData.tipo]: tipoCanchaData.superficie };
@@ -244,12 +239,11 @@ function AdminPanel() {
 
         try {
             await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
-            setMensaje({ text: `Tipo de cancha "${tipoCanchaData.tipo}" guardado correctamente en el complejo.`, type: 'success' });
-            fetchComplejos(); // Recargar los complejos para ver los cambios
-            setEditingTipoCancha(null); // Salir del modo edición de tipo de cancha
-            setNuevoTipoCancha(estadoInicialTipoCancha); // Resetear el formulario
-            // Actualizar el complejo en edición en el estado local para reflejar el cambio inmediatamente
-            setEditingComplejo(updatedComplejo); 
+            setMensaje({ text: `Tipo de cancha &quot;${tipoCanchaData.tipo}&quot; guardado correctamente en el complejo.`, type: 'success' }); // Escapado
+            fetchComplejos();
+            setEditingTipoCancha(null);
+            setNuevoTipoCancha(estadoInicialTipoCancha);
+            setEditingComplejo(updatedComplejo);
         } catch (err) {
             console.error('Error al guardar el tipo de cancha:', err);
             const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al guardar el tipo de cancha.';
@@ -258,13 +252,12 @@ function AdminPanel() {
     };
 
     const handleDeleteTipoCancha = async (tipo) => {
-        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha "${tipo}" del complejo "${editingComplejo.nombre}"? Esto eliminará también sus precios y características.`)) {
+        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha &quot;${tipo}&quot; del complejo &quot;${editingComplejo.nombre}&quot;? Esta acción es irreversible.`)) { // Escapado
             setMensaje({ text: '', type: '' });
             if (!editingComplejo) return;
 
             const updatedComplejo = { ...editingComplejo };
 
-            // Eliminar del mapa
             delete updatedComplejo.canchaCounts[tipo];
             delete updatedComplejo.canchaPrices[tipo];
             delete updatedComplejo.canchaSurfaces[tipo];
@@ -273,9 +266,9 @@ function AdminPanel() {
 
             try {
                 await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
-                setMensaje({ text: `Tipo de cancha "${tipo}" eliminado correctamente.`, type: 'success' });
+                setMensaje({ text: `Tipo de cancha &quot;${tipo}&quot; eliminado correctamente.`, type: 'success' }); // Escapado
                 fetchComplejos();
-                setEditingComplejo(updatedComplejo); // Actualizar complejo en edición
+                setEditingComplejo(updatedComplejo);
                 if (editingTipoCancha && editingTipoCancha.tipo === tipo) {
                     setEditingTipoCancha(null);
                     setNuevoTipoCancha(estadoInicialTipoCancha);
@@ -289,7 +282,7 @@ function AdminPanel() {
     };
 
     const startEditingTipoCancha = (tipo) => {
-        if (!editingComplejo) return; // Debe haber un complejo en edición
+        if (!editingComplejo) return;
 
         setEditingTipoCancha({
             tipo: tipo,
@@ -299,8 +292,8 @@ function AdminPanel() {
             iluminacion: editingComplejo.canchaIluminacion[tipo] ?? false,
             techo: editingComplejo.canchaTecho[tipo] ?? false,
         });
-        setNuevoTipoCancha(estadoInicialTipoCancha); // Resetear formulario nuevo
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll al inicio
+        setNuevoTipoCancha(estadoInicialTipoCancha);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const cancelEditingTipoCancha = () => {
@@ -368,8 +361,6 @@ function AdminPanel() {
         if (!string) return '';
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
-
-    const currentTipoCanchaFormData = editingTipoCancha || nuevoTipoCancha;
 
     return (
         <div className="admin-panel">
@@ -457,7 +448,6 @@ function AdminPanel() {
                             </div>
                         </form>
                     ) : (
-                        // Solo el ADMIN puede crear nuevos complejos. Los propietarios deben seleccionar uno existente.
                         userRole === 'COMPLEX_OWNER' && !editingComplejo && (
                             <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
                         )
@@ -606,7 +596,6 @@ function AdminPanel() {
                                                 </span>
                                             </td>
                                             <td data-label="Acciones">
-                                                {/* Botones de acción para Reservas */}
                                                 {(r.estado === 'pendiente_pago_efectivo' || r.estado === 'pendiente_pago_mp') && (
                                                     <button className="admin-btn-confirm" onClick={() => handleConfirmReserva(r.id)}>
                                                         Confirmar
@@ -615,7 +604,6 @@ function AdminPanel() {
                                                 <button className="admin-btn-delete" onClick={() => handleDeleteReserva(r.id)}>
                                                     Eliminar
                                                 </button>
-                                                {/* Botón para generar PDF */}
                                                 <a href={`${process.env.REACT_APP_API_URL}/reservas/${r.id}/pdf-comprobante`} target="_blank" rel="noopener noreferrer" className="admin-btn-pdf">
                                                     PDF
                                                 </a>
