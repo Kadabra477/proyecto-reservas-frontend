@@ -1,14 +1,13 @@
-// frontend/src/features/auth/VerifyAccount.jsx
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import api from '../../api/axiosConfig'; // Tu instancia de Axios configurada
-import '../../styles/AuthForm.css'; // O cualquier estilo que uses para formularios
+import api from '../../api/axiosConfig';
+import '../../styles/AuthForm.css';
 
 function VerifyAccount() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [message, setMessage] = useState('Verificando tu cuenta...');
-    const [messageType, setMessageType] = useState('info'); // 'info', 'success', 'error'
+    const [messageType, setMessageType] = useState('info');
 
     useEffect(() => {
         const token = searchParams.get('token');
@@ -21,18 +20,14 @@ function VerifyAccount() {
 
         const verifyUser = async () => {
             try {
-                // Endpoint para activar el usuario en el backend
-                // Asegúrate que tu controlador de autenticación en el backend tenga este endpoint:
-                // @GetMapping("/auth/verify-account")
-                // public ResponseEntity<?> verifyUser(@RequestParam String token)
                 const response = await api.get(`/auth/verify-account?token=${token}`);
-                
+
                 if (response.status === 200) {
                     setMessage('✅ ¡Tu cuenta ha sido verificada exitosamente! Ya puedes iniciar sesión.');
                     setMessageType('success');
                     setTimeout(() => {
-                        navigate('/login?validated=true'); // Redirige al login con un mensaje de éxito
-                    }, 3000); // Redirige después de 3 segundos
+                        navigate('/login?validated=true'); // Redirige al login con el mensaje de éxito
+                    }, 3000);
                 } else {
                     setMessage('❌ Error al verificar la cuenta. El token puede ser inválido o haber expirado.');
                     setMessageType('error');

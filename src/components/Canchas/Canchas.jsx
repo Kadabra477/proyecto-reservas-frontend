@@ -1,10 +1,8 @@
-// frontend/src/features/canchas/Canchas.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
-// ¡CORRECCIÓN CRÍTICA AQUÍ! Ruta relativa correcta para ComplejoCard.jsx
-import ComplejoCard from '../CanchaCard/ComplejoCard'; // RUTA CORREGIDA
-import './Canchas.css'; // Estilos generales para la lista de complejos/canchas
+import ComplejoCard from '../ComplejoCard/ComplejoCard'; // Asegúrate que la ruta sea correcta si es necesario
+import './Canchas.css';
 
 function Canchas() {
     const [complejos, setComplejos] = useState([]);
@@ -16,7 +14,7 @@ function Canchas() {
         setLoading(true);
         setError(null);
         try {
-            const response = await api.get('/complejos'); 
+            const response = await api.get('/complejos');
             if (Array.isArray(response.data)) {
                 setComplejos(response.data);
             } else {
@@ -36,7 +34,7 @@ function Canchas() {
     }, [fetchComplejos]);
 
     const handleReserveAnyCancha = () => {
-        navigate('/reservar'); 
+        navigate('/reservar');
     };
 
     if (loading) {
@@ -47,21 +45,36 @@ function Canchas() {
         return <div className="canchas-container error-message">{error}</div>;
     }
 
+    // Determina si el botón de reservar debe estar deshabilitado
+    const isReserveButtonDisabled = complejos.length === 0; // Deshabilita si no hay complejos
+
     return (
         <div className="canchas-container">
             <h1 className="canchas-title">Nuestros Complejos Deportivos</h1>
-            
-            <button className="btn-main-reserve" onClick={handleReserveAnyCancha}>
+
+            <button
+                className="btn-main-reserve"
+                onClick={handleReserveAnyCancha}
+                disabled={isReserveButtonDisabled} // Deshabilita si no hay complejos
+            >
                 Reservar una Cancha por Tipo
             </button>
+            
+            {/* Mensaje informativo si el botón está deshabilitado */}
+            {isReserveButtonDisabled && (
+                <p className="info-message-no-complejos">
+                    No hay complejos disponibles para reservar en este momento. Por favor, revisa más tarde o contacta al administrador.
+                </p>
+            )}
 
             {complejos.length > 0 ? (
-                <div className="complejos-grid"> 
+                <div className="complejos-grid">
                     {complejos.map(complejo => (
                         <ComplejoCard key={complejo.id} complejo={complejo} />
                     ))}
                 </div>
             ) : (
+                // Este mensaje se muestra si no hay complejos, complementa al del botón
                 <p className="no-canchas-message">No hay complejos registrados en el sistema. Contacta al administrador.</p>
             )}
         </div>

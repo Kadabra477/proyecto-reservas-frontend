@@ -32,7 +32,8 @@ const estadoInicialTipoCancha = {
 function AdminPanel() {
     const [complejos, setComplejos] = useState([]);
     const [reservas, setReservas] = useState([]);
-    const [activeTab, setActiveTab] = useState('complejos');
+    const [usuarios, setUsuarios] = useState([]); // Nuevo estado para usuarios
+    const [activeTab, setActiveTab] = useState('complejos'); // 'complejos', 'reservas', 'usuarios', 'estadisticas'
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [editingComplejo, setEditingComplejo] = useState(null);
@@ -41,9 +42,11 @@ function AdminPanel() {
     const [editingTipoCancha, setEditingTipoCancha] = useState(null);
     const [nuevoTipoCancha, setNuevoTipoCancha] = useState(estadoInicialTipoCancha);
 
+    const [managingUserRoles, setManagingUserRoles] = useState(null); // Usuario al que se le gestionan los roles
+    const [selectedRoles, setSelectedRoles] = useState([]); // Roles seleccionados para el usuario
+
     const userRole = localStorage.getItem('userRole');
 
-    // Mueve la declaración de currentComplejoFormData aquí, al inicio del componente
     const currentComplejoFormData = editingComplejo || nuevoComplejo;
     const currentTipoCanchaFormData = editingTipoCancha || nuevoTipoCancha;
 
@@ -97,6 +100,26 @@ function AdminPanel() {
         }
     }, []);
 
+    // Nuevo: Fetch Usuarios (solo para ADMIN)
+    const fetchUsuarios = useCallback(async () => {
+        setIsLoadingData(true);
+        setMensaje({ text: '', type: '' });
+        try {
+            if (userRole === 'ADMIN') {
+                const res = await api.get('/users'); // Endpoint para obtener todos los usuarios
+                setUsuarios(Array.isArray(res.data) ? res.data : []);
+            } else {
+                setUsuarios([]); // Otros roles no ven la lista de usuarios
+            }
+        } catch (err) {
+            console.error('Error al obtener usuarios:', err);
+            const errorMsg = err.response?.data?.message || err.response?.data || 'Error al cargar la lista de usuarios.';
+            setMensaje({ text: errorMsg, type: 'error' });
+        } finally {
+            setIsLoadingData(false);
+        }
+    }, [userRole]);
+
     useEffect(() => {
         const token = localStorage.getItem('jwtToken');
         if (!token) {
@@ -108,8 +131,10 @@ function AdminPanel() {
             fetchComplejos();
         } else if (activeTab === 'reservas') {
             fetchReservas();
+        } else if (activeTab === 'usuarios' && userRole === 'ADMIN') {
+            fetchUsuarios();
         }
-    }, [activeTab, fetchComplejos, fetchReservas, userRole]);
+    }, [activeTab, fetchComplejos, fetchReservas, fetchUsuarios, userRole]);
 
     // --- Manejo de Formularios de Complejo ---
     const handleComplejoChange = (e) => {
@@ -122,7 +147,7 @@ function AdminPanel() {
         e.preventDefault();
         setMensaje({ text: '', type: '' });
 
-        const complejoDataToSave = { ...currentComplejoFormData }; // Usa la variable ya declarada
+        const complejoDataToSave = { ...currentComplejoFormData };
 
         if (!complejoDataToSave.nombre?.trim() || !complejoDataToSave.ubicacion?.trim() || !complejoDataToSave.horarioApertura || !complejoDataToSave.horarioCierre) {
             setMensaje({ text: 'Los campos obligatorios de Complejo (Nombre, Ubicación, Horarios) son obligatorios.', type: 'error' });
@@ -219,7 +244,7 @@ function AdminPanel() {
             return;
         }
 
-        const tipoCanchaData = { ...currentTipoCanchaFormData }; // Usa la variable ya declarada
+        const tipoCanchaData = { ...currentTipoCanchaFormData };
 
         const cantidadNum = parseInt(tipoCanchaData.cantidad, 10);
         const precioNum = parseFloat(tipoCanchaData.precio);
@@ -239,7 +264,7 @@ function AdminPanel() {
 
         try {
             await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
-            setMensaje({ text: `Tipo de cancha &quot;${tipoCanchaData.tipo}&quot; guardado correctamente en el complejo.`, type: 'success' }); // Escapado
+            setMensaje({ text: `Tipo de cancha &quot;${tipoCanchaData.tipo}&quot; guardado correctamente en el complejo.`, type: 'success' });
             fetchComplejos();
             setEditingTipoCancha(null);
             setNuevoTipoCancha(estadoInicialTipoCancha);
@@ -252,7 +277,7 @@ function AdminPanel() {
     };
 
     const handleDeleteTipoCancha = async (tipo) => {
-        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha &quot;${tipo}&quot; del complejo &quot;${editingComplejo.nombre}&quot;? Esta acción es irreversible.`)) { // Escapado
+        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha &quot;${tipo}&quot; del complejo &quot;${editingComplejo.nombre}&quot;? Esta acción es irreversible.`)) {
             setMensaje({ text: '', type: '' });
             if (!editingComplejo) return;
 
@@ -266,7 +291,7 @@ function AdminPanel() {
 
             try {
                 await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
-                setMensaje({ text: `Tipo de cancha &quot;${tipo}&quot; eliminado correctamente.`, type: 'success' }); // Escapado
+                setMensaje({ text: `Tipo de cancha &quot;${tipo}&quot; eliminado correctamente.`, type: 'success' });
                 fetchComplejos();
                 setEditingComplejo(updatedComplejo);
                 if (editingTipoCancha && editingTipoCancha.tipo === tipo) {
@@ -362,6 +387,55 @@ function AdminPanel() {
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
 
+    // --- Manejo de Usuarios y Roles (Nueva Funcionalidad) ---
+    // Función para iniciar la gestión de roles de un usuario
+    const startManagingUserRoles = (user) => {
+        setManagingUserRoles(user);
+        // Los roles vienen como objetos { authority: "ROLE_ADMIN" } en el frontend
+        // Los mapeamos a solo el nombre del rol sin "ROLE_" para los checkboxes
+        const currentRoles = user.authorities ? user.authorities.map(auth => auth.authority.replace('ROLE_', '')) : [];
+        setSelectedRoles(currentRoles);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Función para cancelar la gestión de roles
+    const cancelManagingUserRoles = () => {
+        setManagingUserRoles(null);
+        setSelectedRoles([]);
+    };
+
+    // Función para manejar el cambio de roles en el checkbox
+    const handleRoleChange = (e) => {
+        const { value, checked } = e.target;
+        setSelectedRoles(prevRoles => {
+            if (checked) {
+                return [...prevRoles, value];
+            } else {
+                return prevRoles.filter(role => role !== value);
+            }
+        });
+    };
+
+    // Función para guardar los roles de un usuario
+    const handleSaveUserRoles = async () => {
+        setMensaje({ text: '', type: '' });
+        if (!managingUserRoles) return;
+
+        try {
+            // Envía los roles con el prefijo "ROLE_" al backend
+            const rolesToSend = selectedRoles.map(role => `ROLE_${role}`);
+            await api.put(`/users/${managingUserRoles.id}/roles`, rolesToSend);
+            setMensaje({ text: `Roles de ${managingUserRoles.username} actualizados correctamente.`, type: 'success' });
+            fetchUsuarios(); // Recargar lista de usuarios para ver los cambios
+            setManagingUserRoles(null); // Salir del modo de gestión
+            setSelectedRoles([]);
+        } catch (err) {
+            console.error('Error al guardar roles:', err);
+            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al guardar los roles.';
+            setMensaje({ text: errorMsg, type: 'error' });
+        }
+    };
+
     return (
         <div className="admin-panel">
             <h1>Panel de Administración</h1>
@@ -382,6 +456,16 @@ function AdminPanel() {
                 >
                     Gestionar Reservas
                 </button>
+                {/* Nueva pestaña para usuarios, visible solo para ADMIN */}
+                {userRole === 'ADMIN' && (
+                    <button
+                        className={`admin-tab-button ${activeTab === 'usuarios' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('usuarios')}
+                        disabled={isLoadingData}
+                    >
+                        Gestionar Usuarios
+                    </button>
+                )}
                 <button
                     className={`admin-tab-button ${activeTab === 'estadisticas' ? 'active' : ''}`}
                     onClick={() => setActiveTab('estadisticas')}
@@ -456,7 +540,7 @@ function AdminPanel() {
                     {/* Sección para Gestionar Tipos de Cancha dentro del Complejo (solo si se está editando un complejo) */}
                     {editingComplejo && (userRole === 'ADMIN' || userRole === 'COMPLEX_OWNER') && (
                         <div className="admin-tipo-cancha-gestion">
-                            <h3>Gestionar Tipos de Cancha para &quot;{editingComplejo.nombre}&quot;</h3> {/* Escapado */}
+                            <h3>Gestionar Tipos de Cancha para &quot;{editingComplejo.nombre}&quot;</h3>
 
                             {/* Formulario para agregar/editar un Tipo de Cancha */}
                             <form className="admin-tipo-cancha-form" onSubmit={handleSaveTipoCancha}>
@@ -514,7 +598,7 @@ function AdminPanel() {
 
                             {/* Lista de Tipos de Cancha del Complejo actual */}
                             <div className="admin-list-tipos-cancha">
-                                <h4>Tipos de Cancha configurados en &quot;{editingComplejo.nombre}&quot;</h4> {/* Escapado */}
+                                <h4>Tipos de Cancha configurados en &quot;{editingComplejo.nombre}&quot;</h4>
                                 <table>
                                     <thead>
                                         <tr>
@@ -614,6 +698,86 @@ function AdminPanel() {
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Contenido de la Pestaña de Usuarios (visible solo para ADMIN) */}
+            {activeTab === 'usuarios' && userRole === 'ADMIN' && (
+                <div className="admin-tab-content">
+                    <h2>Gestionar Usuarios y Roles</h2>
+                    {isLoadingData ? <p>Cargando usuarios...</p> : (
+                        <div className="admin-table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Email (Username)</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Roles</th>
+                                        <th>Activo</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {usuarios.length > 0 ? usuarios.map(u => (
+                                        <tr key={u.id}>
+                                            <td data-label="ID">{u.id}</td>
+                                            <td data-label="Email">{u.username}</td>
+                                            <td data-label="Nombre">{u.nombreCompleto || 'N/A'}</td>
+                                            <td data-label="Roles">
+                                                {/* Los roles vienen como objetos { authority: "ROLE_ADMIN" }, los mapeamos a solo el nombre */}
+                                                {u.authorities && u.authorities.map(auth => auth.authority.replace('ROLE_', '')).join(', ')}
+                                            </td>
+                                            <td data-label="Activo">{u.enabled ? 'Sí' : 'No'}</td>
+                                            <td data-label="Acciones">
+                                                {/* No permitir gestionar roles del propio admin por seguridad básica */}
+                                                {u.username !== localStorage.getItem('username') ? (
+                                                    <button className="admin-btn-edit" onClick={() => startManagingUserRoles(u)}>
+                                                        Gestionar Roles
+                                                    </button>
+                                                ) : (
+                                                    <span className="info-text">Tu cuenta</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    )) : (
+                                        <tr><td colSpan="6" className="admin-no-data">No hay usuarios registrados.</td></tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* Formulario de Gestión de Roles (solo si managingUserRoles no es null) */}
+                    {managingUserRoles && (
+                        <div className="admin-user-role-form-modal">
+                            <h3>Gestionar Roles para: {managingUserRoles.username}</h3>
+                            <div className="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" value="USER" checked={selectedRoles.includes('USER')} onChange={handleRoleChange} />
+                                    Usuario Estándar
+                                </label>
+                                <label>
+                                    <input type="checkbox" value="COMPLEX_OWNER" checked={selectedRoles.includes('COMPLEX_OWNER')} onChange={handleRoleChange} />
+                                    Dueño de Complejo
+                                </label>
+                                {/* El rol ADMIN solo puede ser asignado/revocado con mucho cuidado,
+                                    evitando que un admin se auto-desactive. Por ahora, no lo permitimos
+                                    directamente desde aquí para evitar problemas accidentales.
+                                    Si necesitas que el ADMIN pueda degradar a otros ADMINS, requeriría
+                                    una lógica más compleja (ej. pedir contraseña, otro admin, etc.)
+                                */}
+                                <label>
+                                    <input type="checkbox" value="ADMIN" checked={selectedRoles.includes('ADMIN')} onChange={handleRoleChange} disabled={true} />
+                                    Administrador General (gestión manual)
+                                </label>
+                            </div>
+                            <div className="admin-form-buttons">
+                                <button className="admin-btn-save" onClick={handleSaveUserRoles}>Guardar Roles</button>
+                                <button className="admin-btn-cancel" onClick={cancelManagingUserRoles}>Cancelar</button>
+                            </div>
                         </div>
                     )}
                 </div>
