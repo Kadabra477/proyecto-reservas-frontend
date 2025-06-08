@@ -1,48 +1,50 @@
+// frontend/src/api/axiosConfig.js
 import axios from 'axios';
 
+// La URL base para el backend, SIN el '/api'
+const API_BASE_URL = process.env.REACT_APP_API_URL; 
+
+// Crea una instancia de Axios
 const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
+  baseURL: API_BASE_URL + '/api', // Añade '/api' aquí una sola vez
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: false, // Puedes cambiar a true si manejas cookies/sesiones en el backend
 });
 
-// Interceptor para agregar el token JWT en el header Authorization
+// Interceptor para añadir el token JWT a cada petición saliente
 api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('jwtToken');
-        if (token) {
-            config.headers['Authorization'] = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
+  (config) => {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
-// Interceptor para manejar respuestas, especialmente 401 Unauthorized
+// Interceptor para manejar errores 401 (No autorizado)
 api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        // Ignorar errores SSL solo en desarrollo
-        if (error.message && error.message.includes('SSL')) {
-            console.warn('Advertencia: Error SSL ignorado (solo en desarrollo)');
-            return Promise.resolve(error.response);
-        }
-
-        if (error.response && error.response.status === 401) {
-            const originalRequestUrl = error.config && error.config.url ? error.config.url : '';
-
-            // No hacer logout si la llamada es al login para evitar bucles
-            if (!originalRequestUrl.endsWith('/auth/login')) {
-                localStorage.removeItem('jwtToken');
-                localStorage.removeItem('username');
-                localStorage.removeItem('nombreCompleto');
-                localStorage.removeItem('userRole');
-                if (typeof window !== 'undefined') {
-                    window.location.assign('/login');
-                }
-            }
-        }
-
-        return Promise.reject(error);
+  (response) => {
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      console.warn('401 Unauthorized - Token inválido o expirado. Redirigiendo a /login...');
+      // Eliminar el token y otros datos de la sesión
+      localStorage.removeItem('jwtToken');
+      localStorage.removeItem('username');
+      localStorage.removeItem('nombreCompleto');
+      localStorage.removeItem('userRole');
+      // Redirigir al login
+      window.location.href = '/login?unauthorized=true';
     }
+    return Promise.reject(error);
+  }
 );
 
 export default api;
