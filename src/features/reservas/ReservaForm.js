@@ -66,7 +66,7 @@ function ReservaForm() {
         const fetchComplejos = async () => {
             setIsLoadingInitialData(true);
             try {
-                const response = await api.get('/api/complejos'); // Endpoint para listar todos los complejos
+                const response = await api.get('/complejos'); // Endpoint para listar todos los complejos
                 setComplejosDisponibles(response.data);
                 
                 let initialComplejoId = '';
@@ -143,7 +143,7 @@ function ReservaForm() {
         setAvailabilityMessage('');
         try {
             // Llama al nuevo endpoint del backend que cuenta canchas por tipo
-            const response = await api.get(`/api/reservas/disponibilidad-por-tipo?complejoId=${selectedComplejoId}&tipoCancha=${selectedTipoCancha}&fecha=${fecha}&hora=${hora}`);
+            const response = await api.get(`/reservas/disponibilidad-por-tipo?complejoId=${selectedComplejoId}&tipoCancha=${selectedTipoCancha}&fecha=${fecha}&hora=${hora}`);
             const count = response.data; // El backend devuelve un número entero
             setAvailableCanchasCount(count);
             if (count > 0) {
@@ -245,7 +245,7 @@ function ReservaForm() {
         };
 
         try {
-            const reservaResponse = await api.post("/api/reservas/crear", reservaData);
+            const reservaResponse = await api.post("/reservas/crear", reservaData);
             const reservaCreada = reservaResponse.data;
 
             console.log("Reserva creada con ID:", reservaCreada.id, "Método de pago:", reservaCreada.metodoPago, "Complejo:", reservaCreada.complejoNombre, "Cancha asignada:", reservaCreada.nombreCanchaAsignada);

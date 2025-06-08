@@ -16,7 +16,7 @@ function Canchas() {
         setLoading(true);
         setError(null);
         try {
-            const response = await api.get('/api/complejos'); 
+            const response = await api.get('/complejos'); 
             if (Array.isArray(response.data)) {
                 setComplejos(response.data);
             } else {
