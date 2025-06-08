@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axiosConfig';
 import AdminEstadisticas from './AdminEstadisticas';
-import './AdminPanel.css';
+import './AdminPanel.css'; // Asegúrate de tener los estilos actualizados
 
 // Estado inicial para un formulario de COMPLEJO nuevo
 const estadoInicialComplejo = {
@@ -456,7 +456,7 @@ function AdminPanel() {
                     {/* Sección para Gestionar Tipos de Cancha dentro del Complejo (solo si se está editando un complejo) */}
                     {editingComplejo && (userRole === 'ADMIN' || userRole === 'COMPLEX_OWNER') && (
                         <div className="admin-tipo-cancha-gestion">
-                            <h3>Gestionar Tipos de Cancha para "{editingComplejo.nombre}"</h3>
+                            <h3>Gestionar Tipos de Cancha para &quot;{editingComplejo.nombre}&quot;</h3> {/* Escapado */}
 
                             {/* Formulario para agregar/editar un Tipo de Cancha */}
                             <form className="admin-tipo-cancha-form" onSubmit={handleSaveTipoCancha}>
@@ -514,7 +514,7 @@ function AdminPanel() {
 
                             {/* Lista de Tipos de Cancha del Complejo actual */}
                             <div className="admin-list-tipos-cancha">
-                                <h4>Tipos de Cancha configurados en "{editingComplejo.nombre}"</h4>
+                                <h4>Tipos de Cancha configurados en &quot;{editingComplejo.nombre}&quot;</h4> {/* Escapado */}
                                 <table>
                                     <thead>
                                         <tr>
