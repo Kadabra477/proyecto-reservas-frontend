@@ -4,22 +4,13 @@ import AdminEstadisticas from './AdminEstadisticas';
 import './AdminPanel.css'; // Asegúrate de tener los estilos actualizados
 
 // Estado inicial para un formulario de COMPLEJO nuevo
-const estadoInicialComplejo = {
+const estadoInicialComplejoAdmin = {
     nombre: '',
-    descripcion: '',
-    fotoUrl: '',
-    ubicacion: '',
-    telefono: '',
-    horarioApertura: '10:00', // Formato HH:MM
-    horarioCierre: '23:00',   // Formato HH:MM
-    canchaCounts: {},
-    canchaPrices: {},
-    canchaSurfaces: {},
-    canchaIluminacion: {},
-    canchaTecho: {},
+    propietarioUsername: '',
+    canchaCounts: { "Fútbol 5": 1 } // Un valor por defecto para empezar
 };
 
-// Estado inicial para un nuevo Tipo de Cancha dentro de un complejo
+// Estado inicial para un Tipo de Cancha dentro de un complejo (para el dueño)
 const estadoInicialTipoCancha = {
     tipo: '',
     cantidad: '',
@@ -32,22 +23,27 @@ const estadoInicialTipoCancha = {
 function AdminPanel() {
     const [complejos, setComplejos] = useState([]);
     const [reservas, setReservas] = useState([]);
-    const [usuarios, setUsuarios] = useState([]); // Nuevo estado para usuarios
-    const [activeTab, setActiveTab] = useState('complejos'); // 'complejos', 'reservas', 'usuarios', 'estadisticas'
+    const [usuarios, setUsuarios] = useState([]);
+    const [activeTab, setActiveTab] = useState('complejos');
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [editingComplejo, setEditingComplejo] = useState(null);
-    const [nuevoComplejo, setNuevoComplejo] = useState(estadoInicialComplejo);
+    const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin);
 
     const [editingTipoCancha, setEditingTipoCancha] = useState(null);
     const [nuevoTipoCancha, setNuevoTipoCancha] = useState(estadoInicialTipoCancha);
 
-    const [managingUserRoles, setManagingUserRoles] = useState(null); // Usuario al que se le gestionan los roles
-    const [selectedRoles, setSelectedRoles] = useState([]); // Roles seleccionados para el usuario
+    const [managingUserRoles, setManagingUserRoles] = useState(null);
+    const [selectedRoles, setSelectedRoles] = useState([]);
 
     const userRole = localStorage.getItem('userRole');
 
-    const currentComplejoFormData = editingComplejo || nuevoComplejo;
+    const currentComplejoFormData = editingComplejo || {
+        nombre: '', descripcion: '', fotoUrl: '', ubicacion: '', telefono: '',
+        horarioApertura: '10:00', horarioCierre: '23:00',
+        canchaCounts: {}, canchaPrices: {}, canchaSurfaces: {},
+        iluminacion: {}, techo: {}
+    };
     const currentTipoCanchaFormData = editingTipoCancha || nuevoTipoCancha;
 
 
@@ -100,16 +96,15 @@ function AdminPanel() {
         }
     }, []);
 
-    // Nuevo: Fetch Usuarios (solo para ADMIN)
     const fetchUsuarios = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
             if (userRole === 'ADMIN') {
-                const res = await api.get('/users'); // Endpoint para obtener todos los usuarios
+                const res = await api.get('/users?enabled=true');
                 setUsuarios(Array.isArray(res.data) ? res.data : []);
             } else {
-                setUsuarios([]); // Otros roles no ven la lista de usuarios
+                setUsuarios([]);
             }
         } catch (err) {
             console.error('Error al obtener usuarios:', err);
@@ -136,50 +131,76 @@ function AdminPanel() {
         }
     }, [activeTab, fetchComplejos, fetchReservas, fetchUsuarios, userRole]);
 
-    // --- Manejo de Formularios de Complejo ---
-    const handleComplejoChange = (e) => {
+
+    const handleNuevoComplejoAdminChange = (e) => {
         const { name, value } = e.target;
-        const targetState = editingComplejo ? setEditingComplejo : setNuevoComplejo;
-        targetState(prev => ({ ...prev, [name]: value }));
+        if (name.startsWith('canchaCounts.')) {
+            const tipoCancha = name.split('.')[1];
+            setNuevoComplejoAdmin(prev => ({
+                ...prev,
+                canchaCounts: {
+                    ...prev.canchaCounts,
+                    [tipoCancha]: parseInt(value, 10) || 0
+                }
+            }));
+        } else {
+            setNuevoComplejoAdmin(prev => ({ ...prev, [name]: value }));
+        }
     };
 
-    const handleSaveComplejo = async (e) => {
+    const handleSaveNuevoComplejoAdmin = async (e) => {
         e.preventDefault();
         setMensaje({ text: '', type: '' });
 
-        const complejoDataToSave = { ...currentComplejoFormData };
+        const dataToSave = { ...nuevoComplejoAdmin };
+        if (!dataToSave.nombre?.trim() || !dataToSave.propietarioUsername?.trim()) {
+            setMensaje({ text: 'Nombre del complejo y email del propietario son obligatorios.', type: 'error' });
+            return;
+        }
+        if (Object.keys(dataToSave.canchaCounts).length === 0 || Object.values(dataToSave.canchaCounts).every(count => count <= 0)) {
+            setMensaje({ text: 'Debe especificar al menos una cantidad de canchas por tipo.', type: 'error' });
+            return;
+        }
 
-        if (!complejoDataToSave.nombre?.trim() || !complejoDataToSave.ubicacion?.trim() || !complejoDataToSave.horarioApertura || !complejoDataToSave.horarioCierre) {
+        try {
+            await api.post('/complejos', dataToSave);
+            setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
+            setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
+            fetchComplejos();
+        } catch (err) {
+            console.error('Error al crear complejo (Admin):', err);
+            const errorMsg = err.response?.data?.message || err.response?.data || 'Error al crear el complejo.';
+            setMensaje({ text: errorMsg, type: 'error' });
+        }
+    };
+
+    const handleEditingComplejoChange = (e) => {
+        const { name, value } = e.target;
+        setEditingComplejo(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleUpdateComplejo = async (e) => {
+        e.preventDefault();
+        setMensaje({ text: '', type: '' });
+
+        const complejoDataToUpdate = { ...editingComplejo };
+
+        if (!complejoDataToUpdate.nombre?.trim() || !complejoDataToUpdate.ubicacion?.trim() || !complejoDataToUpdate.horarioApertura || !complejoDataToUpdate.horarioCierre) {
             setMensaje({ text: 'Los campos obligatorios de Complejo (Nombre, Ubicación, Horarios) son obligatorios.', type: 'error' });
             return;
         }
 
-        complejoDataToSave.horarioApertura = complejoDataToSave.horarioApertura.substring(0, 5);
-        complejoDataToSave.horarioCierre = complejoDataToSave.horarioCierre.substring(0, 5);
-
-        complejoDataToSave.canchaCounts = complejoDataToSave.canchaCounts || {};
-        complejoDataToSave.canchaPrices = complejoDataToSave.canchaPrices || {};
-        complejoDataToSave.canchaSurfaces = complejoDataToSave.canchaSurfaces || {};
-        complejoDataToSave.canchaIluminacion = complejoDataToSave.canchaIluminacion || {};
-        complejoDataToSave.canchaTecho = complejoDataToSave.canchaTecho || {};
-
-
-        const request = editingComplejo
-            ? api.put(`/complejos/${editingComplejo.id}`, complejoDataToSave)
-            : api.post('/complejos', complejoDataToSave);
+        complejoDataToUpdate.horarioApertura = complejoDataToUpdate.horarioApertura.substring(0, 5);
+        complejoDataToUpdate.horarioCierre = complejoDataToUpdate.horarioCierre.substring(0, 5);
 
         try {
-            await request;
-            setMensaje({
-                text: editingComplejo ? 'Complejo actualizado correctamente.' : 'Complejo creado correctamente.',
-                type: 'success'
-            });
+            await api.put(`/complejos/${complejoDataToUpdate.id}`, complejoDataToUpdate);
+            setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
             fetchComplejos();
             setEditingComplejo(null);
-            setNuevoComplejo(estadoInicialComplejo);
         } catch (err) {
-            console.error('Error al guardar el complejo:', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al guardar el complejo.';
+            console.error('Error al actualizar el complejo:', err);
+            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al actualizar el complejo.';
             setMensaje({ text: errorMsg, type: 'error' });
         }
     };
@@ -193,7 +214,6 @@ function AdminPanel() {
                 fetchComplejos();
                 if (editingComplejo && editingComplejo.id === id) {
                     setEditingComplejo(null);
-                    setNuevoComplejo(estadoInicialComplejo);
                 }
             } catch (err) {
                 console.error('Error al eliminar el complejo:', err);
@@ -214,7 +234,7 @@ function AdminPanel() {
             canchaIluminacion: complejoParaEditar.canchaIluminacion || {},
             canchaTecho: complejoParaEditar.canchaTecho || {},
         });
-        setNuevoComplejo(estadoInicialComplejo);
+        setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
         setEditingTipoCancha(null);
         setNuevoTipoCancha(estadoInicialTipoCancha);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -222,12 +242,11 @@ function AdminPanel() {
 
     const cancelEditingComplejo = () => {
         setEditingComplejo(null);
-        setNuevoComplejo(estadoInicialComplejo);
+        setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
         setEditingTipoCancha(null);
         setNuevoTipoCancha(estadoInicialTipoCancha);
     };
 
-    // --- Manejo de Formularios de Tipos de Cancha dentro de un Complejo ---
     const handleTipoCanchaChange = (e) => {
         const { name, value, type, checked } = e.target;
         const newValue = type === 'checkbox' ? checked : value;
@@ -249,18 +268,25 @@ function AdminPanel() {
         const cantidadNum = parseInt(tipoCanchaData.cantidad, 10);
         const precioNum = parseFloat(tipoCanchaData.precio);
 
-        if (!tipoCanchaData.tipo?.trim() || isNaN(cantidadNum) || cantidadNum <= 0 || isNaN(precioNum) || precioNum <= 0 || !tipoCanchaData.superficie?.trim()) {
+        if (!tipoCanchaData.tipo?.trim() || isNaN(cantidadNum) || cantidadNum <= 0 || isNaN(precioNum) || precioNum < 0 || !tipoCanchaData.superficie?.trim()) {
             setMensaje({ text: 'Todos los campos de Tipo de Cancha (Tipo, Cantidad, Precio, Superficie) son obligatorios y válidos.', type: 'error' });
             return;
         }
 
         const updatedComplejo = { ...editingComplejo };
 
-        updatedComplejo.canchaCounts = { ...updatedComplejo.canchaCounts, [tipoCanchaData.tipo]: cantidadNum };
-        updatedComplejo.canchaPrices = { ...updatedComplejo.canchaPrices, [tipoCanchaData.tipo]: precioNum };
-        updatedComplejo.canchaSurfaces = { ...updatedComplejo.canchaSurfaces, [tipoCanchaData.tipo]: tipoCanchaData.superficie };
-        updatedComplejo.canchaIluminacion = { ...updatedComplejo.canchaIluminacion, [tipoCanchaData.tipo]: tipoCanchaData.iluminacion };
-        updatedComplejo.canchaTecho = { ...updatedComplejo.canchaTecho, [tipoCanchaData.tipo]: tipoCanchaData.techo };
+        updatedComplejo.canchaCounts = updatedComplejo.canchaCounts || {};
+        updatedComplejo.canchaPrices = updatedComplejo.canchaPrices || {};
+        updatedComplejo.canchaSurfaces = updatedComplejo.canchaSurfaces || {};
+        updatedComplejo.canchaIluminacion = updatedComplejo.canchaIluminacion || {};
+        updatedComplejo.canchaTecho = updatedComplejo.canchaTecho || {};
+
+
+        updatedComplejo.canchaCounts[tipoCanchaData.tipo] = cantidadNum;
+        updatedComplejo.canchaPrices[tipoCanchaData.tipo] = precioNum;
+        updatedComplejo.canchaSurfaces[tipoCanchaData.tipo] = tipoCanchaData.superficie;
+        updatedComplejo.canchaIluminacion[tipoCanchaData.tipo] = tipoCanchaData.iluminacion;
+        updatedComplejo.canchaTecho[tipoCanchaData.tipo] = tipoCanchaData.techo;
 
         try {
             await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
@@ -277,17 +303,18 @@ function AdminPanel() {
     };
 
     const handleDeleteTipoCancha = async (tipo) => {
-        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha &quot;${tipo}&quot; del complejo &quot;${editingComplejo.nombre}&quot;? Esta acción es irreversible.`)) {
+        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha &quot;<span class="math-inline">\{tipo\}&quot; del complejo &quot;</span>{editingComplejo.nombre}&quot;? Esta acción es irreversible.`)) {
             setMensaje({ text: '', type: '' });
             if (!editingComplejo) return;
 
             const updatedComplejo = { ...editingComplejo };
 
-            delete updatedComplejo.canchaCounts[tipo];
-            delete updatedComplejo.canchaPrices[tipo];
-            delete updatedComplejo.canchaSurfaces[tipo];
-            delete updatedComplejo.canchaIluminacion[tipo];
-            delete updatedComplejo.canchaTecho[tipo];
+            if (updatedComplejo.canchaCounts) delete updatedComplejo.canchaCounts[tipo];
+            if (updatedComplejo.canchaPrices) delete updatedComplejo.canchaPrices[tipo];
+            if (updatedComplejo.canchaSurfaces) delete updatedComplejo.canchaSurfaces[tipo];
+            if (updatedComplejo.canchaIluminacion) delete updatedComplejo.canchaIluminacion[tipo];
+            if (updatedComplejo.canchaTecho) delete updatedComplejo.canchaTecho[tipo];
+
 
             try {
                 await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
@@ -326,7 +353,6 @@ function AdminPanel() {
         setNuevoTipoCancha(estadoInicialTipoCancha);
     };
 
-    // --- Manejo de Reservas ---
     const handleConfirmReserva = async (id) => {
         setMensaje({ text: '', type: '' });
         try {
@@ -355,7 +381,6 @@ function AdminPanel() {
         }
     };
 
-    // --- Funciones Auxiliares ---
     const formatDate = (dateStr) => {
         if (!dateStr) return 'N/A';
         try {
@@ -387,24 +412,18 @@ function AdminPanel() {
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     };
 
-    // --- Manejo de Usuarios y Roles (Nueva Funcionalidad) ---
-    // Función para iniciar la gestión de roles de un usuario
     const startManagingUserRoles = (user) => {
         setManagingUserRoles(user);
-        // Los roles vienen como objetos { authority: "ROLE_ADMIN" } en el frontend
-        // Los mapeamos a solo el nombre del rol sin "ROLE_" para los checkboxes
         const currentRoles = user.authorities ? user.authorities.map(auth => auth.authority.replace('ROLE_', '')) : [];
         setSelectedRoles(currentRoles);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Función para cancelar la gestión de roles
     const cancelManagingUserRoles = () => {
         setManagingUserRoles(null);
         setSelectedRoles([]);
     };
 
-    // Función para manejar el cambio de roles en el checkbox
     const handleRoleChange = (e) => {
         const { value, checked } = e.target;
         setSelectedRoles(prevRoles => {
@@ -416,18 +435,16 @@ function AdminPanel() {
         });
     };
 
-    // Función para guardar los roles de un usuario
     const handleSaveUserRoles = async () => {
         setMensaje({ text: '', type: '' });
         if (!managingUserRoles) return;
 
         try {
-            // Envía los roles con el prefijo "ROLE_" al backend
             const rolesToSend = selectedRoles.map(role => `ROLE_${role}`);
             await api.put(`/users/${managingUserRoles.id}/roles`, rolesToSend);
             setMensaje({ text: `Roles de ${managingUserRoles.username} actualizados correctamente.`, type: 'success' });
-            fetchUsuarios(); // Recargar lista de usuarios para ver los cambios
-            setManagingUserRoles(null); // Salir del modo de gestión
+            fetchUsuarios();
+            setManagingUserRoles(null);
             setSelectedRoles([]);
         } catch (err) {
             console.error('Error al guardar roles:', err);
@@ -456,7 +473,6 @@ function AdminPanel() {
                 >
                     Gestionar Reservas
                 </button>
-                {/* Nueva pestaña para usuarios, visible solo para ADMIN */}
                 {userRole === 'ADMIN' && (
                     <button
                         className={`admin-tab-button ${activeTab === 'usuarios' ? 'active' : ''}`}
@@ -475,7 +491,6 @@ function AdminPanel() {
                 </button>
             </div>
 
-            {/* Contenido de la Pestaña de Complejos */}
             {activeTab === 'complejos' && (
                 <div className="admin-tab-content">
                     <h2>{editingComplejo ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
@@ -487,39 +502,73 @@ function AdminPanel() {
                         <p className="info-message">Como Dueño de Complejo, puedes gestionar solo los complejos que te pertenecen. Selecciona un complejo de la lista para editarlo.</p>
                     )}
 
-                    {/* Formulario para Agregar/Editar Complejos (visible solo para ADMIN, o para COMPLEX_OWNER si edita) */}
                     {userRole === 'ADMIN' || (userRole === 'COMPLEX_OWNER' && editingComplejo) ? (
-                        <form className="admin-complejo-form" onSubmit={handleSaveComplejo}>
+                        <form className="admin-complejo-form" onSubmit={userRole === 'ADMIN' && !editingComplejo ? handleSaveNuevoComplejoAdmin : handleUpdateComplejo}>
                             <h3>Datos Generales del Complejo</h3>
-                            <div className="admin-form-group">
-                                <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
-                                <input type="text" id="nombre" name="nombre" value={currentComplejoFormData.nombre || ''} onChange={handleComplejoChange} required placeholder='Ej: El Alargue' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="descripcion">Descripción:</label>
-                                <textarea id="descripcion" name="descripcion" value={currentComplejoFormData.descripcion || ''} onChange={handleComplejoChange} rows={3} placeholder='Breve descripción del complejo...' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
-                                <input type="text" id="ubicacion" name="ubicacion" value={currentComplejoFormData.ubicacion || ''} onChange={handleComplejoChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="telefono">Teléfono:</label>
-                                <input type="tel" id="telefono" name="telefono" value={currentComplejoFormData.telefono || ''} onChange={handleComplejoChange} placeholder='Ej: +549261xxxxxxx' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="fotoUrl">URL de Foto Principal:</label>
-                                <input type="url" id="fotoUrl" name="fotoUrl" value={currentComplejoFormData.fotoUrl || ''} onChange={handleComplejoChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="horarioApertura">Horario Apertura: <span className="obligatorio">*</span></label>
-                                <input type="time" id="horarioApertura" name="horarioApertura" value={currentComplejoFormData.horarioApertura || ''} onChange={handleComplejoChange} required />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
-                                <input type="time" id="horarioCierre" name="horarioCierre" value={currentComplejoFormData.horarioCierre || ''} onChange={handleComplejoChange} required />
-                            </div>
-
+                            {userRole === 'ADMIN' && !editingComplejo ? (
+                                <>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
+                                        <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre || ''} onChange={handleNuevoComplejoAdminChange} required placeholder='Ej: El Alargue' />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="propietarioUsername">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
+                                        <input type="email" id="propietarioUsername" name="propietarioUsername" value={nuevoComplejoAdmin.propietarioUsername || ''} onChange={handleNuevoComplejoAdminChange} required placeholder='dueño@ejemplo.com' />
+                                    </div>
+                                    <h4>Cantidad de Canchas por Tipo (inicial)</h4>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="canchaCounts.Fútbol 5">Fútbol 5:</label>
+                                        <input type="number" id="canchaCounts.Fútbol 5" name="canchaCounts.Fútbol 5" value={nuevoComplejoAdmin.canchaCounts["Fútbol 5"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="canchaCounts.Fútbol 7">Fútbol 7:</label>
+                                        <input type="number" id="canchaCounts.Fútbol 7" name="canchaCounts.Fútbol 7" value={nuevoComplejoAdmin.canchaCounts["Fútbol 7"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="canchaCounts.Pádel">Pádel:</label>
+                                        <input type="number" id="canchaCounts.Pádel" name="canchaCounts.Pádel" value={nuevoComplejoAdmin.canchaCounts["Pádel"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="canchaCounts.Tenis">Tenis:</label>
+                                        <input type="number" id="canchaCounts.Tenis" name="canchaCounts.Tenis" value={nuevoComplejoAdmin.canchaCounts["Tenis"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="canchaCounts.Básquet">Básquet:</label>
+                                        <input type="number" id="canchaCounts.Básquet" name="canchaCounts.Básquet" value={nuevoComplejoAdmin.canchaCounts["Básquet"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
+                                        <input type="text" id="nombre" name="nombre" value={currentComplejoFormData.nombre || ''} onChange={handleEditingComplejoChange} required placeholder='Ej: El Alargue' />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="descripcion">Descripción:</label>
+                                        <textarea id="descripcion" name="descripcion" value={currentComplejoFormData.descripcion || ''} onChange={handleEditingComplejoChange} rows={3} placeholder='Breve descripción del complejo...' />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
+                                        <input type="text" id="ubicacion" name="ubicacion" value={currentComplejoFormData.ubicacion || ''} onChange={handleEditingComplejoChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="telefono">Teléfono:</label>
+                                        <input type="tel" id="telefono" name="telefono" value={currentComplejoFormData.telefono || ''} onChange={handleEditingComplejoChange} placeholder='Ej: +549261xxxxxxx' />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="fotoUrl">URL de Foto Principal:</label>
+                                        <input type="url" id="fotoUrl" name="fotoUrl" value={currentComplejoFormData.fotoUrl || ''} onChange={handleEditingComplejoChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="horarioApertura">Horario Apertura: <span className="obligatorio">*</span></label>
+                                        <input type="time" id="horarioApertura" name="horarioApertura" value={currentComplejoFormData.horarioApertura || ''} onChange={handleEditingComplejoChange} required />
+                                    </div>
+                                    <div className="admin-form-group">
+                                        <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
+                                        <input type="time" id="horarioCierre" name="horarioCierre" value={currentComplejoFormData.horarioCierre || ''} onChange={handleEditingComplejoChange} required />
+                                    </div>
+                                </>
+                            )}
                             <div className="admin-form-buttons">
                                 <button type="submit" className="admin-btn-save">
                                     {editingComplejo ? 'Actualizar Complejo' : 'Crear Complejo'}
@@ -537,12 +586,10 @@ function AdminPanel() {
                         )
                     )}
 
-                    {/* Sección para Gestionar Tipos de Cancha dentro del Complejo (solo si se está editando un complejo) */}
                     {editingComplejo && (userRole === 'ADMIN' || userRole === 'COMPLEX_OWNER') && (
                         <div className="admin-tipo-cancha-gestion">
                             <h3>Gestionar Tipos de Cancha para &quot;{editingComplejo.nombre}&quot;</h3>
 
-                            {/* Formulario para agregar/editar un Tipo de Cancha */}
                             <form className="admin-tipo-cancha-form" onSubmit={handleSaveTipoCancha}>
                                 <h4>{editingTipoCancha ? `Editando Tipo: ${editingTipoCancha.tipo}` : 'Agregar Nuevo Tipo de Cancha'}</h4>
                                 <div className="admin-form-group">
@@ -596,7 +643,6 @@ function AdminPanel() {
                                 </div>
                             </form>
 
-                            {/* Lista de Tipos de Cancha del Complejo actual */}
                             <div className="admin-list-tipos-cancha">
                                 <h4>Tipos de Cancha configurados en &quot;{editingComplejo.nombre}&quot;</h4>
                                 <table>
@@ -638,7 +684,6 @@ function AdminPanel() {
                 </div>
             )}
 
-            {/* Contenido de la Pestaña de Reservas */}
             {activeTab === 'reservas' && (
                 <div className="admin-tab-content">
                     <h2>Reservas Registradas</h2>
@@ -688,7 +733,7 @@ function AdminPanel() {
                                                 <button className="admin-btn-delete" onClick={() => handleDeleteReserva(r.id)}>
                                                     Eliminar
                                                 </button>
-                                                <a href={`${process.env.REACT_APP_API_URL}/reservas/${r.id}/pdf-comprobante`} target="_blank" rel="noopener noreferrer" className="admin-btn-pdf">
+                                                <a href={`<span class="math-inline">\{process\.env\.REACT\_APP\_API\_URL\}/reservas/</span>{r.id}/pdf-comprobante`} target="_blank" rel="noopener noreferrer" className="admin-btn-pdf">
                                                     PDF
                                                 </a>
                                             </td>
@@ -703,7 +748,6 @@ function AdminPanel() {
                 </div>
             )}
 
-            {/* Contenido de la Pestaña de Usuarios (visible solo para ADMIN) */}
             {activeTab === 'usuarios' && userRole === 'ADMIN' && (
                 <div className="admin-tab-content">
                     <h2>Gestionar Usuarios y Roles</h2>
@@ -727,12 +771,10 @@ function AdminPanel() {
                                             <td data-label="Email">{u.username}</td>
                                             <td data-label="Nombre">{u.nombreCompleto || 'N/A'}</td>
                                             <td data-label="Roles">
-                                                {/* Los roles vienen como objetos { authority: "ROLE_ADMIN" }, los mapeamos a solo el nombre */}
                                                 {u.authorities && u.authorities.map(auth => auth.authority.replace('ROLE_', '')).join(', ')}
                                             </td>
                                             <td data-label="Activo">{u.enabled ? 'Sí' : 'No'}</td>
                                             <td data-label="Acciones">
-                                                {/* No permitir gestionar roles del propio admin por seguridad básica */}
                                                 {u.username !== localStorage.getItem('username') ? (
                                                     <button className="admin-btn-edit" onClick={() => startManagingUserRoles(u)}>
                                                         Gestionar Roles
@@ -750,7 +792,6 @@ function AdminPanel() {
                         </div>
                     )}
 
-                    {/* Formulario de Gestión de Roles (solo si managingUserRoles no es null) */}
                     {managingUserRoles && (
                         <div className="admin-user-role-form-modal">
                             <h3>Gestionar Roles para: {managingUserRoles.username}</h3>
@@ -763,12 +804,6 @@ function AdminPanel() {
                                     <input type="checkbox" value="COMPLEX_OWNER" checked={selectedRoles.includes('COMPLEX_OWNER')} onChange={handleRoleChange} />
                                     Dueño de Complejo
                                 </label>
-                                {/* El rol ADMIN solo puede ser asignado/revocado con mucho cuidado,
-                                    evitando que un admin se auto-desactive. Por ahora, no lo permitimos
-                                    directamente desde aquí para evitar problemas accidentales.
-                                    Si necesitas que el ADMIN pueda degradar a otros ADMINS, requeriría
-                                    una lógica más compleja (ej. pedir contraseña, otro admin, etc.)
-                                */}
                                 <label>
                                     <input type="checkbox" value="ADMIN" checked={selectedRoles.includes('ADMIN')} onChange={handleRoleChange} disabled={true} />
                                     Administrador General (gestión manual)
@@ -783,7 +818,6 @@ function AdminPanel() {
                 </div>
             )}
 
-            {/* Contenido de la Pestaña de Estadísticas */}
             {activeTab === 'estadisticas' && (
                 <AdminEstadisticas userRole={userRole} />
             )}
