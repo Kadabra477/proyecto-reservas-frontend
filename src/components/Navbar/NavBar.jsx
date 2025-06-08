@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import './NavBar.css';
+import './NavBar.css'; // Asegúrate de que tus estilos estén aquí
 
 function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
     const navigate = useNavigate();
@@ -24,13 +24,14 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
                     ¿DÓNDE <span className="navbar-logo-span">JUEGO?</span>
                 </NavLink>
                 <nav className="navbar-menu">
-                    {/* Renderización condicional del enlace "Canchas" */}
-                    {isLoggedIn && ( // Solo muestra el enlace 'Canchas' si el usuario está logueado
+                    {/* Renderización condicional del enlace "Complejos" */}
+                    {isLoggedIn && ( // Solo muestra el enlace 'Complejos' si el usuario está logueado
                         <NavLink
-                            to="/canchas"
+                            // ¡CORRECCIÓN CRÍTICA AQUÍ! La ruta ahora es /complejos
+                            to="/complejos" 
                             className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
                         >
-                            Canchas
+                            Complejos {/* ¡TEXTO CORREGIDO! */}
                         </NavLink>
                     )}
 
