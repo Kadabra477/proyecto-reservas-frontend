@@ -1,14 +1,12 @@
-// frontend/src/components/ComplejoCard/ComplejoCard.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './ComplejoCard.css'; // Crea este archivo CSS para los estilos de la tarjeta del complejo
+import './ComplejoCard.css';
 
-const placeholderImage = '/imagenes/default-complejo.png'; // Asegúrate que esta imagen exista en public/imagenes
+const placeholderImage = '/imagenes/default-complejo.png';
 
 function ComplejoCard({ complejo }) {
     const navigate = useNavigate();
 
-    // Función para navegar al formulario de reserva, preseleccionando el complejo
     const handleReserveClick = () => {
         navigate('/reservar', { state: { preselectedComplejoId: complejo.id } });
     };
@@ -21,7 +19,6 @@ function ComplejoCard({ complejo }) {
         return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(numericPrice);
     };
 
-    // Puedes agregar una función para mostrar los tipos de canchas y sus precios/características
     const renderCanchaTypes = () => {
         if (!complejo.canchaCounts || Object.keys(complejo.canchaCounts).length === 0) {
             return <p>No hay tipos de canchas configurados.</p>;
