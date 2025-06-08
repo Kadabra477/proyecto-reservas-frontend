@@ -15,8 +15,8 @@ import Register from './features/auth/Register';
 import Home from './features/home/Home';
 import ReservaForm from './features/reservas/ReservaForm';
 import ReservaDetail from './features/reservas/ReservaDetail';
-import AdminPanel from './features/admin/AdminPanel'; // Componente de panel de administración
-import Canchas from './components/Canchas/Canchas';
+import AdminPanel from './features/admin/AdminPanel';
+import Complejos from './components/Complejos/Complejos'; // ¡CAMBIO AQUÍ! Importa el componente con el nuevo nombre
 import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
@@ -33,7 +33,6 @@ function RedireccionSiAutenticado({ children, destino = "/dashboard" }) {
     const estaAutenticado = !!localStorage.getItem('jwtToken');
     const location = useLocation();
     if (estaAutenticado) {
-        // Redirige al dashboard si ya está autenticado, o al destino especificado
         const from = location.state?.from?.pathname || destino;
         return <Navigate to={from} replace />;
     }
@@ -43,18 +42,15 @@ function RedireccionSiAutenticado({ children, destino = "/dashboard" }) {
 // Helper: Ruta Protegida para manejar roles
 function RutaProtegida({ children, rolesRequeridos }) {
     const estaAutenticado = !!localStorage.getItem('jwtToken');
-    const userRole = localStorage.getItem('userRole'); // Obtiene el rol del localStorage
+    const userRole = localStorage.getItem('userRole');
     const location = useLocation();
 
     if (!estaAutenticado) {
-        // Si no está autenticado, redirige al login, guardando la URL actual para después
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    // Si se requieren roles y el rol del usuario no está entre ellos
     if (rolesRequeridos && !rolesRequeridos.includes(userRole)) {
         console.warn(`Acceso denegado: Rol ${userRole} no autorizado para ${location.pathname}. Roles requeridos: ${rolesRequeridos}`);
-        // Redirige al dashboard por defecto para roles no autorizados
         return <Navigate to="/dashboard" replace />;
     }
 
@@ -64,36 +60,34 @@ function RutaProtegida({ children, rolesRequeridos }) {
 function App() {
     const [estaAutenticado, setEstaAutenticado] = useState(false);
     const [nombreUsuario, setNombreUsuario] = useState('');
-    const [userRole, setUserRole] = useState(null); // Estado para almacenar el rol del usuario
+    const [userRole, setUserRole] = useState(null);
     const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
     const handleLogout = useCallback(() => {
-        // Limpia todos los datos de autenticación del localStorage
         localStorage.removeItem('jwtToken');
         localStorage.removeItem('username');
         localStorage.removeItem('nombreCompleto');
-        localStorage.removeItem('userRole'); // Limpia también el rol
+        localStorage.removeItem('userRole');
         setEstaAutenticado(false);
         setNombreUsuario('');
         setUserRole(null);
     }, []);
 
     const handleLoginSuccess = useCallback((token, usernameFromJwt, nombreCompletoFromJwt, roleFromJwt) => {
-        // Almacena los datos de autenticación, incluyendo el rol
         localStorage.setItem('jwtToken', token);
         localStorage.setItem('username', usernameFromJwt);
         localStorage.setItem('nombreCompleto', nombreCompletoFromJwt);
-        localStorage.setItem('userRole', roleFromJwt); // Guarda el rol en localStorage
+        localStorage.setItem('userRole', roleFromJwt);
         setEstaAutenticado(true);
         setNombreUsuario(nombreCompletoFromJwt);
-        setUserRole(roleFromJwt); // Actualiza el estado del rol
+        setUserRole(roleFromJwt);
     }, []);
 
     useEffect(() => {
         const verificarToken = async () => {
             const token = localStorage.getItem('jwtToken');
             const nombre = localStorage.getItem('nombreCompleto');
-            const role = localStorage.getItem('userRole'); // Obtiene el rol del localStorage
+            const role = localStorage.getItem('userRole');
 
             if (!token) {
                 setEstaAutenticado(false);
@@ -104,7 +98,6 @@ function App() {
             }
 
             try {
-                // Validación del token contra el backend
                 const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/validate-token`, {
                     method: "GET",
                     headers: {
@@ -122,10 +115,10 @@ function App() {
 
                 setEstaAutenticado(true);
                 setNombreUsuario(nombre || '');
-                setUserRole(role); // Establece el rol en el estado
+                setUserRole(role);
             } catch (error) {
                 console.log("Token inválido o expirado:", error);
-                handleLogout(); // Cierra sesión si el token es inválido o expirado
+                handleLogout();
             } finally {
                 setIsLoadingAuth(false);
             }
@@ -137,7 +130,6 @@ function App() {
     const ContenidoApp = () => {
         const location = useLocation();
 
-        // Muestra un mensaje de carga mientras se verifica la autenticación inicial
         if (isLoadingAuth) {
             return (
                 <>
@@ -149,7 +141,6 @@ function App() {
             );
         }
 
-        // Define qué rutas NO deben mostrar la Navbar
         const shouldShowNavbar = ![
             '/login',
             '/register',
@@ -164,13 +155,13 @@ function App() {
                     <Navbar
                         isLoggedIn={estaAutenticado}
                         nombreUsuario={nombreUsuario}
-                        onLogout={handleLogout} // Pasa la función de logout
-                        userRole={userRole} // Pasa el rol a la Navbar para renderizado condicional
+                        onLogout={handleLogout}
+                        userRole={userRole}
                     />
                 )}
 
                 <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/" element={<Home estaAutenticado={estaAutenticado} />} /> {/* Pasa la prop estaAutenticado */}
 
                     {/* Rutas de autenticación */}
                     <Route path="/login" element={<RedireccionSiAutenticado><Login onLoginSuccess={handleLoginSuccess} /></RedireccionSiAutenticado>} />
@@ -178,11 +169,11 @@ function App() {
                     <Route path="/forgot-password" element={<ForgotPasswordRequest />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/verify-account" element={<VerifyAccount />} />
-                    {/* Esta ruta es específica para el redireccionamiento de OAuth2, donde se procesa el token */}
                     <Route path="/oauth2/redirect" element={<OAuth2Success onLoginSuccess={handleLoginSuccess} />} />
 
                     {/* Rutas principales y de usuario autenticado */}
-                    <Route path="/complejos" element={<Canchas />} /> {/* Canchas.jsx ahora lista Complejos */}
+                    {/* ¡CAMBIO AQUÍ! Usa el componente Complejos */}
+                    <Route path="/complejos" element={<Complejos />} />
                     <Route path="/reservar" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} />
                     <Route path="/reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaDetail /></RutaProtegida>} />
                     <Route path="/dashboard" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><DashboardUsuario /></RutaProtegida>} />
@@ -193,10 +184,9 @@ function App() {
                     <Route path="/pago-pendiente" element={<PagoPendiente />} />
 
                     {/* Rutas de Administración Protegidas por Rol */}
-                    {/* Ambos roles (ADMIN y COMPLEX_OWNER) pueden acceder al AdminPanel, la diferenciación se hace dentro del componente */}
                     <Route path="/admin" element={<RutaProtegida rolesRequeridos={['ADMIN', 'COMPLEX_OWNER']}><AdminPanel /></RutaProtegida>} />
 
-                    {/* Ruta de fallback para 404 (redirecciona a Home) */}
+                    {/* Ruta de fallback para 404 */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </>
