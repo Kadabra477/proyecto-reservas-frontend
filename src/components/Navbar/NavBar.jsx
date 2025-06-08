@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import './NavBar.css'; // Asegúrate de que tus estilos estén aquí
+import './NavBar.css';
 
-function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
+function Navbar({ isLoggedIn, nombreUsuario, onLogout, userRole }) { // Recibe 'userRole' aquí
     const navigate = useNavigate();
 
     const handleLogoutClick = () => {
@@ -24,14 +24,13 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
                     ¿DÓNDE <span className="navbar-logo-span">JUEGO?</span>
                 </NavLink>
                 <nav className="navbar-menu">
-                    {/* Renderización condicional del enlace "Complejos" */}
-                    {isLoggedIn && ( // Solo muestra el enlace 'Complejos' si el usuario está logueado
+                    {/* Enlace "Complejos" (visible para todos los usuarios autenticados) */}
+                    {isLoggedIn && (
                         <NavLink
-                            // ¡CORRECCIÓN CRÍTICA AQUÍ! La ruta ahora es /complejos
-                            to="/complejos" 
+                            to="/complejos"
                             className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
                         >
-                            Complejos {/* ¡TEXTO CORREGIDO! */}
+                            Complejos
                         </NavLink>
                     )}
 
@@ -45,6 +44,15 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout }) {
                             >
                                 Dashboard
                             </NavLink>
+                            {/* Enlace al Panel de Administración (visible solo para ADMIN o COMPLEX_OWNER) */}
+                            {(userRole === 'ADMIN' || userRole === 'COMPLEX_OWNER') && (
+                                <NavLink
+                                    to="/admin"
+                                    className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+                                >
+                                    Admin
+                                </NavLink>
+                            )}
                             <div className="navbar-user-section">
                                 {/* Muestra solo el primer nombre */}
                                 <span className="navbar-greeting">Hola, {getFirstName(nombreUsuario)}!</span>

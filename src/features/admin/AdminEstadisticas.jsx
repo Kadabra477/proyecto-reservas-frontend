@@ -1,7 +1,6 @@
-// frontend/src/features/admin/AdminEstadisticas.jsx (NUEVO ARCHIVO)
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/axiosConfig'; // Usamos tu instancia de axios
+import api from '../../api/axiosConfig';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -13,7 +12,7 @@ import {
     ArcElement,
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
-import './AdminEstadisticas.css'; // Asegúrate de que este archivo exista
+import './AdminEstadisticas.css';
 
 // Registrar los componentes de Chart.js
 ChartJS.register(
@@ -26,38 +25,42 @@ ChartJS.register(
     ArcElement
 );
 
-const AdminEstadisticas = () => {
+const AdminEstadisticas = ({ userRole }) => { // Recibe userRole como prop
     const [estadisticas, setEstadisticas] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const API_ESTADISTICAS_URL = '/estadisticas/admin'; // Endpoint de tu backend
+    const API_ESTADISTICAS_URL = '/estadisticas/admin';
+
+    const fetchEstadisticas = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await api.get(API_ESTADISTICAS_URL);
+            setEstadisticas(response.data);
+        } catch (err) {
+            console.error("Error al cargar las estadísticas:", err);
+            if (err.response && err.response.status === 403) {
+                // Mensaje más específico basado en el rol si es posible
+                if (userRole === 'COMPLEX_OWNER') {
+                    setError('Acceso denegado. No tienes permisos para ver las estadísticas globales. Se mostrarán las de tus complejos.');
+                    // Nota: Si el backend ya filtra, este mensaje puede no ser necesario si no hay error 403
+                    // y simplemente se muestran menos datos. Pero lo mantenemos si el backend realmente deniega.
+                } else {
+                    setError('Acceso denegado. No tienes permisos para ver las estadísticas.');
+                }
+            } else {
+                setError('Error al cargar las estadísticas. Intenta de nuevo.');
+            }
+        } finally {
+            setLoading(false);
+        }
+    }, [userRole]); // Depende de userRole para, hipotéticamente, ajustar la petición o el mensaje
 
     useEffect(() => {
-        const fetchEstadisticas = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                // api.get ya incluye el token JWT si está en localStorage
-                const response = await api.get(API_ESTADISTICAS_URL);
-                setEstadisticas(response.data);
-            } catch (err) {
-                console.error("Error al cargar las estadísticas:", err);
-                if (err.response && err.response.status === 403) {
-                    setError('Acceso denegado. No tienes permisos para ver las estadísticas.');
-                    // Considerar redirigir si no es admin, o mostrar solo el error
-                    // setTimeout(() => navigate('/dashboard'), 3000); 
-                } else {
-                    setError('Error al cargar las estadísticas. Intenta de nuevo.');
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchEstadisticas();
-    }, [navigate]);
+    }, [fetchEstadisticas]);
 
     if (loading) {
         return <div className="admin-estadisticas-container">Cargando estadísticas...</div>;
@@ -71,13 +74,13 @@ const AdminEstadisticas = () => {
         return <div className="admin-estadisticas-container">No hay datos de estadísticas disponibles.</div>;
     }
 
-    // Datos para el gráfico de reservas por cancha
+    // Datos para el gráfico de reservas por tipo de cancha
     const reservasPorCanchaData = {
-        labels: Object.keys(estadisticas.reservasPorCancha),
+        labels: Object.keys(estadisticas.reservasPorTipoCancha), // Usar reservasPorTipoCancha
         datasets: [
             {
                 label: 'Número de Reservas',
-                data: Object.values(estadisticas.reservasPorCancha),
+                data: Object.values(estadisticas.reservasPorTipoCancha), // Usar reservasPorTipoCancha
                 backgroundColor: [
                     'rgba(75, 192, 192, 0.7)',
                     'rgba(153, 102, 255, 0.7)',
@@ -99,7 +102,6 @@ const AdminEstadisticas = () => {
         ],
     };
 
-    // Opciones para el gráfico de barras de reservas por cancha
     const barOptions = {
         responsive: true,
         plugins: {
@@ -111,7 +113,7 @@ const AdminEstadisticas = () => {
             },
             title: {
                 display: true,
-                text: 'Reservas por Cancha',
+                text: 'Reservas por Tipo de Cancha', // Título ajustado
                 font: {
                     size: 18,
                     weight: 'bold',
@@ -150,22 +152,24 @@ const AdminEstadisticas = () => {
         },
     };
 
-    // Datos para el gráfico de pastel de estado de reservas
     const estadoReservasData = {
-        labels: ['Confirmadas', 'Pendientes'],
+        labels: ['Confirmadas', 'Pendientes', 'Canceladas/Rechazadas'], // Añadido Canceladas
         datasets: [
             {
                 data: [
                     estadisticas.totalReservasConfirmadas,
                     estadisticas.totalReservasPendientes,
+                    estadisticas.totalReservasCanceladas, // Incluye las canceladas
                 ],
                 backgroundColor: [
-                    'rgba(40, 167, 69, 0.7)', // Verde para confirmadas
-                    'rgba(255, 193, 7, 0.7)',  // Amarillo para pendientes
+                    'rgba(40, 167, 69, 0.7)',   // Verde para confirmadas
+                    'rgba(255, 193, 7, 0.7)',   // Amarillo para pendientes
+                    'rgba(220, 53, 69, 0.7)',   // Rojo para canceladas/rechazadas
                 ],
                 borderColor: [
                     'rgba(40, 167, 69, 1)',
                     'rgba(255, 193, 7, 1)',
+                    'rgba(220, 53, 69, 1)',
                 ],
                 borderWidth: 1,
             },
@@ -207,9 +211,7 @@ const AdminEstadisticas = () => {
         },
     };
 
-    // Datos para el gráfico de horarios pico
     const horariosPicoLabels = Object.keys(estadisticas.horariosPico).sort((a, b) => {
-        // Ordenar horas de forma numérica (ej. "08:00" antes de "09:00")
         const [ha, ma] = a.split(':').map(Number);
         const [hb, mb] = b.split(':').map(Number);
         if (ha !== hb) return ha - hb;
@@ -290,7 +292,7 @@ const AdminEstadisticas = () => {
 
     return (
         <div className="admin-estadisticas-container">
-            <h2 className="admin-estadisticas-title">Estadísticas del Complejo</h2>
+            <h2 className="admin-estadisticas-title">Estadísticas {userRole === 'ADMIN' ? 'Generales' : 'de tus Complejos'}</h2>
 
             <div className="estadisticas-resumen">
                 <div className="resumen-card ingresos">
@@ -305,11 +307,11 @@ const AdminEstadisticas = () => {
                     <h3>Reservas Pendientes</h3>
                     <p>{estadisticas.totalReservasPendientes}</p>
                 </div>
-                 {/* Si tu backend maneja "canceladas", habilita esto */}
-                 {/* <div className="resumen-card reservas-canceladas">
-                    <h3>Reservas Canceladas</h3>
+                {/* Ahora el backend ya devuelve totalReservasCanceladas */}
+                <div className="resumen-card reservas-canceladas">
+                    <h3>Reservas Canceladas/Rechazadas</h3>
                     <p>{estadisticas.totalReservasCanceladas}</p>
-                </div> */}
+                </div>
             </div>
 
             <div className="estadisticas-charts">
@@ -324,9 +326,10 @@ const AdminEstadisticas = () => {
                 </div>
             </div>
 
-            <button className="back-to-admin-button" onClick={() => navigate('/admin/panel')}>
+            {/* Puedes mantener o eliminar este botón según tu navegación */}
+            {/* <button className="back-to-admin-button" onClick={() => navigate('/admin/panel')}>
                 Volver al Panel de Administrador
-            </button>
+            </button> */}
         </div>
     );
 };

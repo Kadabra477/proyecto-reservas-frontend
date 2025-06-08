@@ -1,12 +1,10 @@
-// frontend/src/features/reservas/ReservaDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './ReservaDetail.css';
 
-// Importar los logos desde src/assets
-import mercadopagoLogo from '../../assets/mercadopago.png'; // RUTA CORREGIDA
-import efectivoLogo from '../../assets/efectivo.png';     // RUTA CORREGIDA
+import mercadopagoLogo from '../../assets/mercadopago.png';
+import efectivoLogo from '../../assets/efectivo.png';
 
 const ReservaDetail = () => {
     const { id } = useParams();
@@ -20,7 +18,7 @@ const ReservaDetail = () => {
             setLoading(true);
             setError(null);
             try {
-                const response = await api.get(`/reservas/${id}`); // Usa tu instancia `api`
+                const response = await api.get(`/reservas/${id}`);
                 setReserva(response.data);
             } catch (err) {
                 console.error("Error al cargar la reserva:", err);
@@ -40,19 +38,18 @@ const ReservaDetail = () => {
     }, [id]);
 
     const handlePagoMercadoPago = async () => {
-        if (!reserva || !reserva.id || !reserva.canchaNombre || !reserva.precioTotal) {
+        if (!reserva || !reserva.id || !reserva.precioTotal) { // No usar canchaNombre aquí
             setError('Datos de reserva incompletos para procesar el pago.');
             return;
         }
         try {
-            // Asumiendo que `reserva.cliente` contiene el nombre para Mercado Pago
             const nombreCliente = reserva.cliente || localStorage.getItem('nombreCompleto') || 'Cliente Desconocido';
             const preferenciaResponse = await api.post(
                 `/pagos/crear-preferencia/${reserva.id}`,
                 {
                     reservaId: reserva.id,
                     nombreCliente: nombreCliente,
-                    monto: reserva.precioTotal // Usar precioTotal de la reserva
+                    monto: reserva.precioTotal
                 }
             );
             const initPoint = preferenciaResponse.data.initPoint;
@@ -70,14 +67,14 @@ const ReservaDetail = () => {
 
     const handlePagarEnEfectivo = () => {
         alert('Has seleccionado pagar en efectivo. Por favor, realiza el pago al llegar a la cancha.');
-        navigate('/mis-reservas');
+        navigate('/dashboard'); // Redirige al dashboard después de seleccionar efectivo
     };
 
     const formatLocalDateTime = (dateTimeString) => {
         if (!dateTimeString) return 'Fecha no disponible';
         try {
             const date = new Date(dateTimeString);
-            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+            const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
             return date.toLocaleString('es-AR', options);
         } catch (e) {
             console.error("Error formateando fecha:", dateTimeString, e);
@@ -85,14 +82,13 @@ const ReservaDetail = () => {
         }
     };
 
-    // Función para capitalizar la primera letra y manejar formatos de estado
     const formatReservaEstado = (estado) => {
         if (!estado) return 'Desconocido';
         estado = estado.toLowerCase();
         switch (estado) {
             case 'pendiente': return 'Pendiente';
             case 'confirmada': return 'Confirmada';
-            case 'confirmada_efectivo': return 'Confirmada (Efectivo)';
+            case 'pendiente_pago_efectivo': return 'Pendiente (Efectivo)';
             case 'pendiente_pago_mp': return 'Pendiente (Mercado Pago)';
             case 'pagada': return 'Pagada';
             case 'rechazada_pago_mp': return 'Rechazada (Mercado Pago)';
@@ -100,8 +96,7 @@ const ReservaDetail = () => {
             default: return estado.charAt(0).toUpperCase() + estado.slice(1);
         }
     };
-    
-    // Función para capitalizar la primera letra de una string simple
+
     const capitalizeFirstLetter = (string) => {
         if (!string) return '';
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -120,23 +115,28 @@ const ReservaDetail = () => {
         return <div className="reserva-detail-container">No se encontró la reserva.</div>;
     }
 
-    const isConfirmedByAdmin = reserva.confirmada;
-    const isPaid = reserva.pagada;
+    // La lógica de `confirmada` ya no es necesaria si el estado es el campo principal.
+    // Usaremos el campo `estado` para determinar si es pagada o pendiente.
+    const isPaid = reserva.pagada; // `pagada` sigue siendo útil
+    const isPendingPayment = !isPaid && (reserva.estado === 'pendiente_pago_efectivo' || reserva.estado === 'pendiente_pago_mp');
 
     return (
         <div className="reserva-detail-container">
             <h2 className="reserva-detail-title">Detalle de la Reserva</h2>
             <div className="reserva-detail-card">
-                <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p>
-                <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p> 
+                <p><strong>Complejo:</strong> {reserva.complejoNombre || 'N/A'}</p>
+                <p><strong>Tipo de Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
+                <p><strong>Cancha Asignada:</strong> {reserva.nombreCanchaAsignada || 'N/A'}</p>
+                <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
                 <p><strong>Precio Total:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p> 
+                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p>
                 <p><strong>Pago:</strong> {isPaid ? 'Pagada' : 'Pendiente'}</p>
                 {reserva.metodoPago && <p><strong>Método de Pago Seleccionado:</strong> {capitalizeFirstLetter(reserva.metodoPago)}</p>}
                 <p><strong>Reservado a nombre de:</strong> {reserva.cliente}</p>
+                <p><strong>DNI:</strong> {reserva.dni || '-'}</p>
                 <p><strong>Teléfono de contacto:</strong> {reserva.telefono || '-'}</p>
-                
-                {isConfirmedByAdmin && !isPaid && (
+
+                {isPendingPayment && (
                     <div className="payment-options">
                         <h3>Finaliza tu Pago:</h3>
                         {reserva.metodoPago && reserva.metodoPago.toLowerCase() === 'mercadopago' && (
@@ -154,19 +154,12 @@ const ReservaDetail = () => {
                     </div>
                 )}
 
-                {!isConfirmedByAdmin && (
-                    <p className="pending-confirmation-message">
-                        Esta reserva está pendiente de confirmación por parte del administrador.
-                        Las opciones de pago se habilitarán una vez confirmada.
-                    </p>
-                )}
-
                 {isPaid && (
                     <p className="paid-confirmation-message">
                         ¡Esta reserva ya está pagada! Gracias por tu confirmación.
                     </p>
                 )}
-                
+
                 <button className="back-button" onClick={() => navigate('/dashboard')}>
                     Volver al Dashboard
                 </button>

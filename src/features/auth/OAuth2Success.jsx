@@ -1,28 +1,26 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-// Asegúrate de que no estás importando 'api' si no lo usas directamente aquí para evitar warnings o ciclos
-// import api from '../../api/axiosConfig'; 
 
-function OAuth2Success({ onLoginSuccess }) { // Recibe onLoginSuccess como prop
+function OAuth2Success({ onLoginSuccess }) {
     const navigate = useNavigate();
     const location = useLocation();
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
-        const username = params.get('username'); // Asumiendo que el backend envía el username (email)
-        const nombreCompleto = params.get('name'); // Asumiendo que el backend envía el nombre completo de Google
+        const username = params.get('username');
+        const nombreCompleto = params.get('name');
         const userRole = params.get('role'); // <-- ¡NUEVO! Obtener el rol de la URL
 
         if (token) {
             localStorage.setItem('jwtToken', token);
-            console.log('Token guardado en localStorage (OAuth2Success):', token); // Log más específico
+            console.log('Token guardado en localStorage (OAuth2Success):', token);
 
             // Guardar datos en localStorage
             if (username) {
                 localStorage.setItem('username', username);
             }
-            if (nombreCompleto) { // Usamos el nombre que viene de Google
+            if (nombreCompleto) {
                 localStorage.setItem('nombreCompleto', nombreCompleto);
             }
             if (userRole) { // <-- ¡NUEVO! Guardar el rol en localStorage
@@ -34,8 +32,7 @@ function OAuth2Success({ onLoginSuccess }) { // Recibe onLoginSuccess como prop
 
             // Notificar a App.js que el login fue exitoso, pasando todos los datos
             if (onLoginSuccess) {
-                // Asegúrate de pasar todos los datos, incluyendo el rol
-                onLoginSuccess(token, username, nombreCompleto, userRole || 'USER'); 
+                onLoginSuccess(token, username, nombreCompleto, userRole || 'USER');
             }
 
             navigate('/dashboard'); // Redirige al dashboard después de procesar
