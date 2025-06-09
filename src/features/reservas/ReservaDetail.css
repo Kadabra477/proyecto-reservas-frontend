@@ -1,5 +1,27 @@
 /* frontend/src/features/reservas/ReservaDetail.css */
 
+/* Variables de color (asumiendo que están definidas en otro lugar, como un archivo global.css) */
+:root {
+    --primary: #007bff; /* Azul vibrante */
+    --primary-dark: #0056b3;
+    --secondary: #6c757d; /* Gris oscuro para subtítulos */
+    --success: #28a745;
+    --success-dark: #218838;
+    --warning: #ffc107;
+    --warning-dark: #856404;
+    --info: #17a2b8;
+    --info-dark: #138496;
+    --danger: #dc3545;
+    --danger-dark: #c82333;
+    --gray: #ced4da; /* Borde de input */
+    --gray-light: #e9ecef; /* Fondo claro */
+    --gray-lightest: #f8f9fa; /* Fondo muy claro */
+    --text: #343a40; /* Color de texto principal */
+    --text-light: #495057; /* Color de texto secundario */
+    --white: #ffffff;
+    --shadow: 0 5px 20px rgba(0, 0, 0, 0.08); /* Sombra estándar */
+}
+
 .reserva-detail-container {
     padding: 20px;
     max-width: 700px;
@@ -8,7 +30,7 @@
     border-radius: 12px;
     box-shadow: var(--shadow);
     text-align: center;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Segoe UI', sans-serif; /* Usar Segoe UI para coherencia */
 }
 
 .reserva-detail-title {
@@ -42,21 +64,22 @@
 
 .payment-options {
     margin-top: 30px;
-    border-top: 1px solid var(--gray);
+    border-top: 1px solid var(--gray-light); /* Borde más suave */
     padding-top: 25px;
 }
 
 .payment-options h3 {
-    color: var(--success-dark);
+    color: var(--primary-dark); /* Color más neutro para el título de pago */
     margin-bottom: 20px;
     font-size: 1.6em;
     font-weight: 600;
 }
 
-.payment-buttons {
+/* Flexbox para botones de pago, para que se apilen bien */
+.payment-options {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 15px; /* Espacio entre los botones */
     margin-bottom: 20px;
 }
 
@@ -76,11 +99,10 @@
 }
 
 .payment-button .payment-logo {
-    width: 30px; 
+    width: 30px;
     height: 30px;
     margin-right: 12px;
     vertical-align: middle;
-    /* CLAVE: Ajustar la imagen para que no se estire */
     object-fit: contain; /* Asegura que la imagen se escala dentro del contenedor manteniendo su proporción */
     flex-shrink: 0; /* Evita que la imagen se encoja si el texto es muy largo */
 }
@@ -107,7 +129,7 @@
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
-.payment-note {
+.payment-note { /* No se usa en el JS actual, pero se mantiene el estilo por si acaso */
     font-size: 0.95em;
     color: var(--text-light);
     font-style: italic;
@@ -135,7 +157,7 @@
 }
 
 .back-button {
-    background-color: var(--info);
+    background-color: var(--secondary); /* Usar color secundario para el botón de volver */
     color: white;
     padding: 12px 25px;
     border: none;
@@ -148,7 +170,7 @@
 }
 
 .back-button:hover {
-    background-color: var(--info-dark);
+    background-color: var(--gray-dark); /* Color más oscuro al pasar el mouse */
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
@@ -164,6 +186,19 @@
     border: 1px solid var(--danger);
 }
 
+/* Mensaje para cuando no se encuentra la reserva */
+.no-data-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.1rem;
+    color: var(--text-light);
+    background-color: var(--gray-lightest);
+    border: 1px solid var(--gray-light);
+    border-radius: 8px;
+    margin: 20px auto;
+}
+
+/* Media Queries para Responsive */
 @media (max-width: 600px) {
     .reserva-detail-container {
         padding: 15px;
@@ -183,8 +218,7 @@
         width: 25px;
         height: 25px;
         margin-right: 10px;
-        /* Reaplicar o ajustar object-fit para pantallas pequeñas si es necesario */
-        object-fit: contain; 
+        object-fit: contain;
     }
     .back-button {
         padding: 10px 20px;

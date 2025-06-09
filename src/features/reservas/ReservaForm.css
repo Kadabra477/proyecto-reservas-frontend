@@ -1,131 +1,255 @@
 /* src/ReservaForm.css */
 
+/* Variables de color (asumiendo que están definidas en otro lugar, como un archivo global.css) */
+:root {
+    --primary: #007bff; /* Azul vibrante */
+    --primary-dark: #0056b3;
+    --secondary: #6c757d; /* Gris oscuro para subtítulos */
+    --success: #28a745;
+    --success-dark: #218838;
+    --warning: #ffc107;
+    --warning-dark: #856404;
+    --info: #17a2b8;
+    --info-dark: #138496;
+    --danger: #dc3545;
+    --danger-dark: #c82333;
+    --gray: #ced4da; /* Borde de input */
+    --gray-light: #e9ecef; /* Fondo claro */
+    --gray-lightest: #f8f9fa; /* Fondo muy claro */
+    --text: #343a40; /* Color de texto principal */
+    --text-light: #495057; /* Color de texto secundario */
+    --white: #ffffff;
+    --shadow: 0 5px 20px rgba(0, 0, 0, 0.08); /* Sombra estándar */
+}
+
+
 /* Contenedor principal del formulario de reserva */
 .reserva-form-container {
-  max-width: 750px; /* Ancho máximo del contenedor */
-  margin: 40px auto; /* Centrado horizontal con margen vertical */
-  padding: 35px 45px; /* Padding interno */
-  background-color: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  font-family: 'Segoe UI', sans-serif;
-  border: 1px solid var(--gray-light); /* Borde sutil */
+    max-width: 800px; /* Ancho máximo del contenedor, un poco más para los 3 campos */
+    margin: 40px auto; /* Centrado horizontal con margen vertical */
+    padding: 35px 45px; /* Padding interno */
+    background-color: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    font-family: 'Segoe UI', sans-serif;
+    border: 1px solid var(--gray-light); /* Borde sutil */
 }
 
 /* Título principal del formulario */
 .reserva-form-title {
-  text-align: center;
-  color: var(--primary);
-  margin-bottom: 25px; /* Espacio debajo del título */
-  font-size: 2rem; /* Tamaño de fuente */
-  font-weight: 700;
+    text-align: center;
+    color: var(--primary);
+    margin-bottom: 25px; /* Espacio debajo del título */
+    font-size: 2.2rem; /* Tamaño de fuente */
+    font-weight: 700;
 }
 
-/* Sección con detalles de la cancha seleccionada */
+/* Sección con detalles del complejo seleccionado */
 .reserva-cancha-details {
-  text-align: center;
-  margin-bottom: 35px; /* Espacio debajo de los detalles */
-  padding-bottom: 25px; /* Espacio antes del borde */
-  border-bottom: 1px solid var(--gray-light); /* Línea divisoria */
+    text-align: center;
+    margin-bottom: 35px; /* Espacio debajo de los detalles */
+    padding-bottom: 25px; /* Espacio antes del borde */
+    border-bottom: 1px solid var(--gray-light); /* Línea divisoria */
+}
+
+.reserva-cancha-details h3 {
+    color: var(--primary-dark);
+    font-size: 1.8rem;
+    margin-bottom: 15px;
 }
 
 .reserva-cancha-img {
-  max-width: 100%;
-  height: 220px; /* Altura de la imagen */
-  object-fit: cover;
-  border-radius: 12px;
-  margin-bottom: 20px; /* Espacio debajo de la imagen */
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra de la imagen */
+    max-width: 100%;
+    height: 220px; /* Altura de la imagen */
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 20px; /* Espacio debajo de la imagen */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra de la imagen */
 }
 
 .reserva-cancha-details p {
-  margin: 8px 0; /* Espacio entre párrafos de detalles */
-  color: var(--text-light);
-  font-size: 1.05rem; /* Tamaño de fuente de detalles */
+    margin: 8px 0; /* Espacio entre párrafos de detalles */
+    color: var(--text-light);
+    font-size: 1.05rem; /* Tamaño de fuente de detalles */
 }
 .reserva-cancha-details strong {
-  color: var(--text); /* Color para texto en negrita */
-  margin-right: 5px; /* Espacio después de la etiqueta en negrita */
+    color: var(--text); /* Color para texto en negrita */
+    margin-right: 5px; /* Espacio después de la etiqueta en negrita */
+}
+.reserva-price {
+    font-size: 1.2em !important;
+    font-weight: bold;
+    color: var(--success-dark) !important;
+    margin-top: 15px !important;
 }
 
-/* Subtítulo para la sección de datos del usuario */
+/* Subtítulo para las secciones del formulario */
 .reserva-form-subtitle {
-  text-align: center;
-  color: var(--secondary); /* Color secundario */
-  margin-bottom: 30px;
-  font-size: 1.5rem; /* Tamaño de fuente */
-  font-weight: 600;
+    text-align: center;
+    color: var(--secondary); /* Color secundario */
+    margin-top: 35px; /* Espacio arriba para separar secciones */
+    margin-bottom: 30px;
+    font-size: 1.6rem; /* Tamaño de fuente */
+    font-weight: 600;
+    width: 100%; /* Asegura que ocupe el ancho completo en el grid */
+    grid-column: 1 / -1; /* Ocupa todas las columnas del grid */
 }
 
 /* Estilo del formulario (usa CSS Grid) */
 .reserva-formulario {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Dos columnas de igual tamaño */
-  gap: 22px 28px; /* Espacio vertical y horizontal entre campos */
-  margin-bottom: 30px; /* Espacio debajo del grid */
+    display: grid;
+    /* Ahora usaremos 3 columnas flexibles para nombre, apellido, DNI,
+       y 2 columnas para email y teléfono */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 22px 28px; /* Espacio vertical y horizontal entre campos */
+    margin-bottom: 30px; /* Espacio debajo del grid */
+}
+
+/* El subtítulo debe ocupar todo el ancho del grid */
+.reserva-formulario .full-width {
+    grid-column: 1 / -1;
 }
 
 /* Grupo de cada campo (etiqueta + input) */
 .reserva-formulario .form-group {
-  display: flex;
-  flex-direction: column; /* Etiqueta arriba, input abajo */
+    display: flex;
+    flex-direction: column; /* Etiqueta arriba, input abajo */
 }
 
 .reserva-formulario label {
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--text-light);
-  font-size: 0.9rem; /* Tamaño de etiqueta */
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 0.95rem; /* Tamaño de etiqueta */
 }
 
-/* Estilo de los inputs */
+/* Estilo de los inputs y selects */
 .reserva-formulario input[type="text"],
 .reserva-formulario input[type="tel"],
 .reserva-formulario input[type="email"],
 .reserva-formulario input[type="date"],
-.reserva-formulario input[type="time"] {
-  padding: 13px 16px; /* Padding interno */
-  border: 1px solid var(--gray);
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: inherit;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  width: 100%;
-  box-sizing: border-box;
+.reserva-formulario input[type="time"],
+.reserva-formulario select { /* Añadido select */
+    padding: 13px 16px; /* Padding interno */
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    color: var(--text); /* Asegurar color de texto */
+    background-color: var(--white); /* Fondo blanco para inputs */
 }
 
 /* Estilo al enfocar un input */
-.reserva-formulario input:focus {
-  border-color: var(--primary);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 172, 83, 0.2); /* Anillo de foco verde */
+.reserva-formulario input:focus,
+.reserva-formulario select:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2); /* Anillo de foco azul primary */
 }
 
 /* Estilo para inputs deshabilitados */
-.reserva-formulario input:disabled {
+.reserva-formulario input:disabled,
+.reserva-formulario select:disabled {
     background-color: var(--gray-lightest);
     cursor: not-allowed;
+    opacity: 0.8;
 }
 
+/* Mensajes de disponibilidad */
+.availability-status {
+    grid-column: 1 / -1; /* Ocupa todo el ancho */
+    padding: 12px 18px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    margin-top: 10px;
+    border-left: 5px solid;
+    transition: all 0.3s ease;
+}
+.availability-status.available {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--success-dark);
+    border-left-color: var(--success);
+}
+.availability-status.not-available {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-dark);
+    border-left-color: var(--danger);
+}
+.availability-status.loading {
+    background-color: rgba(0, 123, 255, 0.1);
+    color: var(--primary-dark);
+    border-left-color: var(--primary);
+}
+.small-info-text { /* Para el mensaje de "Este complejo no tiene tipos de cancha configurados" */
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 5px;
+}
+
+
+/* Selección de Método de Pago */
+.payment-method-selection {
+    grid-column: 1 / -1; /* Ocupa ambas columnas */
+    margin-top: 25px;
+    border-top: 1px solid var(--gray-light);
+    padding-top: 25px;
+}
+.payment-method-selection p {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 15px;
+}
+.payment-method-selection label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 15px;
+    font-size: 1.05rem;
+    color: var(--text-light);
+    transition: color 0.2s ease;
+}
+.payment-method-selection label:hover {
+    color: var(--primary-dark);
+}
+.payment-method-selection input[type="radio"] {
+    width: auto; /* Para que el radio button no ocupe todo el ancho */
+    margin-right: 12px;
+    transform: scale(1.2); /* Hacer el radio button un poco más grande */
+    accent-color: var(--primary); /* Color del radio button */
+    cursor: pointer;
+}
+.payment-icon {
+    width: 28px;
+    height: 28px;
+    margin-left: 10px;
+    vertical-align: middle;
+    object-fit: contain;
+}
 
 /* Botón de confirmar reserva */
 .reserva-submit-button {
-  grid-column: 1 / -1; /* Ocupa ambas columnas */
-  background-color: var(--primary);
-  color: white;
-  padding: 15px; /* Padding del botón */
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-top: 15px; /* Espacio arriba del botón */
+    grid-column: 1 / -1; /* Ocupa ambas columnas */
+    background-color: var(--success); /* Verde para el botón de acción principal */
+    color: white;
+    padding: 16px; /* Padding del botón */
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 25px; /* Espacio arriba del botón */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .reserva-submit-button:hover:not(:disabled) {
-  background-color: var(--primary-dark);
-   transform: translateY(-2px); /* Efecto al pasar el mouse */
+    background-color: var(--success-dark);
+    transform: translateY(-3px); /* Efecto al pasar el mouse */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
 /* Estilo del botón cuando está deshabilitado */
@@ -133,50 +257,99 @@
     background-color: var(--gray);
     cursor: not-allowed;
     transform: none; /* Sin efecto hover */
+    box-shadow: none;
 }
 
 /* Estilo para mensajes de feedback (éxito/error) */
 .reserva-mensaje {
-  text-align: center;
-  font-weight: 600;
-  margin-top: 25px; /* Espacio arriba del mensaje */
-  padding: 14px 18px; /* Padding interno */
-  border-radius: 8px;
-  border: 1px solid transparent;
-  line-height: 1.5;
+    text-align: center;
+    font-weight: 600;
+    margin-top: 30px; /* Espacio arriba del mensaje */
+    padding: 16px 20px; /* Padding interno */
+    border-radius: 8px;
+    border: 1px solid transparent;
+    line-height: 1.5;
+    font-size: 1rem;
 }
 
 .reserva-mensaje.success {
-  color: var(--success-dark);
-  background-color: rgba(46, 204, 113, 0.1);
-  border-color: rgba(46, 204, 113, 0.3);
+    color: var(--success-dark);
+    background-color: rgba(40, 167, 69, 0.1);
+    border-color: rgba(40, 167, 69, 0.3);
 }
 
 .reserva-mensaje.error {
-   color: var(--danger-dark);
-   background-color: rgba(231, 76, 60, 0.1);
-   border-color: rgba(231, 76, 60, 0.3);
+    color: var(--danger-dark);
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.3);
+}
+.reserva-mensaje.info { /* Estilo para el mensaje de redirigiendo a MP */
+    color: var(--primary-dark);
+    background-color: rgba(0, 123, 255, 0.1);
+    border-color: rgba(0, 123, 255, 0.3);
+}
+.reserva-mensaje.warning { /* Estilo para mensajes de advertencia */
+    color: var(--warning-dark);
+    background-color: rgba(255, 193, 7, 0.1);
+    border-color: rgba(255, 193, 7, 0.3);
+}
+
+
+/* Mensajes de carga y error iniciales */
+.loading-message, .error-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 40px auto;
+    max-width: 600px;
+    border-radius: 10px;
+}
+.loading-message {
+    background-color: var(--gray-lightest);
+    color: var(--primary-dark);
+    border: 1px solid var(--gray-light);
+}
+.error-message {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-dark);
+    border: 1px solid var(--danger);
 }
 
 
 /* Ajustes Responsive para pantallas pequeñas */
-@media (max-width: 650px) {
-  .reserva-form-container {
-      padding: 25px 20px; /* Menos padding */
-      margin: 20px auto; /* Menos margen vertical */
-  }
-  .reserva-formulario {
-    grid-template-columns: 1fr; /* Una sola columna */
-    gap: 18px; /* Menos espacio entre campos */
-  }
-   .reserva-submit-button {
-      font-size: 1rem; /* Tamaño de fuente del botón */
-      padding: 14px;
-  }
-  .reserva-form-title {
-      font-size: 1.6rem;
-  }
-  .reserva-form-subtitle {
-      font-size: 1.3rem;
-  }
+@media (max-width: 768px) {
+    .reserva-form-container {
+        padding: 25px 20px; /* Menos padding */
+        margin: 20px auto; /* Menos margen vertical */
+    }
+    .reserva-form-title {
+        font-size: 1.8rem;
+    }
+    .reserva-form-subtitle {
+        font-size: 1.4rem;
+        margin-top: 25px;
+        margin-bottom: 20px;
+    }
+    .reserva-formulario {
+        grid-template-columns: 1fr; /* Una sola columna en móviles */
+        gap: 18px; /* Menos espacio entre campos */
+    }
+    .reserva-formulario .full-width {
+        grid-column: auto; /* Resetear para que no fuerce el 1 / -1 en una columna */
+    }
+    .reserva-cancha-img {
+        height: 180px; /* Ajustar altura de imagen en móviles */
+    }
+    .reserva-submit-button {
+        font-size: 1rem; /* Tamaño de fuente del botón */
+        padding: 14px;
+    }
+    .payment-method-selection label {
+        font-size: 0.95rem;
+    }
+    .payment-icon {
+        width: 24px;
+        height: 24px;
+    }
 }

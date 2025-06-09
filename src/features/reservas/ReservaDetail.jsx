@@ -22,12 +22,16 @@ const ReservaDetail = () => {
                 setReserva(response.data);
             } catch (err) {
                 console.error("Error al cargar la reserva:", err);
-                if (err.response && err.response.status === 404) {
-                    setError('Reserva no encontrada.');
-                } else if (err.response && err.response.status === 403) {
-                    setError('No tienes permiso para ver esta reserva.');
+                if (err.response) {
+                    if (err.response.status === 404) {
+                        setError('Reserva no encontrada.');
+                    } else if (err.response.status === 403) {
+                        setError('No tienes permiso para ver esta reserva.');
+                    } else {
+                        setError(`Error al cargar la reserva: ${err.response.data?.message || err.message || 'Intenta de nuevo.'}`);
+                    }
                 } else {
-                    setError('Error al cargar la reserva. Intenta de nuevo.');
+                    setError('Error de red al cargar la reserva. Verifica tu conexión.');
                 }
             } finally {
                 setLoading(false);
@@ -38,12 +42,13 @@ const ReservaDetail = () => {
     }, [id]);
 
     const handlePagoMercadoPago = async () => {
-        if (!reserva || !reserva.id || !reserva.precioTotal) { // No usar canchaNombre aquí
+        if (!reserva || !reserva.id || !reserva.precioTotal) {
             setError('Datos de reserva incompletos para procesar el pago.');
             return;
         }
         try {
-            const nombreCliente = reserva.cliente || localStorage.getItem('nombreCompleto') || 'Cliente Desconocido';
+            // Usamos reserva.cliente que ya debería venir formateado (Nombre Apellido)
+            const nombreCliente = reserva.cliente || 'Cliente Desconocido';
             const preferenciaResponse = await api.post(
                 `/pagos/crear-preferencia/${reserva.id}`,
                 {
@@ -66,7 +71,7 @@ const ReservaDetail = () => {
     };
 
     const handlePagarEnEfectivo = () => {
-        alert('Has seleccionado pagar en efectivo. Por favor, realiza el pago al llegar a la cancha.');
+        alert('Has seleccionado pagar en efectivo. Por favor, realiza el pago al llegar al complejo.');
         navigate('/dashboard'); // Redirige al dashboard después de seleccionar efectivo
     };
 
@@ -104,7 +109,7 @@ const ReservaDetail = () => {
 
 
     if (loading) {
-        return <div className="reserva-detail-container">Cargando detalles de la reserva...</div>;
+        return <div className="reserva-detail-container loading-message">Cargando detalles de la reserva...</div>;
     }
 
     if (error) {
@@ -112,13 +117,14 @@ const ReservaDetail = () => {
     }
 
     if (!reserva) {
-        return <div className="reserva-detail-container">No se encontró la reserva.</div>;
+        return <div className="reserva-detail-container no-data-message">No se encontró la reserva.</div>;
     }
 
-    // La lógica de `confirmada` ya no es necesaria si el estado es el campo principal.
-    // Usaremos el campo `estado` para determinar si es pagada o pendiente.
-    const isPaid = reserva.pagada; // `pagada` sigue siendo útil
-    const isPendingPayment = !isPaid && (reserva.estado === 'pendiente_pago_efectivo' || reserva.estado === 'pendiente_pago_mp');
+    const isPaid = reserva.pagada;
+    const isPendingPayment = !isPaid && (reserva.metodoPago === 'efectivo' || reserva.metodoPago === 'mercadopago');
+    const isMpPending = reserva.metodoPago === 'mercadopago' && !isPaid;
+    const isEfectivoPending = reserva.metodoPago === 'efectivo' && !isPaid;
+
 
     return (
         <div className="reserva-detail-container">
@@ -139,13 +145,13 @@ const ReservaDetail = () => {
                 {isPendingPayment && (
                     <div className="payment-options">
                         <h3>Finaliza tu Pago:</h3>
-                        {reserva.metodoPago && reserva.metodoPago.toLowerCase() === 'mercadopago' && (
+                        {isMpPending && (
                             <button className="payment-button mercadopago-button" onClick={handlePagoMercadoPago}>
                                 <img src={mercadopagoLogo} alt="Mercado Pago" className="payment-logo" />
                                 Pagar con Mercado Pago
                             </button>
                         )}
-                        {reserva.metodoPago && reserva.metodoPago.toLowerCase() === 'efectivo' && (
+                        {isEfectivoPending && (
                             <button className="payment-button efectivo-button" onClick={handlePagarEnEfectivo}>
                                 <img src={efectivoLogo} alt="Efectivo" className="payment-logo" />
                                 Pagar en Efectivo
