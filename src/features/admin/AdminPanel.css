@@ -1,5 +1,23 @@
 /* frontend/src/features/admin/AdminPanel.css */
 
+/* Variables de color (asumiendo que están definidas en otro lugar, como un archivo global.css) */
+:root {
+    --primary: #007bff; /* Azul vibrante */
+    --primary-dark: #0056b3;
+    --primary-lightest: #e6f2ff; /* Azul muy claro */
+    --success: #28a745; /* Verde estándar */
+    --info: #17a2b8; /* Cian/Azul claro para info/editar */
+    --danger: #dc3545; /* Rojo para peligro/eliminar */
+    --warning: #ffc107; /* Amarillo para advertencia */
+    --gray: #6c757d; /* Gris medio */
+    --gray-dark: #343a40; /* Gris oscuro */
+    --gray-light: #dee2e6; /* Gris claro */
+    --gray-lightest: #f8f9fa; /* Gris muy claro */
+    --text: #343a40; /* Color de texto principal */
+    --text-light: #6c757d; /* Color de texto secundario/ligero */
+    --white: #ffffff;
+}
+
 .admin-panel {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     max-width: 1400px; /* Aumentar ancho máximo para tablas y gráficos */
@@ -19,7 +37,7 @@
     padding-bottom: 15px;
 }
 
-/* Estilo de Mensajes (Éxito/Error) */
+/* Estilo de Mensajes (Éxito/Error/Información) */
 .admin-mensaje {
     padding: 14px 20px;
     margin: 25px auto; /* Centrar mensaje */
@@ -29,6 +47,7 @@
     border-left: 5px solid;
     animation: fadeOutMessage 5s forwards;
     max-width: 800px; /* Limitar ancho del mensaje */
+    opacity: 1; /* Asegurar que sea visible al inicio de la animación */
 }
 .admin-mensaje.success {
     background-color: rgba(46, 204, 113, 0.1);
@@ -39,6 +58,23 @@
     background-color: rgba(231, 76, 60, 0.1);
     color: #c82333; /* Rojo más oscuro */
     border-left-color: #e74c3c; /* Rojo más brillante */
+}
+.info-message, .info-message-no-complejos { /* Mensaje de información general */
+    background-color: rgba(52, 152, 219, 0.1); /* Azul claro */
+    color: #007bff;
+    border-left: 5px solid #007bff;
+    padding: 14px 20px;
+    margin: 25px auto;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+    max-width: 800px;
+}
+.small-info { /* Para mensajes pequeños debajo de campos */
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-top: 5px;
+    margin-bottom: 0;
 }
 
 @keyframes fadeOutMessage {
@@ -65,9 +101,10 @@
     font-weight: 600;
     transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
     border-bottom: 3px solid transparent;
-    margin-bottom: -1px;
+    margin-bottom: -1px; /* Para que el borde inferior no se doble con el de la barra */
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
 }
 
 .admin-tab-button:hover:not(.active) {
@@ -97,8 +134,9 @@
     text-align: center; /* Centrar subtítulos */
 }
 
-/* Formulario para Canchas */
-.admin-cancha-form {
+/* Formularios de Complejos y Tipos de Cancha */
+.admin-complejo-form,
+.admin-tipo-cancha-form { /* Clase base para ambos formularios */
     background-color: var(--gray-lightest, #f5f5f5);
     padding: 30px 35px;
     border-radius: 12px;
@@ -107,6 +145,34 @@
     max-width: 800px; /* Limitar ancho del formulario */
     margin-left: auto;
     margin-right: auto;
+}
+.admin-tipo-cancha-gestion { /* Contenedor para la sección de tipos de cancha */
+    background-color: var(--white); /* Fondo blanco para diferenciar */
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra más suave */
+    margin-top: 30px;
+    max-width: 900px; /* Un poco más ancho que el formulario principal */
+    margin-left: auto;
+    margin-right: auto;
+}
+.admin-tipo-cancha-gestion h3 {
+    text-align: center;
+    color: var(--primary-dark);
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--gray-light);
+    padding-bottom: 10px;
+}
+.admin-tipo-cancha-form h4 { /* Subtítulo dentro del formulario de tipo de cancha */
+    font-size: 1.3rem;
+    color: var(--text);
+    margin-bottom: 20px;
+    text-align: left; /* Alineado a la izquierda */
+    border-bottom: 1px dashed var(--gray-light); /* Línea punteada */
+    padding-bottom: 10px;
+    margin-left: -5px; /* Ajustar un poco para el padding del formulario */
+    margin-right: -5px;
 }
 
 /* Grupos de Campos del Formulario */
@@ -123,12 +189,20 @@
     font-size: 0.95rem;
 }
 
+.obligatorio {
+    color: var(--danger); /* Color para indicar campos obligatorios */
+    font-weight: 700;
+    margin-left: 4px;
+}
+
 .admin-form-group input[type="text"],
 .admin-form-group input[type="number"],
 .admin-form-group input[type="url"],
 .admin-form-group input[type="tel"],
+.admin-form-group input[type="email"], /* Añadido para el email del propietario */
+.admin-form-group input[type="time"], /* Añadido para los horarios */
 .admin-form-group textarea,
-.admin-form-group select { /* Añadir select si lo usas */
+.admin-form-group select {
     padding: 12px 15px;
     border-radius: 8px;
     border: 1px solid var(--gray);
@@ -137,6 +211,8 @@
     width: 100%;
     box-sizing: border-box;
     font-family: inherit;
+    color: var(--text); /* Asegurar color de texto */
+    background-color: var(--white); /* Fondo blanco para inputs */
 }
 .admin-form-group input:focus,
 .admin-form-group textarea:focus,
@@ -144,6 +220,10 @@
     border-color: var(--info);
     outline: none;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+.admin-form-group select:disabled { /* Estilo para select deshabilitado */
+    background-color: var(--gray-lightest);
+    cursor: not-allowed;
 }
 
 .admin-form-group textarea {
@@ -199,23 +279,35 @@
 }
 
 /* Colores específicos de botones */
-.admin-btn-save { background-color: var(--success); color: white; } /* Cambio a verde para Guardar */
+.admin-btn-save { background-color: var(--success); color: white; }
 .admin-btn-save:hover { background-color: #218838; }
 
 .admin-btn-cancel { background-color: var(--gray-dark); color: white; }
 .admin-btn-cancel:hover { background-color: #5a6268; }
 
-.admin-btn-edit { background-color: var(--info); color: white; } /* Cambio a info (azul) para Editar */
+.admin-btn-edit { background-color: var(--info); color: white; }
 .admin-btn-edit:hover { background-color: #0069d9; }
 
 .admin-btn-delete { background-color: var(--danger); color: white; }
 .admin-btn-delete:hover { background-color: #c82333; }
 
-.admin-btn-confirm { background-color: var(--primary); color: white; } /* Cambio a primary (azul) para Confirmar */
+.admin-btn-confirm { background-color: var(--primary); color: white; }
 .admin-btn-confirm:hover { background-color: #0056b3; }
 
+.admin-btn-pdf { /* Estilo para el botón de PDF */
+    background-color: #dc3545; /* Rojo para PDF, diferente del peligro */
+    color: white;
+}
+.admin-btn-pdf:hover {
+    background-color: #a71d2a;
+}
+
+
 /* Estilo de Tablas */
-.admin-cancha-list h3, .admin-reserva-list h3 { /* Título de las listas */
+.admin-complejo-list h3,
+.admin-list-tipos-cancha h4, /* Nuevo estilo para el título de la tabla de tipos de cancha */
+.admin-reserva-list h3,
+.admin-usuario-list h3 { /* Título de las listas */
     margin-top: 30px;
     margin-bottom: 20px;
     color: var(--primary-dark);
@@ -226,7 +318,7 @@
 .admin-table-container {
     display: block;
     width: 100%;
-    overflow-x: auto;
+    overflow-x: auto; /* Permite scroll horizontal en tablas pequeñas */
     -webkit-overflow-scrolling: touch;
     border: 1px solid var(--gray-light);
     border-radius: 8px;
@@ -236,7 +328,7 @@
 
 .admin-table-container table {
     width: 100%;
-    min-width: 900px; /* Aumentado el ancho mínimo para más columnas */
+    min-width: 900px; /* Ancho mínimo para tablas con muchas columnas */
     border-collapse: collapse;
     background: white;
     margin-top: 0;
@@ -251,14 +343,17 @@ th, td {
     border-bottom: 1px solid var(--gray-light);
     font-size: 0.95rem;
     vertical-align: middle;
-    white-space: nowrap;
+    white-space: nowrap; /* Evita que el texto se rompa por defecto */
 }
 
 /* Permitir que algunas celdas se envuelvan si es necesario */
-td[data-label="Descripción"], td[data-label="Ubicación"], td[data-label="Cliente"], td[data-label="Fecha y Hora"] {
-    white-space: normal;
+td[data-label="Descripción"],
+td[data-label="Ubicación"],
+td[data-label="Cliente"],
+td[data-label="Fecha y Hora"],
+td[data-label="Tipos de Cancha"] { /* Añadido para tipos de cancha del complejo */
+    white-space: normal; /* Permitir que el texto se envuelva */
 }
-
 
 th {
     background-color: var(--primary-lightest); /* Fondo claro para los encabezados */
@@ -267,7 +362,7 @@ th {
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
-    position: sticky;
+    position: sticky; /* Encabezados pegajosos al hacer scroll horizontal */
     top: 0;
     z-index: 1;
 }
@@ -284,12 +379,23 @@ td button {
     padding: 7px 14px;
     font-size: 0.85rem;
     margin-right: 6px;
-    margin-bottom: 6px;
+    margin-bottom: 6px; /* Espacio entre botones si se envuelven */
     border-radius: 6px;
 }
 td button:last-child {
     margin-right: 0;
 }
+td a.admin-btn-pdf { /* Estilo específico para enlaces que parecen botones */
+    display: inline-block;
+    padding: 7px 14px;
+    font-size: 0.85rem;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    text-decoration: none; /* Quitar subrayado por defecto */
+    text-align: center;
+}
+
 
 /* Estilo de Badges (etiquetas de estado) */
 .admin-badge {
@@ -302,7 +408,7 @@ td button:last-child {
     letter-spacing: 0.5px;
     white-space: nowrap;
 }
-.admin-badge.available, .admin-badge.confirmed {
+.admin-badge.available, .admin-badge.confirmed, .admin-badge.paid { /* Añadido 'paid' */
     background-color: rgba(40, 167, 69, 0.15); /* Verde */
     color: #28a745;
 }
@@ -310,6 +416,11 @@ td button:last-child {
     background-color: rgba(255, 193, 7, 0.15); /* Amarillo */
     color: #ffc107;
 }
+.admin-badge.canceled, .admin-badge.rejected { /* Añadido 'canceled', 'rejected' */
+    background-color: rgba(220, 53, 69, 0.15); /* Rojo */
+    color: #dc3545;
+}
+
 
 /* Mensaje para cuando no hay datos en la tabla */
 .admin-no-data {
@@ -318,6 +429,48 @@ td button:last-child {
     padding: 30px;
     font-style: italic;
     background-color: var(--gray-lightest);
+}
+
+/* Estilo para el modal de gestión de roles de usuario */
+.admin-user-role-form-modal {
+    background-color: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    margin-top: 40px;
+    max-width: 600px; /* Limitar ancho del modal */
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid var(--gray-light);
+}
+.admin-user-role-form-modal h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--primary-dark);
+}
+.admin-user-role-form-modal .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+.admin-user-role-form-modal .checkbox-group label {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+}
+.admin-user-role-form-modal .checkbox-group input[type="checkbox"] {
+    margin-right: 10px;
+    flex-shrink: 0; /* Evita que el checkbox se encoja */
+}
+.admin-user-role-form-modal .info-text {
+    font-style: italic;
+    color: var(--gray);
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 10px;
 }
 
 
@@ -356,6 +509,53 @@ td button:last-child {
         width: 100%;
     }
     /* Las tablas se harán scroll horizontal automáticamente */
+    /* Aquí puedes considerar usar display: block en thead, tbody, tr y td
+       y text-align: right para td, con data-label en :before para vista móvil */
+    .admin-table-container table {
+        min-width: unset; /* Quitar ancho mínimo en móviles para permitir reestructuración */
+    }
+    .admin-table-container th,
+    .admin-table-container td {
+        white-space: normal; /* Permitir que todo el texto se envuelva */
+        text-align: right; /* Alinea el contenido a la derecha */
+    }
+    .admin-table-container td::before { /* Muestra la etiqueta de la columna antes del contenido */
+        content: attr(data-label);
+        float: left;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-right: 10px;
+        color: var(--primary-dark);
+    }
+    .admin-table-container thead {
+        display: none; /* Oculta los encabezados de tabla originales */
+    }
+    .admin-table-container tr {
+        display: block;
+        margin-bottom: 15px;
+        border: 1px solid var(--gray-light);
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        padding: 15px;
+    }
+    .admin-table-container td {
+        display: block;
+        border-bottom: 1px solid var(--gray-light);
+        padding: 10px 0;
+    }
+    .admin-table-container td:last-child {
+        border-bottom: none;
+    }
+    .admin-table-container td button,
+    .admin-table-container td a {
+        width: calc(50% - 3px); /* Dos botones por fila */
+        margin-right: 0 !important; /* Resetear margin-right */
+        display: inline-block; /* Permitir flotar */
+    }
+    .admin-table-container td button:nth-child(odd),
+    .admin-table-container td a:nth-child(odd) {
+        margin-right: 6px !important; /* Espacio entre botones */
+    }
 }
 
 @media (max-width: 600px) {
@@ -372,5 +572,14 @@ td button:last-child {
     }
     .admin-tab-content h2 {
         font-size: 1.5rem;
+    }
+    .admin-complejo-form,
+    .admin-tipo-cancha-form,
+    .admin-tipo-cancha-gestion,
+    .admin-user-role-form-modal {
+        padding: 20px;
+    }
+    .admin-tipo-cancha-form h4 {
+        font-size: 1.1rem;
     }
 }
