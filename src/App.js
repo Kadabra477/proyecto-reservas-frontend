@@ -1,12 +1,9 @@
-// frontend/src/App.js
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     BrowserRouter as Router,
     Routes,
     Route,
     Navigate,
-    useNavigate,
     useLocation,
 } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
@@ -17,7 +14,7 @@ import Register from './features/auth/Register';
 import Home from './features/home/Home';
 import ReservaForm from './features/reservas/ReservaForm';
 import ReservaDetail from './features/reservas/ReservaDetail';
-import AdminPanel from './features/admin/AdminPanel';
+import AdminPanel from './features/admin/AdminPanel'; // Mantén esta importación
 import Complejos from './components/Complejos/Complejos';
 import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
@@ -175,7 +172,8 @@ function App() {
 
                     {/* Rutas principales y de usuario autenticado */}
                     <Route path="/complejos" element={<Complejos />} />
-                    <Route path="/reservar" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} />
+                    {/* Asegúrate que las rutas de reserva especifiquen el ID de complejo y cancha, si es necesario */}
+                    <Route path="/reservar/:complejoId/:canchaId" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} />
                     <Route path="/reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaDetail /></RutaProtegida>} />
                     <Route path="/dashboard" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><DashboardUsuario /></RutaProtegida>} />
 
@@ -185,7 +183,7 @@ function App() {
                     <Route path="/pago-pendiente" element={<PagoPendiente />} />
 
                     {/* Rutas de Administración Protegidas por Rol */}
-                    {/* Mantener ADMIN y COMPLEX_OWNER aquí, ya que el AdminPanel filtra internamente */}
+                    {/* AdminPanel ahora maneja la lógica interna de roles para la visibilidad de secciones */}
                     <Route path="/admin" element={<RutaProtegida rolesRequeridos={['ADMIN', 'COMPLEX_OWNER']}><AdminPanel /></RutaProtegida>} />
 
                     {/* Ruta de fallback para 404 */}

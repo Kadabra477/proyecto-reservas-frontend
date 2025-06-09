@@ -6,18 +6,8 @@ import './AdminPanel.css'; // Asegúrate de tener los estilos actualizados
 // Estado inicial para un formulario de COMPLEJO nuevo
 const estadoInicialComplejoAdmin = {
     nombre: '',
-    propietarioUsername: '',
-    canchaCounts: { "Fútbol 5": 1 } // Un valor por defecto para empezar
-};
-
-// Estado inicial para un Tipo de Cancha dentro de un complejo (para el dueño)
-const estadoInicialTipoCancha = {
-    tipo: '',
-    cantidad: '',
-    precio: '',
-    superficie: '',
-    iluminacion: false,
-    techo: false,
+    emailPropietario: '', // Cambiado de propietarioUsername a emailPropietario para ser consistente con el backend
+    canchas: [{ tipoCancha: '', cantidad: '', precioHora: '', superficie: '', iluminacion: false, techo: false }] // Estado inicial para canchas dinámicas
 };
 
 function AdminPanel() {
@@ -30,21 +20,44 @@ function AdminPanel() {
     const [editingComplejo, setEditingComplejo] = useState(null);
     const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin);
 
-    const [editingTipoCancha, setEditingTipoCancha] = useState(null);
-    const [nuevoTipoCancha, setNuevoTipoCancha] = useState(estadoInicialTipoCancha);
-
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
 
     const userRole = localStorage.getItem('userRole');
 
-    const currentComplejoFormData = editingComplejo || {
-        nombre: '', descripcion: '', fotoUrl: '', ubicacion: '', telefono: '',
-        horarioApertura: '10:00', horarioCierre: '23:00',
-        canchaCounts: {}, canchaPrices: {}, canchaSurfaces: {},
-        iluminacion: {}, techo: {}
-    };
-    const currentTipoCanchaFormData = editingTipoCancha || nuevoTipoCancha;
+    // Mapea los datos de mapas de canchas del backend a un formato de array para el formulario
+    const mapComplejoToFormCanchas = useCallback((complejo) => {
+        const canchasArray = [];
+        if (complejo.canchaCounts) {
+            Object.keys(complejo.canchaCounts).forEach(tipoCancha => {
+                canchasArray.push({
+                    tipoCancha: tipoCancha,
+                    cantidad: complejo.canchaCounts[tipoCancha] || 0,
+                    precioHora: complejo.canchaPrices[tipoCancha] || 0,
+                    superficie: complejo.canchaSurfaces[tipoCancha] || '',
+                    iluminacion: complejo.canchaIluminacion[tipoCancha] || false,
+                    techo: complejo.canchaTecho[tipoCancha] || false
+                });
+            });
+        }
+        return canchasArray;
+    }, []);
+
+    // Cuando se empieza a editar un complejo, inicializa el estado de las canchas para el formulario
+    useEffect(() => {
+        if (editingComplejo) {
+            setNuevoComplejoAdmin({
+                ...editingComplejo,
+                emailPropietario: editingComplejo.propietario?.username || '', // Si el complejo ya tiene propietario, carga su email
+                horarioApertura: editingComplejo.horarioApertura ? editingComplejo.horarioApertura.substring(0, 5) : '10:00',
+                horarioCierre: editingComplejo.horarioCierre ? editingComplejo.horarioCierre.substring(0, 5) : '23:00',
+                // Transforma los mapas de canchas del backend a un array para el formulario dinámico
+                canchas: mapComplejoToFormCanchas(editingComplejo)
+            });
+        } else {
+            setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Resetea si no hay edición
+        }
+    }, [editingComplejo, mapComplejoToFormCanchas]);
 
 
     useEffect(() => {
@@ -124,7 +137,7 @@ function AdminPanel() {
 
         if (activeTab === 'complejos') {
             fetchComplejos();
-        } else if (activeTab === 'reservas') {
+        } else if (activeTab === 'reservas' && userRole === 'ADMIN') { // Solo ADMIN puede ver reservas
             fetchReservas();
         } else if (activeTab === 'usuarios' && userRole === 'ADMIN') {
             fetchUsuarios();
@@ -132,78 +145,139 @@ function AdminPanel() {
     }, [activeTab, fetchComplejos, fetchReservas, fetchUsuarios, userRole]);
 
 
-    const handleNuevoComplejoAdminChange = (e) => {
+    // Manejo de cambios en el formulario de complejo (tanto para crear como para editar)
+    const handleComplejoFormChange = (e) => {
         const { name, value } = e.target;
-        if (name.startsWith('canchaCounts.')) {
-            const tipoCancha = name.split('.')[1];
-            setNuevoComplejoAdmin(prev => ({
-                ...prev,
-                canchaCounts: {
-                    ...prev.canchaCounts,
-                    [tipoCancha]: parseInt(value, 10) || 0
-                }
-            }));
+        setNuevoComplejoAdmin(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Manejo de cambios en el formulario dinámico de canchas
+    const handleCanchaChange = (index, event) => {
+        const { name, value, type, checked } = event.target;
+        const newValue = type === 'checkbox' ? checked : value;
+
+        const newCanchas = [...nuevoComplejoAdmin.canchas];
+        newCanchas[index] = {
+            ...newCanchas[index],
+            [name]: name === 'cantidad' || name === 'precioHora' ? parseFloat(newValue) || 0 : newValue
+        };
+        setNuevoComplejoAdmin(prev => ({ ...prev, canchas: newCanchas }));
+    };
+
+    // Agregar nueva cancha al formulario
+    const handleAddCancha = () => {
+        setNuevoComplejoAdmin(prev => ({
+            ...prev,
+            canchas: [...prev.canchas, { tipoCancha: '', cantidad: '', precioHora: '', superficie: '', iluminacion: false, techo: false }]
+        }));
+    };
+
+    // Eliminar cancha del formulario
+    const handleRemoveCancha = (index) => {
+        const newCanchas = nuevoComplejoAdmin.canchas.filter((_, i) => i !== index);
+        setNuevoComplejoAdmin(prev => ({ ...prev, canchas: newCanchas }));
+    };
+
+
+    const handleSaveComplejo = async (e) => {
+        e.preventDefault();
+        setMensaje({ text: '', type: '' });
+
+        const { nombre, emailPropietario, canchas, descripcion, ubicacion, telefono, fotoUrl, horarioApertura, horarioCierre } = nuevoComplejoAdmin;
+
+        // Validaciones generales
+        if (!nombre?.trim()) {
+            setMensaje({ text: 'El nombre del complejo es obligatorio.', type: 'error' });
+            return;
+        }
+
+        if (userRole === 'ADMIN' && !editingComplejo && !emailPropietario?.trim()) {
+            setMensaje({ text: 'El email del propietario es obligatorio para nuevos complejos (Administrador).', type: 'error' });
+            return;
+        }
+
+        if (canchas.length === 0 || canchas.some(c => !c.tipoCancha?.trim() || isNaN(parseFloat(c.precioHora)) || parseFloat(c.precioHora) <= 0 || isNaN(parseInt(c.cantidad, 10)) || parseInt(c.cantidad, 10) <= 0 || !c.superficie?.trim())) {
+            setMensaje({ text: 'Todas las canchas deben tener un tipo, cantidad, precio, y superficie válidos.', type: 'error' });
+            return;
+        }
+
+        // Transformar el array de canchas de vuelta a mapas para el backend
+        const canchaCounts = {};
+        const canchaPrices = {};
+        const canchaSurfaces = {};
+        const canchaIluminacion = {};
+        const canchaTecho = {};
+
+        canchas.forEach(cancha => {
+            if (cancha.tipoCancha.trim()) {
+                canchaCounts[cancha.tipoCancha] = parseInt(cancha.cantidad, 10);
+                canchaPrices[cancha.tipoCancha] = parseFloat(cancha.precioHora);
+                canchaSurfaces[cancha.tipoCancha] = cancha.superficie;
+                canchaIluminacion[cancha.tipoCancha] = cancha.iluminacion;
+                canchaTecho[cancha.tipoCancha] = cancha.techo;
+            }
+        });
+
+        const complejoData = {
+            nombre,
+            descripcion: descripcion || '',
+            ubicacion: ubicacion || '',
+            telefono: telefono || '',
+            fotoUrl: fotoUrl || '',
+            horarioApertura: horarioApertura || '10:00',
+            horarioCierre: horarioCierre || '23:00',
+            canchaCounts,
+            canchaPrices,
+            canchaSurfaces,
+            canchaIluminacion,
+            canchaTecho
+        };
+
+        if (editingComplejo) {
+            // Actualizar complejo existente
+            try {
+                await api.put(`/complejos/${editingComplejo.id}`, complejoData);
+                setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
+                setEditingComplejo(null); // Sale del modo edición
+                setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Resetea el formulario
+                fetchComplejos();
+            } catch (err) {
+                console.error('Error al actualizar el complejo:', err);
+                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al actualizar el complejo.';
+                setMensaje({ text: errorMsg, type: 'error' });
+            }
         } else {
-            setNuevoComplejoAdmin(prev => ({ ...prev, [name]: value }));
+            // Crear nuevo complejo (solo ADMIN)
+            const crearComplejoRequest = {
+                nombre: nombre,
+                propietarioUsername: emailPropietario, // Este campo es crucial para el ADMIN
+                canchaCounts,
+                canchaPrices,
+                canchaSurfaces,
+                canchaIluminacion,
+                canchaTecho,
+                // Otros campos del complejo como descripción, ubicación, etc., si los mandas desde el admin
+                descripcion: descripcion || '',
+                ubicacion: ubicacion || '',
+                telefono: telefono || '',
+                fotoUrl: fotoUrl || '',
+                horarioApertura: horarioApertura || '10:00',
+                horarioCierre: horarioCierre || '23:00',
+            };
+
+            try {
+                await api.post('/complejos', crearComplejoRequest); // Tu endpoint para crear complejos
+                setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
+                setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Resetea el formulario
+                fetchComplejos();
+            } catch (err) {
+                console.error('Error al crear complejo (Admin):', err);
+                const errorMsg = err.response?.data?.message || err.response?.data || 'Error al crear el complejo.';
+                setMensaje({ text: errorMsg, type: 'error' });
+            }
         }
     };
 
-    const handleSaveNuevoComplejoAdmin = async (e) => {
-        e.preventDefault();
-        setMensaje({ text: '', type: '' });
-
-        const dataToSave = { ...nuevoComplejoAdmin };
-        if (!dataToSave.nombre?.trim() || !dataToSave.propietarioUsername?.trim()) {
-            setMensaje({ text: 'Nombre del complejo y email del propietario son obligatorios.', type: 'error' });
-            return;
-        }
-        if (Object.keys(dataToSave.canchaCounts).length === 0 || Object.values(dataToSave.canchaCounts).every(count => count <= 0)) {
-            setMensaje({ text: 'Debe especificar al menos una cantidad de canchas por tipo.', type: 'error' });
-            return;
-        }
-
-        try {
-            await api.post('/complejos', dataToSave);
-            setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
-            setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            fetchComplejos();
-        } catch (err) {
-            console.error('Error al crear complejo (Admin):', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Error al crear el complejo.';
-            setMensaje({ text: errorMsg, type: 'error' });
-        }
-    };
-
-    const handleEditingComplejoChange = (e) => {
-        const { name, value } = e.target;
-        setEditingComplejo(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleUpdateComplejo = async (e) => {
-        e.preventDefault();
-        setMensaje({ text: '', type: '' });
-
-        const complejoDataToUpdate = { ...editingComplejo };
-
-        if (!complejoDataToUpdate.nombre?.trim() || !complejoDataToUpdate.ubicacion?.trim() || !complejoDataToUpdate.horarioApertura || !complejoDataToUpdate.horarioCierre) {
-            setMensaje({ text: 'Los campos obligatorios de Complejo (Nombre, Ubicación, Horarios) son obligatorios.', type: 'error' });
-            return;
-        }
-
-        complejoDataToUpdate.horarioApertura = complejoDataToUpdate.horarioApertura.substring(0, 5);
-        complejoDataToUpdate.horarioCierre = complejoDataToUpdate.horarioCierre.substring(0, 5);
-
-        try {
-            await api.put(`/complejos/${complejoDataToUpdate.id}`, complejoDataToUpdate);
-            setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
-            fetchComplejos();
-            setEditingComplejo(null);
-        } catch (err) {
-            console.error('Error al actualizar el complejo:', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al actualizar el complejo.';
-            setMensaje({ text: errorMsg, type: 'error' });
-        }
-    };
 
     const handleDeleteComplejo = async (id) => {
         if (window.confirm(`¿Estás seguro de eliminar el complejo con ID: ${id}? Esta acción es irreversible y eliminará todas las reservas asociadas.`)) {
@@ -214,6 +288,7 @@ function AdminPanel() {
                 fetchComplejos();
                 if (editingComplejo && editingComplejo.id === id) {
                     setEditingComplejo(null);
+                    setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
                 }
             } catch (err) {
                 console.error('Error al eliminar el complejo:', err);
@@ -224,134 +299,16 @@ function AdminPanel() {
     };
 
     const startEditingComplejo = (complejoParaEditar) => {
-        setEditingComplejo({
-            ...complejoParaEditar,
-            horarioApertura: complejoParaEditar.horarioApertura ? complejoParaEditar.horarioApertura.substring(0, 5) : '10:00',
-            horarioCierre: complejoParaEditar.horarioCierre ? complejoParaEditar.horarioCierre.substring(0, 5) : '23:00',
-            canchaCounts: complejoParaEditar.canchaCounts || {},
-            canchaPrices: complejoParaEditar.canchaPrices || {},
-            canchaSurfaces: complejoParaEditar.canchaSurfaces || {},
-            canchaIluminacion: complejoParaEditar.canchaIluminacion || {},
-            canchaTecho: complejoParaEditar.canchaTecho || {},
-        });
-        setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-        setEditingTipoCancha(null);
-        setNuevoTipoCancha(estadoInicialTipoCancha);
+        setEditingComplejo(complejoParaEditar);
+        // El useEffect se encargará de inicializar `nuevoComplejoAdmin`
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const cancelEditingComplejo = () => {
         setEditingComplejo(null);
         setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-        setEditingTipoCancha(null);
-        setNuevoTipoCancha(estadoInicialTipoCancha);
     };
 
-    const handleTipoCanchaChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        const newValue = type === 'checkbox' ? checked : value;
-        const targetState = editingTipoCancha ? setEditingTipoCancha : setNuevoTipoCancha;
-        targetState(prev => ({ ...prev, [name]: newValue }));
-    };
-
-    const handleSaveTipoCancha = async (e) => {
-        e.preventDefault();
-        setMensaje({ text: '', type: '' });
-
-        if (!editingComplejo) {
-            setMensaje({ text: 'Primero selecciona o crea un complejo para agregar tipos de cancha.', type: 'error' });
-            return;
-        }
-
-        const tipoCanchaData = { ...currentTipoCanchaFormData };
-
-        const cantidadNum = parseInt(tipoCanchaData.cantidad, 10);
-        const precioNum = parseFloat(tipoCanchaData.precio);
-
-        if (!tipoCanchaData.tipo?.trim() || isNaN(cantidadNum) || cantidadNum <= 0 || isNaN(precioNum) || precioNum < 0 || !tipoCanchaData.superficie?.trim()) {
-            setMensaje({ text: 'Todos los campos de Tipo de Cancha (Tipo, Cantidad, Precio, Superficie) son obligatorios y válidos.', type: 'error' });
-            return;
-        }
-
-        const updatedComplejo = { ...editingComplejo };
-
-        updatedComplejo.canchaCounts = updatedComplejo.canchaCounts || {};
-        updatedComplejo.canchaPrices = updatedComplejo.canchaPrices || {};
-        updatedComplejo.canchaSurfaces = updatedComplejo.canchaSurfaces || {};
-        updatedComplejo.canchaIluminacion = updatedComplejo.canchaIluminacion || {};
-        updatedComplejo.canchaTecho = updatedComplejo.canchaTecho || {};
-
-
-        updatedComplejo.canchaCounts[tipoCanchaData.tipo] = cantidadNum;
-        updatedComplejo.canchaPrices[tipoCanchaData.tipo] = precioNum;
-        updatedComplejo.canchaSurfaces[tipoCanchaData.tipo] = tipoCanchaData.superficie;
-        updatedComplejo.canchaIluminacion[tipoCanchaData.tipo] = tipoCanchaData.iluminacion;
-        updatedComplejo.canchaTecho[tipoCanchaData.tipo] = tipoCanchaData.techo;
-
-        try {
-            await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
-            setMensaje({ text: `Tipo de cancha &quot;${tipoCanchaData.tipo}&quot; guardado correctamente en el complejo.`, type: 'success' });
-            fetchComplejos();
-            setEditingTipoCancha(null);
-            setNuevoTipoCancha(estadoInicialTipoCancha);
-            setEditingComplejo(updatedComplejo);
-        } catch (err) {
-            console.error('Error al guardar el tipo de cancha:', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al guardar el tipo de cancha.';
-            setMensaje({ text: errorMsg, type: 'error' });
-        }
-    };
-
-    const handleDeleteTipoCancha = async (tipo) => {
-        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha &quot;<span class="math-inline">\{tipo\}&quot; del complejo &quot;</span>{editingComplejo.nombre}&quot;? Esta acción es irreversible.`)) {
-            setMensaje({ text: '', type: '' });
-            if (!editingComplejo) return;
-
-            const updatedComplejo = { ...editingComplejo };
-
-            if (updatedComplejo.canchaCounts) delete updatedComplejo.canchaCounts[tipo];
-            if (updatedComplejo.canchaPrices) delete updatedComplejo.canchaPrices[tipo];
-            if (updatedComplejo.canchaSurfaces) delete updatedComplejo.canchaSurfaces[tipo];
-            if (updatedComplejo.canchaIluminacion) delete updatedComplejo.canchaIluminacion[tipo];
-            if (updatedComplejo.canchaTecho) delete updatedComplejo.canchaTecho[tipo];
-
-
-            try {
-                await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
-                setMensaje({ text: `Tipo de cancha &quot;${tipo}&quot; eliminado correctamente.`, type: 'success' });
-                fetchComplejos();
-                setEditingComplejo(updatedComplejo);
-                if (editingTipoCancha && editingTipoCancha.tipo === tipo) {
-                    setEditingTipoCancha(null);
-                    setNuevoTipoCancha(estadoInicialTipoCancha);
-                }
-            } catch (err) {
-                console.error('Error al eliminar el tipo de cancha:', err);
-                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el tipo de cancha.';
-                setMensaje({ text: errorMsg, type: 'error' });
-            }
-        }
-    };
-
-    const startEditingTipoCancha = (tipo) => {
-        if (!editingComplejo) return;
-
-        setEditingTipoCancha({
-            tipo: tipo,
-            cantidad: editingComplejo.canchaCounts[tipo] || '',
-            precio: editingComplejo.canchaPrices[tipo] || '',
-            superficie: editingComplejo.canchaSurfaces[tipo] || '',
-            iluminacion: editingComplejo.canchaIluminacion[tipo] ?? false,
-            techo: editingComplejo.canchaTecho[tipo] ?? false,
-        });
-        setNuevoTipoCancha(estadoInicialTipoCancha);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const cancelEditingTipoCancha = () => {
-        setEditingTipoCancha(null);
-        setNuevoTipoCancha(estadoInicialTipoCancha);
-    };
 
     const handleConfirmReserva = async (id) => {
         setMensaje({ text: '', type: '' });
@@ -453,6 +410,13 @@ function AdminPanel() {
         }
     };
 
+    // Función para obtener la lista de tipos de cancha existentes del complejo (para mostrar en la tabla)
+    const getCanchaTypesFromComplejo = (complejo) => {
+        if (!complejo || !complejo.canchaCounts) return [];
+        return Object.keys(complejo.canchaCounts);
+    };
+
+
     return (
         <div className="admin-panel">
             <h1>Panel de Administración</h1>
@@ -466,13 +430,16 @@ function AdminPanel() {
                 >
                     Gestionar Complejos
                 </button>
-                <button
-                    className={`admin-tab-button ${activeTab === 'reservas' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('reservas')}
-                    disabled={isLoadingData}
-                >
-                    Gestionar Reservas
-                </button>
+                {/* La pestaña "Gestionar Reservas" ahora solo se muestra para ADMIN */}
+                {userRole === 'ADMIN' && (
+                    <button
+                        className={`admin-tab-button ${activeTab === 'reservas' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('reservas')}
+                        disabled={isLoadingData}
+                    >
+                        Gestionar Reservas
+                    </button>
+                )}
                 {userRole === 'ADMIN' && (
                     <button
                         className={`admin-tab-button ${activeTab === 'usuarios' ? 'active' : ''}`}
@@ -496,79 +463,155 @@ function AdminPanel() {
                     <h2>{editingComplejo ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
 
                     {userRole === 'ADMIN' && (
-                        <p className="info-message">Como Administrador General, puedes crear y editar cualquier complejo. El complejo se asignará al usuario que lo crea (tú).</p>
+                        <p className="info-message">Como Administrador General, puedes crear y editar cualquier complejo. Los complejos creados por ti también te pertenecerán por defecto, pero puedes asignarlos a otro propietario al crearlos.</p>
                     )}
                     {userRole === 'COMPLEX_OWNER' && (
-                        <p className="info-message">Como Dueño de Complejo, puedes gestionar solo los complejos que te pertenecen. Selecciona un complejo de la lista para editarlo.</p>
+                        <p className="info-message">Como Dueño de Complejo, puedes gestionar solo los complejos que te pertenecen. Selecciona un complejo de la lista para editarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
                     )}
 
                     {userRole === 'ADMIN' || (userRole === 'COMPLEX_OWNER' && editingComplejo) ? (
-                        <form className="admin-complejo-form" onSubmit={userRole === 'ADMIN' && !editingComplejo ? handleSaveNuevoComplejoAdmin : handleUpdateComplejo}>
+                        <form className="admin-complejo-form" onSubmit={handleSaveComplejo}>
                             <h3>Datos Generales del Complejo</h3>
-                            {userRole === 'ADMIN' && !editingComplejo ? (
+                            <div className="admin-form-group">
+                                <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
+                                <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre || ''} onChange={handleComplejoFormChange} required placeholder='Ej: El Alargue' />
+                            </div>
+
+                            {userRole === 'ADMIN' && !editingComplejo && ( // Solo el ADMIN puede especificar el email del propietario al crear
+                                <div className="admin-form-group">
+                                    <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
+                                    <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario || ''} onChange={handleComplejoFormChange} required placeholder='dueño@ejemplo.com' />
+                                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol 'COMPLEX_OWNER' si no lo tiene.</p>
+                                </div>
+                            )}
+
+                            {editingComplejo && ( // Solo si estamos editando, se muestran estos campos
                                 <>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
-                                        <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre || ''} onChange={handleNuevoComplejoAdminChange} required placeholder='Ej: El Alargue' />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="propietarioUsername">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
-                                        <input type="email" id="propietarioUsername" name="propietarioUsername" value={nuevoComplejoAdmin.propietarioUsername || ''} onChange={handleNuevoComplejoAdminChange} required placeholder='dueño@ejemplo.com' />
-                                    </div>
-                                    <h4>Cantidad de Canchas por Tipo (inicial)</h4>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="canchaCounts.Fútbol 5">Fútbol 5:</label>
-                                        <input type="number" id="canchaCounts.Fútbol 5" name="canchaCounts.Fútbol 5" value={nuevoComplejoAdmin.canchaCounts["Fútbol 5"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="canchaCounts.Fútbol 7">Fútbol 7:</label>
-                                        <input type="number" id="canchaCounts.Fútbol 7" name="canchaCounts.Fútbol 7" value={nuevoComplejoAdmin.canchaCounts["Fútbol 7"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="canchaCounts.Pádel">Pádel:</label>
-                                        <input type="number" id="canchaCounts.Pádel" name="canchaCounts.Pádel" value={nuevoComplejoAdmin.canchaCounts["Pádel"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="canchaCounts.Tenis">Tenis:</label>
-                                        <input type="number" id="canchaCounts.Tenis" name="canchaCounts.Tenis" value={nuevoComplejoAdmin.canchaCounts["Tenis"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="canchaCounts.Básquet">Básquet:</label>
-                                        <input type="number" id="canchaCounts.Básquet" name="canchaCounts.Básquet" value={nuevoComplejoAdmin.canchaCounts["Básquet"] || ''} onChange={handleNuevoComplejoAdminChange} min="0" />
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
-                                        <input type="text" id="nombre" name="nombre" value={currentComplejoFormData.nombre || ''} onChange={handleEditingComplejoChange} required placeholder='Ej: El Alargue' />
-                                    </div>
                                     <div className="admin-form-group">
                                         <label htmlFor="descripcion">Descripción:</label>
-                                        <textarea id="descripcion" name="descripcion" value={currentComplejoFormData.descripcion || ''} onChange={handleEditingComplejoChange} rows={3} placeholder='Breve descripción del complejo...' />
+                                        <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion || ''} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
                                     </div>
                                     <div className="admin-form-group">
                                         <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
-                                        <input type="text" id="ubicacion" name="ubicacion" value={currentComplejoFormData.ubicacion || ''} onChange={handleEditingComplejoChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
+                                        <input type="text" id="ubicacion" name="ubicacion" value={nuevoComplejoAdmin.ubicacion || ''} onChange={handleComplejoFormChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
                                     </div>
                                     <div className="admin-form-group">
                                         <label htmlFor="telefono">Teléfono:</label>
-                                        <input type="tel" id="telefono" name="telefono" value={currentComplejoFormData.telefono || ''} onChange={handleEditingComplejoChange} placeholder='Ej: +549261xxxxxxx' />
+                                        <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono || ''} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
                                     </div>
                                     <div className="admin-form-group">
                                         <label htmlFor="fotoUrl">URL de Foto Principal:</label>
-                                        <input type="url" id="fotoUrl" name="fotoUrl" value={currentComplejoFormData.fotoUrl || ''} onChange={handleEditingComplejoChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
+                                        <input type="url" id="fotoUrl" name="fotoUrl" value={nuevoComplejoAdmin.fotoUrl || ''} onChange={handleComplejoFormChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
                                     </div>
                                     <div className="admin-form-group">
                                         <label htmlFor="horarioApertura">Horario Apertura: <span className="obligatorio">*</span></label>
-                                        <input type="time" id="horarioApertura" name="horarioApertura" value={currentComplejoFormData.horarioApertura || ''} onChange={handleEditingComplejoChange} required />
+                                        <input type="time" id="horarioApertura" name="horarioApertura" value={nuevoComplejoAdmin.horarioApertura || ''} onChange={handleComplejoFormChange} required />
                                     </div>
                                     <div className="admin-form-group">
                                         <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
-                                        <input type="time" id="horarioCierre" name="horarioCierre" value={currentComplejoFormData.horarioCierre || ''} onChange={handleEditingComplejoChange} required />
+                                        <input type="time" id="horarioCierre" name="horarioCierre" value={nuevoComplejoAdmin.horarioCierre || ''} onChange={handleComplejoFormChange} required />
                                     </div>
                                 </>
                             )}
+
+                            <h3>Detalles de Canchas</h3>
+                            <div className="canchas-dinamicas-container">
+                                {nuevoComplejoAdmin.canchas.map((cancha, index) => (
+                                    <div key={index} className="cancha-item-form">
+                                        <h4>Cancha #{index + 1}</h4>
+                                        <div className="admin-form-group">
+                                            <label htmlFor={`tipoCancha-${index}`}>Tipo de Cancha: <span className="obligatorio">*</span></label>
+                                            <select
+                                                id={`tipoCancha-${index}`}
+                                                name="tipoCancha"
+                                                value={cancha.tipoCancha}
+                                                onChange={(e) => handleCanchaChange(index, e)}
+                                                required
+                                            >
+                                                <option value="">Selecciona un tipo</option>
+                                                <option value="Fútbol 5">Fútbol 5</option>
+                                                <option value="Fútbol 7">Fútbol 7</option>
+                                                <option value="Fútbol 11">Fútbol 11</option>
+                                                <option value="Pádel">Pádel</option>
+                                                <option value="Tenis">Tenis</option>
+                                                <option value="Básquet">Básquet</option>
+                                            </select>
+                                        </div>
+                                        <div className="admin-form-group">
+                                            <label htmlFor={`cantidad-${index}`}>Cantidad de Canchas de este Tipo: <span className="obligatorio">*</span></label>
+                                            <input
+                                                type="number"
+                                                id={`cantidad-${index}`}
+                                                name="cantidad"
+                                                value={cancha.cantidad}
+                                                onChange={(e) => handleCanchaChange(index, e)}
+                                                required
+                                                min="1"
+                                                placeholder='Ej: 6'
+                                            />
+                                        </div>
+                                        <div className="admin-form-group">
+                                            <label htmlFor={`precioHora-${index}`}>Precio por Hora ($): <span className="obligatorio">*</span></label>
+                                            <input
+                                                type="number"
+                                                id={`precioHora-${index}`}
+                                                name="precioHora"
+                                                value={cancha.precioHora}
+                                                onChange={(e) => handleCanchaChange(index, e)}
+                                                required
+                                                step="0.01"
+                                                min="0"
+                                                placeholder='Ej: 35000.00'
+                                            />
+                                        </div>
+                                        <div className="admin-form-group">
+                                            <label htmlFor={`superficie-${index}`}>Superficie: <span className="obligatorio">*</span></label>
+                                            <select
+                                                id={`superficie-${index}`}
+                                                name="superficie"
+                                                value={cancha.superficie}
+                                                onChange={(e) => handleCanchaChange(index, e)}
+                                                required
+                                            >
+                                                <option value="">Selecciona una superficie</option>
+                                                <option value="Césped Sintético">Césped Sintético</option>
+                                                <option value="Polvo de Ladrillo">Polvo de Ladrillo</option>
+                                                <option value="Cemento">Cemento</option>
+                                                <option value="Parquet">Parquet</option>
+                                            </select>
+                                        </div>
+                                        <div className="admin-form-group checkbox">
+                                            <input
+                                                type="checkbox"
+                                                id={`iluminacion-${index}`}
+                                                name="iluminacion"
+                                                checked={cancha.iluminacion}
+                                                onChange={(e) => handleCanchaChange(index, e)}
+                                            />
+                                            <label htmlFor={`iluminacion-${index}`}>Tiene Iluminación</label>
+                                        </div>
+                                        <div className="admin-form-group checkbox">
+                                            <input
+                                                type="checkbox"
+                                                id={`techo-${index}`}
+                                                name="techo"
+                                                checked={cancha.techo}
+                                                onChange={(e) => handleCanchaChange(index, e)}
+                                            />
+                                            <label htmlFor={`techo-${index}`}>Tiene Techo</label>
+                                        </div>
+                                        {nuevoComplejoAdmin.canchas.length > 1 && (
+                                            <button type="button" className="admin-btn-delete remove-cancha-btn" onClick={() => handleRemoveCancha(index)}>
+                                                Eliminar Cancha
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            <button type="button" className="admin-btn-add" onClick={handleAddCancha}>
+                                Agregar Tipo de Cancha
+                            </button>
+
                             <div className="admin-form-buttons">
                                 <button type="submit" className="admin-btn-save">
                                     {editingComplejo ? 'Actualizar Complejo' : 'Crear Complejo'}
@@ -586,105 +629,54 @@ function AdminPanel() {
                         )
                     )}
 
-                    {editingComplejo && (userRole === 'ADMIN' || userRole === 'COMPLEX_OWNER') && (
-                        <div className="admin-tipo-cancha-gestion">
-                            <h3>Gestionar Tipos de Cancha para &quot;{editingComplejo.nombre}&quot;</h3>
-
-                            <form className="admin-tipo-cancha-form" onSubmit={handleSaveTipoCancha}>
-                                <h4>{editingTipoCancha ? `Editando Tipo: ${editingTipoCancha.tipo}` : 'Agregar Nuevo Tipo de Cancha'}</h4>
-                                <div className="admin-form-group">
-                                    <label htmlFor="tipo">Tipo de Cancha: <span className="obligatorio">*</span></label>
-                                    <select id="tipo" name="tipo" value={currentTipoCanchaFormData.tipo || ''} onChange={handleTipoCanchaChange} required disabled={!!editingTipoCancha}>
-                                        <option value="">Selecciona un tipo</option>
-                                        <option value="Fútbol 5">Fútbol 5</option>
-                                        <option value="Fútbol 7">Fútbol 7</option>
-                                        <option value="Fútbol 11">Fútbol 11</option>
-                                        <option value="Pádel">Pádel</option>
-                                        <option value="Tenis">Tenis</option>
-                                        <option value="Básquet">Básquet</option>
-                                    </select>
-                                    {editingTipoCancha && <p className="small-info">No puedes cambiar el tipo de cancha mientras editas. Elimínalo y crea uno nuevo si lo necesitas.</p>}
-                                </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="cantidad">Cantidad: <span className="obligatorio">*</span></label>
-                                    <input type="number" id="cantidad" name="cantidad" value={currentTipoCanchaFormData.cantidad || ''} onChange={handleTipoCanchaChange} required min="1" placeholder='Número de canchas de este tipo' />
-                                </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="precio">Precio por Hora: <span className="obligatorio">*</span></label>
-                                    <input type="number" id="precio" name="precio" value={currentTipoCanchaFormData.precio || ''} onChange={handleTipoCanchaChange} required step="0.01" min="0" placeholder='Ej: 35000.00' />
-                                </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="superficie">Superficie: <span className="obligatorio">*</span></label>
-                                    <select id="superficie" name="superficie" value={currentTipoCanchaFormData.superficie || ''} onChange={handleTipoCanchaChange} required>
-                                        <option value="">Selecciona una superficie</option>
-                                        <option value="Césped Sintético">Césped Sintético</option>
-                                        <option value="Polvo de Ladrillo">Polvo de Ladrillo</option>
-                                        <option value="Cemento">Cemento</option>
-                                        <option value="Parquet">Parquet</option>
-                                    </select>
-                                </div>
-                                <div className="admin-form-group checkbox">
-                                    <input type="checkbox" id="iluminacion" name="iluminacion" checked={currentTipoCanchaFormData.iluminacion} onChange={handleTipoCanchaChange} />
-                                    <label htmlFor="iluminacion">Tiene Iluminación</label>
-                                </div>
-                                <div className="admin-form-group checkbox">
-                                    <input type="checkbox" id="techo" name="techo" checked={currentTipoCanchaFormData.techo} onChange={handleTipoCanchaChange} />
-                                    <label htmlFor="techo">Tiene Techo</label>
-                                </div>
-                                <div className="admin-form-buttons">
-                                    <button type="submit" className="admin-btn-save">
-                                        {editingTipoCancha ? 'Actualizar Tipo' : 'Agregar Tipo'}
-                                    </button>
-                                    {editingTipoCancha && (
-                                        <button type="button" className="admin-btn-cancel" onClick={cancelEditingTipoCancha}>
-                                            Cancelar Edición
-                                        </button>
-                                    )}
-                                </div>
-                            </form>
-
-                            <div className="admin-list-tipos-cancha">
-                                <h4>Tipos de Cancha configurados en &quot;{editingComplejo.nombre}&quot;</h4>
+                    <div className="admin-list-container">
+                        <h3>{userRole === 'ADMIN' ? 'Todos los Complejos' : 'Mis Complejos'}</h3>
+                        {isLoadingData ? <p>Cargando complejos...</p> : (
+                            <div className="admin-table-container">
                                 <table>
                                     <thead>
                                         <tr>
-                                            <th>Tipo</th>
-                                            <th>Cant.</th>
-                                            <th>Precio/hr</th>
-                                            <th>Superficie</th>
-                                            <th>Ilum.</th>
-                                            <th>Techo</th>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Propietario</th>
+                                            <th>Ubicación</th>
+                                            <th>Horario</th>
+                                            <th>Canchas</th>
                                             <th>Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {Object.keys(editingComplejo.canchaCounts).length > 0 ? (
-                                            Object.keys(editingComplejo.canchaCounts).map(tipo => (
-                                                <tr key={tipo}>
-                                                    <td data-label="Tipo">{tipo}</td>
-                                                    <td data-label="Cantidad">{editingComplejo.canchaCounts[tipo]}</td>
-                                                    <td data-label="Precio/hr">${(editingComplejo.canchaPrices[tipo] || 0).toLocaleString('es-AR')}</td>
-                                                    <td data-label="Superficie">{editingComplejo.canchaSurfaces[tipo] || '-'}</td>
-                                                    <td data-label="Ilum.">{editingComplejo.canchaIluminacion[tipo] ? 'Sí' : 'No'}</td>
-                                                    <td data-label="Techo">{editingComplejo.canchaTecho[tipo] ? 'Sí' : 'No'}</td>
-                                                    <td data-label="Acciones">
-                                                        <button className="admin-btn-edit" onClick={() => startEditingTipoCancha(tipo)}>Editar</button>
-                                                        <button className="admin-btn-delete" onClick={() => handleDeleteTipoCancha(tipo)}>Eliminar</button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr><td colSpan="7" className="admin-no-data">No hay tipos de canchas configurados para este complejo.</td></tr>
+                                        {complejos.length > 0 ? complejos.map(c => (
+                                            <tr key={c.id}>
+                                                <td data-label="ID">{c.id}</td>
+                                                <td data-label="Nombre">{c.nombre}</td>
+                                                <td data-label="Propietario">{c.propietario?.username || 'N/A'}</td>
+                                                <td data-label="Ubicación">{c.ubicacion || 'N/A'}</td>
+                                                <td data-label="Horario">{c.horarioApertura || 'N/A'} - {c.horarioCierre || 'N/A'}</td>
+                                                <td data-label="Canchas">
+                                                    {Object.keys(c.canchaCounts || {}).map(tipo => (
+                                                        <span key={tipo} className="cancha-type-badge">
+                                                            {c.canchaCounts[tipo]}x {tipo} (${c.canchaPrices[tipo]?.toLocaleString('es-AR') || 'N/A'})
+                                                        </span>
+                                                    ))}
+                                                </td>
+                                                <td data-label="Acciones">
+                                                    <button className="admin-btn-edit" onClick={() => startEditingComplejo(c)}>Editar</button>
+                                                    <button className="admin-btn-delete" onClick={() => handleDeleteComplejo(c.id)}>Eliminar</button>
+                                                </td>
+                                            </tr>
+                                        )) : (
+                                            <tr><td colSpan="7" className="admin-no-data">No hay complejos registrados.</td></tr>
                                         )}
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             )}
 
-            {activeTab === 'reservas' && (
+            {activeTab === 'reservas' && userRole === 'ADMIN' && ( // Solo ADMIN puede ver esta sección
                 <div className="admin-tab-content">
                     <h2>Reservas Registradas</h2>
                     {isLoadingData ? <p>Cargando reservas...</p> : (
@@ -733,7 +725,7 @@ function AdminPanel() {
                                                 <button className="admin-btn-delete" onClick={() => handleDeleteReserva(r.id)}>
                                                     Eliminar
                                                 </button>
-                                                <a href={`<span class="math-inline">\{process\.env\.REACT\_APP\_API\_URL\}/reservas/</span>{r.id}/pdf-comprobante`} target="_blank" rel="noopener noreferrer" className="admin-btn-pdf">
+                                                <a href={`${process.env.REACT_APP_API_URL}/reservas/${r.id}/pdf-comprobante`} target="_blank" rel="noopener noreferrer" className="admin-btn-pdf">
                                                     PDF
                                                 </a>
                                             </td>

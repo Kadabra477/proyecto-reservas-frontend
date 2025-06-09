@@ -1,4 +1,3 @@
-// frontend/src/api/axiosConfig.js
 import axios from 'axios';
 
 // La URL base para el backend, SIN el '/api'
