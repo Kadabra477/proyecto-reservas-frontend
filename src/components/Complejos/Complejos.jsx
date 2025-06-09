@@ -1,12 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
-import ComplejoCard from '../ComplejoCard/ComplejoCard'; // ¡Ruta corregida si ComplejoCard está en su propia carpeta!
-// Si tu carpeta de ComplejoCard también se renombró a kebab-case como 'complejo-card', la ruta sería:
-// import ComplejoCard from '../complejo-card/ComplejoCard';
-import './Complejos.css'; // Asegúrate que el CSS también se llame Complejos.css
+import ComplejoCard from '../ComplejoCard/ComplejoCard';
+import './Complejos.css';
 
-function Complejos() { // ¡CAMBIO AQUÍ! La función ahora se llama Complejos
+function Complejos() {
     const [complejos, setComplejos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -25,7 +23,18 @@ function Complejos() { // ¡CAMBIO AQUÍ! La función ahora se llama Complejos
             }
         } catch (err) {
             console.error("Error al cargar complejos:", err);
-            setError('Error al cargar los complejos disponibles. Intenta de nuevo más tarde.');
+            // MODIFICACIÓN CLAVE AQUÍ: Ajustar el mensaje de error según la respuesta o el estado
+            if (err.response && err.response.status === 500) {
+                // Si es un 500, podría ser un error interno del servidor, no necesariamente "no hay complejos"
+                setError('Hubo un problema con el servidor al cargar los complejos. Por favor, intenta de nuevo más tarde.');
+            } else if (err.response && err.response.status === 204) {
+                // Si la API devuelve 204 No Content, significa que no hay complejos
+                setComplejos([]); // Asegurarse de que la lista esté vacía
+                setError(null); // No es un error, es una ausencia de datos
+            } else {
+                // Para otros errores, un mensaje más genérico
+                setError('Error al cargar los complejos disponibles. Intenta de nuevo más tarde.');
+            }
         } finally {
             setLoading(false);
         }
@@ -43,12 +52,32 @@ function Complejos() { // ¡CAMBIO AQUÍ! La función ahora se llama Complejos
         return <div className="complejos-container loading-message">Cargando complejos...</div>;
     }
 
+    // Lógica para mostrar "No hay complejos disponibles en este momento"
+    // Esto se ejecutará si `complejos.length` es 0, ya sea porque la API devolvió una lista vacía (200 OK con [])
+    // o un 204 No Content, o incluso si hubo un error pero la lista se forzó a vacía.
+    if (complejos.length === 0 && !loading && !error) {
+        return (
+            <div className="complejos-container">
+                <h1 className="complejos-title">Nuestros Complejos Deportivos</h1>
+                <p className="no-complejos-message">
+                    No hay complejos disponibles en este momento. Por favor, revisa más tarde o contacta al administrador.
+                </p>
+                <button
+                    className="btn-main-reserve"
+                    onClick={handleReserveAnyCancha}
+                    disabled={true}
+                >
+                    Reservar una Cancha por Tipo
+                </button>
+            </div>
+        );
+    }
+    
+    // Muestra el error si existe y no se manejó como "no hay complejos"
     if (error) {
         return <div className="complejos-container error-message">{error}</div>;
     }
 
-    const isReserveButtonDisabled = complejos.length === 0;
-    
     return (
         <div className="complejos-container">
             <h1 className="complejos-title">Nuestros Complejos Deportivos</h1>
@@ -56,17 +85,11 @@ function Complejos() { // ¡CAMBIO AQUÍ! La función ahora se llama Complejos
             <button
                 className="btn-main-reserve"
                 onClick={handleReserveAnyCancha}
-                disabled={isReserveButtonDisabled}
+                disabled={complejos.length === 0}
             >
                 Reservar una Cancha por Tipo
             </button>
             
-            {isReserveButtonDisabled && (
-                <p className="info-message-no-complejos">
-                    No hay complejos disponibles para reservar en este momento. Por favor, revisa más tarde o contacta al administrador.
-                </p>
-            )}
-
             {complejos.length > 0 ? (
                 <div className="complejos-grid">
                     {complejos.map(complejo => (
@@ -74,6 +97,8 @@ function Complejos() { // ¡CAMBIO AQUÍ! La función ahora se llama Complejos
                     ))}
                 </div>
             ) : (
+                // Este mensaje ya está cubierto por el `if (complejos.length === 0 && !loading && !error)` de arriba
+                // Puedes eliminar esta parte si el `if` de arriba es suficiente para tu UX
                 <p className="no-complejos-message">No hay complejos registrados en el sistema. Contacta al administrador.</p>
             )}
         </div>
