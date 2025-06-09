@@ -1,6 +1,6 @@
 // frontend/src/features/dashboard/DashboardUsuario.jsx
 
-import React, { useState, useEffect, useCallback } from 'react'; // <-- Eliminado el ";" extra o token inesperado
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './DashboardUsuario.css';
@@ -11,6 +11,7 @@ function DashboardUsuario() {
     const [edad, setEdad] = useState('');
     const [ubicacion, setUbicacion] = useState('');
     const [bio, setBio] = useState('');
+    const [telefono, setTelefono] = useState(''); // Estado para el teléfono
     const [profilePictureUrl, setProfilePictureUrl] = useState('');
     const [profileImageFile, setProfileImageFile] = useState(null);
     const [misReservas, setMisReservas] = useState([]);
@@ -53,6 +54,7 @@ function DashboardUsuario() {
                     setEdad(userData.edad || '');
                     setUbicacion(userData.ubicacion || '');
                     setBio(userData.bio || '');
+                    setTelefono(userData.telefono || ''); // <-- NUEVO: Setear el teléfono
                     setProfilePictureUrl(userData.profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
 
@@ -73,6 +75,7 @@ function DashboardUsuario() {
                     setEdad('');
                     setUbicacion('');
                     setBio('');
+                    setTelefono(''); // Resetear también el teléfono en caso de error
                     setProfilePictureUrl(`${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
             } finally {
@@ -111,6 +114,12 @@ function DashboardUsuario() {
             setLoading(false);
             return;
         }
+        // Opcional: Validar teléfono si es obligatorio
+        if (!telefono.trim() || !/^\d+$/.test(telefono.trim())) {
+             setError("El teléfono es obligatorio y debe contener solo números.");
+             setLoading(false);
+             return;
+        }
 
         try {
             const profileData = {
@@ -118,6 +127,7 @@ function DashboardUsuario() {
                 edad: edad === '' ? null : Number(edad),
                 ubicacion,
                 bio,
+                telefono // <-- NUEVO: Incluir el teléfono en los datos a enviar
             };
 
             const updateProfileRes = await api.put('/users/me', profileData);
@@ -310,6 +320,14 @@ function DashboardUsuario() {
                                 placeholder="Cuéntanos algo sobre ti..."
                                 rows="3"
                             ></textarea>
+                            <input // <-- NUEVO: Campo de teléfono en edición
+                                value={telefono}
+                                onChange={(e) => setTelefono(e.target.value)}
+                                className="perfil-input"
+                                placeholder="Teléfono"
+                                type="tel"
+                                required
+                            />
                             <p className="perfil-dato-editable"><strong>Email:</strong> {email}</p>
 
                             <div className="perfil-acciones">
@@ -325,6 +343,7 @@ function DashboardUsuario() {
                             <p className="perfil-dato"><strong>Edad:</strong> {edad ? `${edad} años` : 'No especificado'}</p>
                             <p className="perfil-dato"><strong>Ubicación:</strong> {ubicacion || 'No especificada'}</p>
                             <p className="perfil-dato"><strong>Email:</strong> {email || 'N/A'}</p>
+                            <p className="perfil-dato"><strong>Teléfono:</strong> {telefono || 'No especificado'}</p> {/* Mostrar teléfono */}
                             <p><strong>Bio:</strong> {bio || 'No especificado'}</p>
                             <button onClick={() => setIsEditing(true)} className="btn btn-outline-primary btn-editar">Editar Perfil</button>
                         </div>
