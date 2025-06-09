@@ -277,22 +277,32 @@ function AdminPanel() {
             }
         }
     };
-
-
-    const handleDeleteComplejo = async (id) => {
-        if (window.confirm(`¿Estás seguro de eliminar el complejo con ID: ${id}? Esta acción es irreversible y eliminará todas las reservas asociadas.`)) {
+    
+    const handleDeleteTipoCancha = async (tipo) => {
+        // La línea 484 es la que empieza el 'if'
+        // Asegúrate de que las comillas internas sean dobles si las de afuera son simples
+        // O usa template literals ` ` para la string completa
+        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha "${tipo}" del complejo "${editingComplejo.nombre}"? Esta acción es irreversible.`)) {
             setMensaje({ text: '', type: '' });
+            if (!editingComplejo) return;
+
+            const updatedComplejo = { ...editingComplejo };
+
+            if (updatedComplejo.canchaCounts) delete updatedComplejo.canchaCounts[tipo];
+            if (updatedComplejo.canchaPrices) delete updatedComplejo.canchaPrices[tipo];
+            if (updatedComplejo.canchaSurfaces) delete updatedComplejo.canchaSurfaces[tipo];
+            if (updatedComplejo.canchaIluminacion) delete updatedComplejo.canchaIluminacion[tipo];
+            if (updatedComplejo.canchaTecho) delete updatedComplejo.canchaTecho[tipo];
+
             try {
-                await api.delete(`/complejos/${id}`);
-                setMensaje({ text: 'Complejo eliminado correctamente.', type: 'success' });
+                await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
+                setMensaje({ text: `Tipo de cancha "${tipo}" eliminado correctamente.`, type: 'success' }); // También podría estar aquí
                 fetchComplejos();
-                if (editingComplejo && editingComplejo.id === id) {
-                    setEditingComplejo(null);
-                    setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-                }
+                setEditingComplejo(updatedComplejo);
+                // ... (resto del código) ...
             } catch (err) {
-                console.error('Error al eliminar el complejo:', err);
-                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el complejo.';
+                console.error('Error al eliminar el tipo de cancha:', err);
+                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el tipo de cancha.';
                 setMensaje({ text: errorMsg, type: 'error' });
             }
         }
