@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from React.useState;
+// frontend/src/features/dashboard/DashboardUsuario.jsx
+
+import React, { useState, useEffect, useCallback } from 'react'; // <-- Eliminado el ";" extra o token inesperado
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './DashboardUsuario.css';
@@ -336,7 +338,7 @@ function DashboardUsuario() {
                     <ul className="lista-reservas">
                         {misReservas.map((reserva) => (
                             <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
-                                <p><strong>Complejo:</strong> {reserva.complejoNombre || 'N/A'}</p> {/* Cambiado de canchaNombre a complejoNombre */}
+                                <p><strong>Complejo:</strong> {reserva.complejoNombre || 'N/A'}</p>
                                 <p><strong>Tipo de Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
                                 <p><strong>Cancha Asignada:</strong> {reserva.nombreCanchaAsignada || 'N/A'}</p>
                                 <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
@@ -358,7 +360,6 @@ function DashboardUsuario() {
                 ) : (
                     <p className="dashboard-info">Aún no tenés reservas.</p>
                 )}
-                {/* CAMBIO AQUÍ: Redirigir a /complejos */}
                 <Link to="/complejos" className="btn btn-primary btn-nueva-reserva">Hacer una Nueva Reserva</Link>
             </div>
 
@@ -367,7 +368,7 @@ function DashboardUsuario() {
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <h3>Detalle de Reserva</h3>
                         <hr />
-                        <p><strong>Complejo:</strong> {modalReserva.complejoNombre || 'N/A'}</p> {/* Cambiado de canchaNombre a complejoNombre */}
+                        <p><strong>Complejo:</strong> {modalReserva.complejoNombre || 'N/A'}</p>
                         <p><strong>Tipo de Cancha:</strong> {modalReserva.tipoCanchaReservada || 'N/A'}</p>
                         <p><strong>Cancha Asignada:</strong> {modalReserva.nombreCanchaAsignada || 'N/A'}</p>
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
@@ -375,7 +376,7 @@ function DashboardUsuario() {
                         <p><strong>Estado:</strong> {formatReservaEstado(modalReserva.estado)}</p>
                         <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${capitalizeFirstLetter(modalReserva.metodoPago || '?')})` : 'Pendiente de Pago'}</p>
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
-                        <p><strong>DNI:</strong> {modalReserva.dni || '-'}</p> {/* Añadido DNI */}
+                        <p><strong>DNI:</strong> {modalReserva.dni || '-'}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
 
                         {modalReserva.jugadores && modalReserva.jugadores.length > 0 && (
@@ -388,7 +389,7 @@ function DashboardUsuario() {
                             <p><strong>Equipo 2:</strong> {Array.from(modalReserva.equipo2).join(', ')}</p>
                         )}
 
-                        {modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_efectivo' && ( // Solo si es efectivo y pendiente
+                        {modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_efectivo' && (
                             <button
                                 className="btn btn-info btn-mostrar-boleto"
                                 onClick={() => handleDescargarPdf(modalReserva.id)}
@@ -397,7 +398,7 @@ function DashboardUsuario() {
                             </button>
                         )}
 
-                        {modalReserva.metodoPago === 'mercadopago' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_mp' && ( // Solo si es MP y pendiente
+                        {modalReserva.metodoPago === 'mercadopago' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_mp' && (
                             <button
                                 className="btn btn-success btn-pagar-mp"
                                 onClick={async () => {

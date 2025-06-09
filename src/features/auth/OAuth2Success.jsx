@@ -11,8 +11,8 @@ function OAuth2Success({ onLoginSuccess }) {
         const params = new URLSearchParams(location.search);
         const token = params.get('token');
         const username = params.get('username');
-        const nombreCompleto = params.get('name');
-        const userRole = params.get('role'); // <-- Se obtiene el rol de la URL
+        const nombreCompleto = params.get('name'); // <-- Aquí se usa 'nombreCompleto' correctamente
+        const userRole = params.get('role');
 
         if (token) {
             localStorage.setItem('jwtToken', token);
@@ -21,24 +21,24 @@ function OAuth2Success({ onLoginSuccess }) {
             if (username) {
                 localStorage.setItem('username', username);
             }
-            if (nombreComplepleto) {
+            if (nombreCompleto) { // <-- Corrección: nombreCompleto
                 localStorage.setItem('nombreCompleto', nombreCompleto);
             }
-            if (userRole) { // <-- Se guarda el rol en localStorage
+            if (userRole) {
                 localStorage.setItem('userRole', userRole);
             } else {
                 console.warn("OAuth2Success: El rol no se recibió de la URL. Asumiendo 'USER'.");
-                localStorage.setItem('userRole', 'USER'); // Fallback si el backend no envía el rol
+                localStorage.setItem('userRole', 'USER');
             }
 
             if (onLoginSuccess) {
                 onLoginSuccess(token, username, nombreCompleto, userRole || 'USER');
             }
 
-            navigate('/dashboard'); // Redirige al dashboard después de procesar
+            navigate('/dashboard');
         } else {
             console.error("OAuth2Success: No se encontró el token en la URL.");
-            navigate('/login?error=oauth_failed'); // Redirige a login con un mensaje de error
+            navigate('/login?error=oauth_failed');
         }
     }, [location, navigate, onLoginSuccess]);
 
