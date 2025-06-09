@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from React.useState;
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './DashboardUsuario.css';
 
 function DashboardUsuario() {
-    const [nombreCompleto, setNombreCompleto] = useState(''); 
+    const [nombreCompleto, setNombreCompleto] = useState('');
     const [email, setEmail] = useState('');
     const [edad, setEdad] = useState('');
     const [ubicacion, setUbicacion] = useState('');
-    const [bio, setBio] = useState(''); 
-    const [profilePictureUrl, setProfilePictureUrl] = useState(''); // Inicializar vacío o con un valor por defecto si es necesario
+    const [bio, setBio] = useState('');
+    const [profilePictureUrl, setProfilePictureUrl] = useState('');
     const [profileImageFile, setProfileImageFile] = useState(null);
     const [misReservas, setMisReservas] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
@@ -50,8 +50,7 @@ function DashboardUsuario() {
                     setEmail(userData.email || '');
                     setEdad(userData.edad || '');
                     setUbicacion(userData.ubicacion || '');
-                    setBio(userData.bio || ''); 
-                    // Usar la URL de la imagen de perfil del backend o el valor por defecto
+                    setBio(userData.bio || '');
                     setProfilePictureUrl(userData.profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
 
@@ -173,7 +172,6 @@ function DashboardUsuario() {
                 responseType: 'blob'
             });
 
-            // Verificar si la respuesta es un PDF válido antes de intentar descargar
             if (response.data.type === 'application/pdf') {
                 const fileURL = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
                 const fileLink = document.createElement('a');
@@ -182,13 +180,10 @@ function DashboardUsuario() {
                 document.body.appendChild(fileLink);
                 fileLink.click();
                 fileLink.remove();
-                window.URL.revokeObjectURL(fileURL); // Liberar el objeto URL
+                window.URL.revokeObjectURL(fileURL);
 
                 setModalReserva(null);
-                // No mostrar alerta aquí, ya que la descarga es un éxito.
             } else {
-                // Si el tipo de contenido no es PDF, puede ser un error del servidor o un HTML.
-                // Intentar leerlo como texto para un mensaje de error más específico.
                 const reader = new FileReader();
                 reader.onload = () => {
                     console.error("Respuesta inesperada del servidor al descargar PDF:", reader.result);
@@ -201,7 +196,6 @@ function DashboardUsuario() {
             console.error("Error al descargar el PDF:", error.response || error);
             let errorMessage = "No se pudo descargar el comprobante. Intenta de nuevo más tarde.";
             if (error.response && error.response.data) {
-                // Si el error.response.data es un Blob, intenta leerlo como texto.
                 if (error.response.data instanceof Blob) {
                     const errorReader = new FileReader();
                     errorReader.onload = (e) => {
@@ -210,12 +204,11 @@ function DashboardUsuario() {
                             errorMessage = errorJson.message || errorJson.error || errorMessage;
                             alert(`Error al descargar el comprobante: ${errorMessage}`);
                         } catch (parseError) {
-                            // Si no es JSON, mostrar el mensaje de error general
                             alert(`Error al descargar el comprobante: ${e.target.result || errorMessage}`);
                         }
                     };
                     errorReader.readAsText(error.response.data);
-                    return; // Salir para evitar la alerta duplicada
+                    return;
                 } else if (error.response.data.message) {
                     errorMessage = error.response.data.message;
                 }
@@ -224,23 +217,21 @@ function DashboardUsuario() {
         }
     };
 
-    // Función para capitalizar la primera letra y manejar formatos de estado
     const formatReservaEstado = (estado) => {
         if (!estado) return 'Desconocido';
         estado = estado.toLowerCase();
         switch (estado) {
             case 'pendiente': return 'Pendiente';
-            case 'confirmada': return 'Confirmada'; // Si el estado del backend es solo 'confirmada'
+            case 'confirmada': return 'Confirmada';
             case 'confirmada_efectivo': return 'Confirmada (Efectivo)';
             case 'pendiente_pago_mp': return 'Pendiente (Mercado Pago)';
             case 'pagada': return 'Pagada';
             case 'rechazada_pago_mp': return 'Rechazada (Mercado Pago)';
             case 'cancelada': return 'Cancelada';
-            default: return estado.charAt(0).toUpperCase() + estado.slice(1); // Capitaliza el resto
+            default: return estado.charAt(0).toUpperCase() + estado.slice(1);
         }
     };
-    
-    // Función para capitalizar la primera letra de una string simple (ej. método de pago)
+
     const capitalizeFirstLetter = (string) => {
         if (!string) return '';
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -267,12 +258,10 @@ function DashboardUsuario() {
         <div className="dashboard-container">
             <div className="perfil-container">
                 <div className="perfil-portada">
-                    {/* Usar process.env.PUBLIC_URL para imágenes en la carpeta public */}
                     <img src={`${process.env.PUBLIC_URL}/imagenes/portada-default.jpg`} alt="Portada" className="portada-img" />
                 </div>
                 <div className="perfil-info-box">
                     <label htmlFor="avatar-upload" className="avatar-label">
-                        {/* Usar process.env.PUBLIC_URL para el avatar por defecto */}
                         <img src={profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`} alt="Avatar" className="perfil-avatar editable" title="Cambiar avatar" />
                         {isEditing && (
                             <span className="change-avatar-icon">
@@ -347,15 +336,15 @@ function DashboardUsuario() {
                     <ul className="lista-reservas">
                         {misReservas.map((reserva) => (
                             <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
-                                <p><strong>Cancha:</strong> {reserva.canchaNombre || 'N/A'}</p> 
+                                <p><strong>Complejo:</strong> {reserva.complejoNombre || 'N/A'}</p> {/* Cambiado de canchaNombre a complejoNombre */}
+                                <p><strong>Tipo de Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
+                                <p><strong>Cancha Asignada:</strong> {reserva.nombreCanchaAsignada || 'N/A'}</p>
                                 <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
-                                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p> {/* Capitalizar y formatear estado */}
+                                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p>
                                 <p><strong>Pago:</strong> {reserva.pagada ? 'Pagada' : 'Pendiente'}</p>
-                                {/* NUEVO: Mostrar método de pago con ícono */}
                                 {reserva.metodoPago && (
                                     <p>
-                                        <strong>Método de Pago:</strong> {capitalizeFirstLetter(reserva.metodoPago)} {/* Capitalizar método de pago */}
-                                        {/* Usar process.env.PUBLIC_URL para imágenes en public/imagenes */}
+                                        <strong>Método de Pago:</strong> {capitalizeFirstLetter(reserva.metodoPago)}
                                         {reserva.metodoPago.toLowerCase() === 'mercadopago' && <img src={`${process.env.PUBLIC_URL}/imagenes/mercadopago-small.png`} alt="Mercado Pago" className="payment-icon-small" />}
                                         {reserva.metodoPago.toLowerCase() === 'efectivo' && <img src={`${process.env.PUBLIC_URL}/imagenes/efectivo-small.png`} alt="Efectivo" className="payment-icon-small" />}
                                     </p>
@@ -369,7 +358,8 @@ function DashboardUsuario() {
                 ) : (
                     <p className="dashboard-info">Aún no tenés reservas.</p>
                 )}
-                <Link to="/canchas" className="btn btn-primary btn-nueva-reserva">Hacer una Nueva Reserva</Link>
+                {/* CAMBIO AQUÍ: Redirigir a /complejos */}
+                <Link to="/complejos" className="btn btn-primary btn-nueva-reserva">Hacer una Nueva Reserva</Link>
             </div>
 
             {modalReserva && (
@@ -377,15 +367,17 @@ function DashboardUsuario() {
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <h3>Detalle de Reserva</h3>
                         <hr />
-                        <p><strong>Cancha:</strong> {modalReserva.canchaNombre || 'N/A'}</p>
+                        <p><strong>Complejo:</strong> {modalReserva.complejoNombre || 'N/A'}</p> {/* Cambiado de canchaNombre a complejoNombre */}
+                        <p><strong>Tipo de Cancha:</strong> {modalReserva.tipoCanchaReservada || 'N/A'}</p>
+                        <p><strong>Cancha Asignada:</strong> {modalReserva.nombreCanchaAsignada || 'N/A'}</p>
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
                         <p><strong>Precio Total:</strong> ${modalReserva.precioTotal ? modalReserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                        <p><strong>Estado:</strong> {formatReservaEstado(modalReserva.estado)}</p> {/* Capitalizar y formatear estado */}
-                        {/* <p><strong>Confirmación Admin:</strong> {modalReserva.confirmada ? 'Sí' : 'No'}</p> ELIMINADA ESTA LÍNEA */}
+                        <p><strong>Estado:</strong> {formatReservaEstado(modalReserva.estado)}</p>
                         <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${capitalizeFirstLetter(modalReserva.metodoPago || '?')})` : 'Pendiente de Pago'}</p>
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
+                        <p><strong>DNI:</strong> {modalReserva.dni || '-'}</p> {/* Añadido DNI */}
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
-                        
+
                         {modalReserva.jugadores && modalReserva.jugadores.length > 0 && (
                             <p><strong>Jugadores:</strong> {modalReserva.jugadores.join(', ')}</p>
                         )}
@@ -396,9 +388,7 @@ function DashboardUsuario() {
                             <p><strong>Equipo 2:</strong> {Array.from(modalReserva.equipo2).join(', ')}</p>
                         )}
 
-                        {/* Botones condicionales en el modal */}
-                        {/* Regla: Solo si la reserva está confirmada por el admin (o pagada si se auto-confirma) y NO está pagada, y es efectivo. */}
-                        {modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.confirmada && (
+                        {modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_efectivo' && ( // Solo si es efectivo y pendiente
                             <button
                                 className="btn btn-info btn-mostrar-boleto"
                                 onClick={() => handleDescargarPdf(modalReserva.id)}
@@ -407,7 +397,7 @@ function DashboardUsuario() {
                             </button>
                         )}
 
-                        {modalReserva.confirmada && !modalReserva.pagada && modalReserva.metodoPago === 'mercadopago' && modalReserva.estado !== 'rechazada_pago_mp' && (
+                        {modalReserva.metodoPago === 'mercadopago' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_mp' && ( // Solo si es MP y pendiente
                             <button
                                 className="btn btn-success btn-pagar-mp"
                                 onClick={async () => {
@@ -418,7 +408,7 @@ function DashboardUsuario() {
                                             {
                                                 reservaId: modalReserva.id,
                                                 nombreCliente: modalReserva.cliente,
-                                                monto: modalReserva.precioTotal // <-- CORREGIDO AQUÍ: Usar precioTotal
+                                                monto: modalReserva.precioTotal
                                             }
                                         );
                                         const initPoint = preferenciaResponse.data.initPoint;
@@ -437,16 +427,18 @@ function DashboardUsuario() {
                                 Pagar con Mercado Pago
                             </button>
                         )}
-                        
-                        {/* Mensaje y botón si la reserva no está confirmada por el admin */}
-                        {!modalReserva.confirmada && modalReserva.estado === 'pendiente' && ( // Solo si el estado es 'pendiente'
-                            <p className="text-warning">Esta reserva está pendiente de confirmación por el administrador. Las opciones de pago/boleto aparecerán una vez confirmada.</p>
+
+                        {modalReserva.estado === 'pendiente' && (
+                            <p className="text-warning">Esta reserva está pendiente de procesamiento inicial. Las opciones de pago/boleto aparecerán una vez el método de pago se determine.</p>
                         )}
 
-                        {/* Mensaje si el pago fue rechazado por MP */}
                         {modalReserva.estado === 'rechazada_pago_mp' && (
-                               <p className="text-danger">Este pago fue rechazado por Mercado Pago. Contacta al administrador si deseas reintentar.</p>
+                            <p className="text-danger">Este pago fue rechazado por Mercado Pago. Contacta al administrador si deseas reintentar.</p>
                         )}
+                        {modalReserva.estado === 'cancelada' && (
+                            <p className="text-danger">Esta reserva ha sido cancelada.</p>
+                        )}
+
 
                         <div className="modal-actions">
                             <button className="btn btn-outline-primary" onClick={handleCloseModal}>Cerrar</button>

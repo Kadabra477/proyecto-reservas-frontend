@@ -1,3 +1,5 @@
+// frontend/src/App.js
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     BrowserRouter as Router,
@@ -16,7 +18,7 @@ import Home from './features/home/Home';
 import ReservaForm from './features/reservas/ReservaForm';
 import ReservaDetail from './features/reservas/ReservaDetail';
 import AdminPanel from './features/admin/AdminPanel';
-import Complejos from './components/Complejos/Complejos'; // ¡CAMBIO AQUÍ! Importa el componente con el nuevo nombre
+import Complejos from './components/Complejos/Complejos';
 import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
@@ -161,7 +163,7 @@ function App() {
                 )}
 
                 <Routes>
-                    <Route path="/" element={<Home estaAutenticado={estaAutenticado} />} /> {/* Pasa la prop estaAutenticado */}
+                    <Route path="/" element={<Home estaAutenticado={estaAutenticado} />} />
 
                     {/* Rutas de autenticación */}
                     <Route path="/login" element={<RedireccionSiAutenticado><Login onLoginSuccess={handleLoginSuccess} /></RedireccionSiAutenticado>} />
@@ -172,7 +174,6 @@ function App() {
                     <Route path="/oauth2/redirect" element={<OAuth2Success onLoginSuccess={handleLoginSuccess} />} />
 
                     {/* Rutas principales y de usuario autenticado */}
-                    {/* ¡CAMBIO AQUÍ! Usa el componente Complejos */}
                     <Route path="/complejos" element={<Complejos />} />
                     <Route path="/reservar" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} />
                     <Route path="/reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaDetail /></RutaProtegida>} />
@@ -184,6 +185,7 @@ function App() {
                     <Route path="/pago-pendiente" element={<PagoPendiente />} />
 
                     {/* Rutas de Administración Protegidas por Rol */}
+                    {/* Mantener ADMIN y COMPLEX_OWNER aquí, ya que el AdminPanel filtra internamente */}
                     <Route path="/admin" element={<RutaProtegida rolesRequeridos={['ADMIN', 'COMPLEX_OWNER']}><AdminPanel /></RutaProtegida>} />
 
                     {/* Ruta de fallback para 404 */}
