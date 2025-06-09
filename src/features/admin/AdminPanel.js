@@ -426,7 +426,7 @@ function AdminPanel() {
         return Object.keys(complejo.canchaCounts);
     };
 
-    const handleDeleteComplejo = async (id) => {
+     const handleDeleteComplejo = async (id) => {
         if (window.confirm(`¿Estás seguro de eliminar el complejo con ID: ${id}? Esta acción es irreversible.`)) {
             setMensaje({ text: '', type: '' });
             try {
@@ -440,7 +440,6 @@ function AdminPanel() {
             }
         }
     };
-
 
     return (
         <div className="admin-panel">
@@ -506,7 +505,7 @@ function AdminPanel() {
                                 <div className="admin-form-group">
                                     <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
                                     <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario || ''} onChange={handleComplejoFormChange} required placeholder='dueño@ejemplo.com' />
-                                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol "COMPLEX_OWNER" si no lo tiene.</p>
+                                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol &quot;COMPLEX_OWNER&quot; si no lo tiene.</p>
                                 </div>
                             )}
 
