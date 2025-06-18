@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
-import '../../styles/AuthForm.css';
+import '../../styles/AuthForm.css'; // Asegúrate de que esta ruta sea correcta
 
 function VerifyAccount() {
     const [searchParams] = useSearchParams();
@@ -20,10 +20,11 @@ function VerifyAccount() {
 
         const verifyUser = async () => {
             try {
-                const response = await api.get(`/auth/verify-account?token=${token}`);
+                // <-- CAMBIO: La llamada al backend ahora usa /auth/validate -->
+                const response = await api.get(`/auth/validate?token=${token}`);
 
                 if (response.status === 200) {
-                    setMessage('✅ ¡Tu cuenta ha sido verificada exitosamente! Ya puedes iniciar sesión.');
+                    setMessage('✅ ¡Tu cuenta ha sido verificada exitosamente! Redirigiendo al login...');
                     setMessageType('success');
                     setTimeout(() => {
                         navigate('/login?validated=true'); // Redirige al login con el mensaje de éxito

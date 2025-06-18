@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/axiosConfig';
-import ComplejoCard from '../ComplejoCard/ComplejoCard';
-import './Complejos.css';
+import api from '../../api/axiosConfig'; // Asegúrate de que esta ruta sea correcta
+import ComplejoCard from '../ComplejoCard/ComplejoCard'; // Asegúrate de que esta ruta sea correcta
+import './Complejos.css'; // Asegúrate de que esta ruta sea correcta
 
 function Complejos() {
     const [complejos, setComplejos] = useState([]);
@@ -23,16 +23,12 @@ function Complejos() {
             }
         } catch (err) {
             console.error("Error al cargar complejos:", err);
-            // MODIFICACIÓN CLAVE AQUÍ: Ajustar el mensaje de error según la respuesta o el estado
             if (err.response && err.response.status === 500) {
-                // Si es un 500, podría ser un error interno del servidor, no necesariamente "no hay complejos"
                 setError('Hubo un problema con el servidor al cargar los complejos. Por favor, intenta de nuevo más tarde.');
             } else if (err.response && err.response.status === 204) {
-                // Si la API devuelve 204 No Content, significa que no hay complejos
-                setComplejos([]); // Asegurarse de que la lista esté vacía
-                setError(null); // No es un error, es una ausencia de datos
+                setComplejos([]);
+                setError(null);
             } else {
-                // Para otros errores, un mensaje más genérico
                 setError('Error al cargar los complejos disponibles. Intenta de nuevo más tarde.');
             }
         } finally {
@@ -44,17 +40,15 @@ function Complejos() {
         fetchComplejos();
     }, [fetchComplejos]);
 
-    const handleReserveAnyCancha = () => {
-        navigate('/reservar');
-    };
+    // <-- ELIMINAR: Función para el botón "Reservar una Cancha por Tipo" -->
+    // const handleReserveAnyCancha = () => {
+    //     navigate('/reservar');
+    // };
 
     if (loading) {
         return <div className="complejos-container loading-message">Cargando complejos...</div>;
     }
 
-    // Lógica para mostrar "No hay complejos disponibles en este momento"
-    // Esto se ejecutará si `complejos.length` es 0, ya sea porque la API devolvió una lista vacía (200 OK con [])
-    // o un 204 No Content, o incluso si hubo un error pero la lista se forzó a vacía.
     if (complejos.length === 0 && !loading && !error) {
         return (
             <div className="complejos-container">
@@ -62,6 +56,7 @@ function Complejos() {
                 <p className="no-complejos-message">
                     No hay complejos disponibles en este momento. Por favor, revisa más tarde o contacta al administrador.
                 </p>
+                {/* <-- ELIMINAR: Botón "Reservar una Cancha por Tipo" si no hay complejos -->
                 <button
                     className="btn-main-reserve"
                     onClick={handleReserveAnyCancha}
@@ -69,11 +64,11 @@ function Complejos() {
                 >
                     Reservar una Cancha por Tipo
                 </button>
+                */}
             </div>
         );
     }
     
-    // Muestra el error si existe y no se manejó como "no hay complejos"
     if (error) {
         return <div className="complejos-container error-message">{error}</div>;
     }
@@ -82,6 +77,7 @@ function Complejos() {
         <div className="complejos-container">
             <h1 className="complejos-title">Nuestros Complejos Deportivos</h1>
 
+            {/* <-- ELIMINAR: Botón "Reservar una Cancha por Tipo" -->
             <button
                 className="btn-main-reserve"
                 onClick={handleReserveAnyCancha}
@@ -89,6 +85,7 @@ function Complejos() {
             >
                 Reservar una Cancha por Tipo
             </button>
+            */}
             
             {complejos.length > 0 ? (
                 <div className="complejos-grid">
