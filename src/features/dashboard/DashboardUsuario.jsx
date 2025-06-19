@@ -11,8 +11,6 @@ function DashboardUsuario() {
     const [edad, setEdad] = useState('');
     const [ubicacion, setUbicacion] = useState('');
     const [bio, setBio] = useState('');
-    // <-- ELIMINAR: Estado para el teléfono -->
-    // const [telefono, setTelefono] = useState('');
     const [profilePictureUrl, setProfilePictureUrl] = useState('');
     const [profileImageFile, setProfileImageFile] = useState(null);
     const [misReservas, setMisReservas] = useState([]);
@@ -55,8 +53,6 @@ function DashboardUsuario() {
                     setEdad(userData.edad || '');
                     setUbicacion(userData.ubicacion || '');
                     setBio(userData.bio || '');
-                    // <-- ELIMINAR: Setear el teléfono -->
-                    // setTelefono(userData.telefono || '');
                     setProfilePictureUrl(userData.profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
 
@@ -117,21 +113,12 @@ function DashboardUsuario() {
             setLoading(false);
             return;
         }
-        // <-- ELIMINAR: Opcional: Validar teléfono si es obligatorio -->
-        // if (!telefono.trim() || !/^\d+$/.test(telefono.trim())) {
-        //     setError("El teléfono es obligatorio y debe contener solo números.");
-        //     setLoading(false);
-        //     return;
-        // }
-
         try {
             const profileData = {
                 nombreCompleto,
                 edad: edad === '' ? null : Number(edad),
                 ubicacion,
                 bio,
-                // <-- ELIMINAR: Incluir el teléfono en los datos a enviar -->
-                // telefono
             };
 
             const updateProfileRes = await api.put('/users/me', profileData);
@@ -324,17 +311,6 @@ function DashboardUsuario() {
                                 placeholder="Cuéntanos algo sobre ti..."
                                 rows="3"
                             ></textarea>
-                            {/* <-- ELIMINAR: Campo de teléfono en edición --> */}
-                            {/*
-                            <input
-                                value={telefono}
-                                onChange={(e) => setTelefono(e.target.value)}
-                                className="perfil-input"
-                                placeholder="Teléfono"
-                                type="tel"
-                                required
-                            />
-                            */}
                             <p className="perfil-dato-editable"><strong>Email:</strong> {email}</p>
 
                             <div className="perfil-acciones">
@@ -350,7 +326,6 @@ function DashboardUsuario() {
                             <p className="perfil-dato"><strong>Edad:</strong> {edad ? `${edad} años` : 'No especificado'}</p>
                             <p className="perfil-dato"><strong>Ubicación:</strong> {ubicacion || 'No especificada'}</p>
                             <p className="perfil-dato"><strong>Email:</strong> {email || 'N/A'}</p>
-                            <p className="perfil-dato"><strong>Teléfono:</strong> {telefono || 'No especificado'}</p> {/* Mostrar teléfono */}
                             <p><strong>Bio:</strong> {bio || 'No especificado'}</p>
                             <button onClick={() => setIsEditing(true)} className="btn btn-outline-primary btn-editar">Editar Perfil</button>
                         </div>
