@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../api/axiosConfig';
-import './DashboardUsuario.css';
+import api from '../../api/axiosConfig'; // Asegúrate de que esta ruta sea correcta
+import './DashboardUsuario.css'; // Asegúrate de que esta ruta sea correcta
 
 function DashboardUsuario() {
     const [nombreCompleto, setNombreCompleto] = useState('');
@@ -11,7 +11,8 @@ function DashboardUsuario() {
     const [edad, setEdad] = useState('');
     const [ubicacion, setUbicacion] = useState('');
     const [bio, setBio] = useState('');
-    const [telefono, setTelefono] = useState(''); // Estado para el teléfono
+    // <-- ELIMINAR: Estado para el teléfono -->
+    // const [telefono, setTelefono] = useState('');
     const [profilePictureUrl, setProfilePictureUrl] = useState('');
     const [profileImageFile, setProfileImageFile] = useState(null);
     const [misReservas, setMisReservas] = useState([]);
@@ -54,7 +55,8 @@ function DashboardUsuario() {
                     setEdad(userData.edad || '');
                     setUbicacion(userData.ubicacion || '');
                     setBio(userData.bio || '');
-                    setTelefono(userData.telefono || ''); // <-- NUEVO: Setear el teléfono
+                    // <-- ELIMINAR: Setear el teléfono -->
+                    // setTelefono(userData.telefono || '');
                     setProfilePictureUrl(userData.profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
 
@@ -75,7 +77,8 @@ function DashboardUsuario() {
                     setEdad('');
                     setUbicacion('');
                     setBio('');
-                    setTelefono(''); // Resetear también el teléfono en caso de error
+                    // <-- ELIMINAR: Resetear también el teléfono en caso de error -->
+                    // setTelefono('');
                     setProfilePictureUrl(`${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
             } finally {
@@ -114,12 +117,12 @@ function DashboardUsuario() {
             setLoading(false);
             return;
         }
-        // Opcional: Validar teléfono si es obligatorio
-        if (!telefono.trim() || !/^\d+$/.test(telefono.trim())) {
-             setError("El teléfono es obligatorio y debe contener solo números.");
-             setLoading(false);
-             return;
-        }
+        // <-- ELIMINAR: Opcional: Validar teléfono si es obligatorio -->
+        // if (!telefono.trim() || !/^\d+$/.test(telefono.trim())) {
+        //     setError("El teléfono es obligatorio y debe contener solo números.");
+        //     setLoading(false);
+        //     return;
+        // }
 
         try {
             const profileData = {
@@ -127,7 +130,8 @@ function DashboardUsuario() {
                 edad: edad === '' ? null : Number(edad),
                 ubicacion,
                 bio,
-                telefono // <-- NUEVO: Incluir el teléfono en los datos a enviar
+                // <-- ELIMINAR: Incluir el teléfono en los datos a enviar -->
+                // telefono
             };
 
             const updateProfileRes = await api.put('/users/me', profileData);
@@ -320,7 +324,9 @@ function DashboardUsuario() {
                                 placeholder="Cuéntanos algo sobre ti..."
                                 rows="3"
                             ></textarea>
-                            <input // <-- NUEVO: Campo de teléfono en edición
+                            {/* <-- ELIMINAR: Campo de teléfono en edición --> */}
+                            {/*
+                            <input
                                 value={telefono}
                                 onChange={(e) => setTelefono(e.target.value)}
                                 className="perfil-input"
@@ -328,6 +334,7 @@ function DashboardUsuario() {
                                 type="tel"
                                 required
                             />
+                            */}
                             <p className="perfil-dato-editable"><strong>Email:</strong> {email}</p>
 
                             <div className="perfil-acciones">
@@ -372,6 +379,12 @@ function DashboardUsuario() {
                                 )}
                                 {reserva.jugadores && reserva.jugadores.length > 0 && (
                                     <p><strong>Jugadores:</strong> {reserva.jugadores.join(', ')}</p>
+                                )}
+                                {reserva.equipo1 && reserva.equipo1.length > 0 && (
+                                    <p><strong>Equipo 1:</strong> {Array.from(reserva.equipo1).join(', ')}</p>
+                                )}
+                                {reserva.equipo2 && reserva.equipo2.length > 0 && (
+                                    <p><strong>Equipo 2:</strong> {Array.from(reserva.equipo2).join(', ')}</p>
                                 )}
                             </li>
                         ))}
