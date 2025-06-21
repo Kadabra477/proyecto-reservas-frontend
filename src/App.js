@@ -7,7 +7,6 @@ import {
     useLocation,
 } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import VerifyAccount from './features/auth/VerifyAccount'
 import Navbar from './components/Navbar/NavBar';
 import Login from './features/auth/Login';
 import Register from './features/auth/Register';
@@ -167,7 +166,6 @@ function App() {
                     <Route path="/register" element={<RedireccionSiAutenticado><Register /></RedireccionSiAutenticado>} />
                     <Route path="/forgot-password" element={<ForgotPasswordRequest />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/verify-account" element={<VerifyAccount />} />
                     <Route path="/oauth2/redirect" element={<OAuth2Success onLoginSuccess={handleLoginSuccess} />} />
 
                     {/* Rutas principales y de usuario autenticado */}
