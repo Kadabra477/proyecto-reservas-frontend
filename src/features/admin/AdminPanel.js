@@ -386,25 +386,27 @@ function AdminPanel() {
             }
         });
     };
-
     const handleSaveUserRoles = async () => {
         setMensaje({ text: '', type: '' });
         if (!managingUserRoles) return;
 
         try {
             const rolesToSend = selectedRoles.map(role => `ROLE_${role}`);
-            await api.put(`/users/${managingUserRoles.id}/roles`, { roles: rolesToSend }); // Envía el objeto con la propiedad 'roles'
+            // <-- CAMBIO CRÍTICO AQUÍ: Envía directamente el array de roles, no un objeto -->
+            // Antes: await api.put(`/users/${managingUserRoles.id}/roles`, { roles: rolesToSend });
+            await api.put(`/users/${managingUserRoles.id}/roles`, rolesToSend);
+            
             setMensaje({ text: `Roles de ${managingUserRoles.username} actualizados correctamente.`, type: 'success' });
             fetchUsuarios(); // Vuelve a cargar la lista de usuarios para reflejar los cambios
             setManagingUserRoles(null);
             setSelectedRoles([]);
         } catch (err) {
             console.error('Error al guardar roles:', err);
+            // Asegúrate de que el mensaje de error venga del backend si está disponible
             const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al guardar los roles.';
             setMensaje({ text: errorMsg, type: 'error' });
         }
     };
-
     // <-- NUEVA FUNCIÓN: handleActivateUser -->
     const handleActivateUser = async (userId, username) => {
         if (window.confirm(`¿Estás seguro de activar la cuenta del usuario ${username}?`)) {
