@@ -40,53 +40,24 @@ function Complejos() {
         fetchComplejos();
     }, [fetchComplejos]);
 
-    // <-- ELIMINAR: Función para el botón "Reservar una Cancha por Tipo" -->
-    // const handleReserveAnyCancha = () => {
-    //     navigate('/reservar');
-    // };
+    // Eliminado: handleReserveAnyCancha
 
     if (loading) {
+        // <-- MEJORA DE DISEÑO: Usar un mensaje de carga más visual si lo deseas -->
         return <div className="complejos-container loading-message">Cargando complejos...</div>;
     }
 
-    if (complejos.length === 0 && !loading && !error) {
-        return (
-            <div className="complejos-container">
-                <h1 className="complejos-title">Nuestros Complejos Deportivos</h1>
-                <p className="no-complejos-message">
-                    No hay complejos disponibles en este momento. Por favor, revisa más tarde o contacta al administrador.
-                </p>
-                {/* <-- ELIMINAR: Botón "Reservar una Cancha por Tipo" si no hay complejos -->
-                <button
-                    className="btn-main-reserve"
-                    onClick={handleReserveAnyCancha}
-                    disabled={true}
-                >
-                    Reservar una Cancha por Tipo
-                </button>
-                */}
-            </div>
-        );
-    }
-    
     if (error) {
+        // <-- MEJORA DE DISEÑO: Estilo de mensaje de error más prominente -->
         return <div className="complejos-container error-message">{error}</div>;
     }
 
     return (
         <div className="complejos-container">
-            <h1 className="complejos-title">Nuestros Complejos Deportivos</h1>
+            {/* <-- MEJORA DE DISEÑO: Título más llamativo y descriptivo --> */}
+            <h1 className="complejos-title">Encuentra Tu Cancha Ideal</h1>
+            <p className="complejos-subtitle">Explora nuestros complejos deportivos y reserva tu espacio.</p>
 
-            {/* <-- ELIMINAR: Botón "Reservar una Cancha por Tipo" -->
-            <button
-                className="btn-main-reserve"
-                onClick={handleReserveAnyCancha}
-                disabled={complejos.length === 0}
-            >
-                Reservar una Cancha por Tipo
-            </button>
-            */}
-            
             {complejos.length > 0 ? (
                 <div className="complejos-grid">
                     {complejos.map(complejo => (
@@ -94,9 +65,14 @@ function Complejos() {
                     ))}
                 </div>
             ) : (
-                // Este mensaje ya está cubierto por el `if (complejos.length === 0 && !loading && !error)` de arriba
-                // Puedes eliminar esta parte si el `if` de arriba es suficiente para tu UX
-                <p className="no-complejos-message">No hay complejos registrados en el sistema. Contacta al administrador.</p>
+                // <-- MEJORA DE DISEÑO: Mensaje cuando no hay complejos -->
+                <div className="no-complejos-section">
+                    <p className="no-complejos-message">
+                        Parece que no hay complejos deportivos disponibles en este momento.
+                        <br />¡Vuelve a revisar más tarde o contacta al administrador!
+                    </p>
+                    {/* Puedes añadir un icono o una ilustración aquí si lo deseas */}
+                </div>
             )}
         </div>
     );

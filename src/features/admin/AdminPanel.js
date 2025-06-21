@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '../../api/axiosConfig'; // Asegúrate de que esta ruta sea correcta
-import AdminEstadisticas from './AdminEstadisticas'; // Asegúrate de que esta ruta sea correcta
-import './AdminPanel.css'; // Asegúrate de tener los estilos actualizados
+import api from '../../api/axiosConfig';
+import AdminEstadisticas from './AdminEstadisticas';
+import './AdminPanel.css';
 
 // Estado inicial para un formulario de COMPLEJO nuevo
 const estadoInicialComplejoAdmin = {
@@ -13,7 +13,7 @@ const estadoInicialComplejoAdmin = {
 function AdminPanel() {
     const [complejos, setComplejos] = useState([]);
     const [reservas, setReservas] = useState([]);
-    const [usuarios, setUsuarios] = useState([]); // Mantener estado de usuarios
+    const [usuarios, setUsuarios] = useState([]);
     const [activeTab, setActiveTab] = useState('complejos');
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
     const [isLoadingData, setIsLoadingData] = useState(false);
@@ -23,7 +23,7 @@ function AdminPanel() {
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
 
-    const userRole = localStorage.getItem('userRole'); // Obtener el rol del usuario autenticado
+    const userRole = localStorage.getItem('userRole');
 
     const mapComplejoToFormCanchas = useCallback((complejo) => {
         const canchasArray = [];
@@ -72,15 +72,9 @@ function AdminPanel() {
         setMensaje({ text: '', type: '' });
         try {
             let res;
-            if (userRole === 'ADMIN') {
-                res = await api.get('/complejos');
-            } else if (userRole === 'COMPLEX_OWNER') {
-                res = await api.get('/complejos/mis-complejos');
-            } else {
-                setComplejos([]);
-                setIsLoadingData(false);
-                return;
-            }
+            // <-- CAMBIO: ComplejoServicio ahora filtra complejos por rol -->
+            // ADMIN obtiene todos, COMPLEX_OWNER solo los suyos.
+            res = await api.get('/complejos'); // Este endpoint ya maneja la lógica de rol en el backend
             setComplejos(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Error al obtener complejos:', err);
@@ -89,7 +83,7 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, [userRole]);
+    }, [userRole]); // Dependencia del userRole para fetchComplejos
 
     const fetchReservas = useCallback(async () => {
         setIsLoadingData(true);
@@ -111,12 +105,11 @@ function AdminPanel() {
         setMensaje({ text: '', type: '' });
         try {
             if (userRole === 'ADMIN') {
-                // <-- CAMBIO: Obtener todos los usuarios, no solo los habilitados -->
-                // El endpoint /users por defecto ya lista todos si no se pasa enabled=true
-                const res = await api.get('/users');
+                // <-- CAMBIO: Obtener todos los usuarios, UsuarioServicio.findAllUsers() ya no filtra por enabled -->
+                const res = await api.get('/users'); // El endpoint /users ahora lista todos los usuarios
                 setUsuarios(Array.isArray(res.data) ? res.data : []);
             } else {
-                setUsuarios([]);
+                setUsuarios([]); // Otros roles no ven la lista de usuarios
             }
         } catch (err) {
             console.error('Error al obtener usuarios:', err);
@@ -134,12 +127,15 @@ function AdminPanel() {
             return;
         }
 
+        // <-- CAMBIO: Ajustar la carga inicial de datos según la pestaña activa y el rol -->
         if (activeTab === 'complejos') {
             fetchComplejos();
         } else if (activeTab === 'reservas' && userRole === 'ADMIN') {
             fetchReservas();
         } else if (activeTab === 'usuarios' && userRole === 'ADMIN') {
-            fetchUsuarios(); // Llama a fetchUsuarios cuando la pestaña de usuarios está activa
+            fetchUsuarios();
+        } else if (activeTab === 'estadisticas') {
+            // No necesita un fetch explícito aquí porque AdminEstadisticas lo hace internamente
         }
     }, [activeTab, fetchComplejos, fetchReservas, fetchUsuarios, userRole]);
 
@@ -386,14 +382,13 @@ function AdminPanel() {
             }
         });
     };
+
     const handleSaveUserRoles = async () => {
         setMensaje({ text: '', type: '' });
         if (!managingUserRoles) return;
 
         try {
             const rolesToSend = selectedRoles.map(role => `ROLE_${role}`);
-            // <-- CAMBIO CRÍTICO AQUÍ: Envía directamente el array de roles, no un objeto -->
-            // Antes: await api.put(`/users/${managingUserRoles.id}/roles`, { roles: rolesToSend });
             await api.put(`/users/${managingUserRoles.id}/roles`, rolesToSend);
             
             setMensaje({ text: `Roles de ${managingUserRoles.username} actualizados correctamente.`, type: 'success' });
@@ -402,11 +397,11 @@ function AdminPanel() {
             setSelectedRoles([]);
         } catch (err) {
             console.error('Error al guardar roles:', err);
-            // Asegúrate de que el mensaje de error venga del backend si está disponible
             const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al guardar los roles.';
             setMensaje({ text: errorMsg, type: 'error' });
         }
     };
+
     // <-- NUEVA FUNCIÓN: handleActivateUser -->
     const handleActivateUser = async (userId, username) => {
         if (window.confirm(`¿Estás seguro de activar la cuenta del usuario ${username}?`)) {
@@ -802,7 +797,7 @@ function AdminPanel() {
                                                         {!u.enabled && ( // Botón para activar solo si el usuario no está activo
                                                             <button 
                                                                 className="admin-btn-activate" 
-                                                                onClick={() => handleActivateUser(u.id, u.username)} // <-- CAMBIO: Botón de activar -->
+                                                                onClick={() => handleActivateUser(u.id, u.username)}
                                                             >
                                                                 Activar
                                                             </button>

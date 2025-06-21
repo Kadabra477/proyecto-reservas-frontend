@@ -1,6 +1,6 @@
-/* frontend/src/features/canchas/Canchas.css */
+/* frontend/src/features/canchas/Complejos.css */
 
-.canchas-container {
+.complejos-container {
     max-width: 1200px;
     margin: 50px auto;
     padding: 30px 20px;
@@ -8,50 +8,38 @@
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     text-align: center;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* <-- MEJORA DE DISEÑO: Transición suave */
 }
 
-.canchas-title {
-    font-size: 2.8em;
+.complejos-title {
+    font-size: 3.2em; /* <-- MEJORA DE DISEÑO: Fuente más grande */
     color: var(--primary-dark, #0056b3);
-    margin-bottom: 40px;
+    margin-bottom: 10px; /* <-- MEJORA DE DISEÑO: Menos margen para el subtítulo */
     font-weight: 800;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); /* <-- MEJORA DE DISEÑO: Sombra de texto más pronunciada */
+    letter-spacing: -0.02em; /* <-- MEJORA DE DISEÑO: Espaciado de letras ajustado */
 }
 
-/* Esta es la clase para la grilla de complejos (no canchas) */
-.complejos-grid { 
+.complejos-subtitle { /* <-- NUEVO: Subtítulo para el título principal */
+    font-size: 1.5em;
+    color: var(--text-light, #555);
+    margin-bottom: 40px;
+    font-weight: 400;
+}
+
+.complejos-grid { /* Grilla de tarjetas de complejos */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-    gap: 30px; 
-    justify-items: center; 
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    justify-items: center;
+    padding: 20px 0; /* <-- MEJORA DE DISEÑO: Padding para separar */
 }
 
-.btn-main-reserve {
-    background-color: var(--primary, #007bff); 
-    color: white;
-    padding: 15px 30px;
-    font-size: 1.2em;
-    font-weight: bold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-bottom: 30px; 
-    display: block; 
-    width: fit-content; 
-    margin-left: auto;
-    margin-right: auto; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
+/* <-- ELIMINADO: Estilos para .btn-main-reserve (se quitó el botón de Complejos.jsx) --> */
 
-.btn-main-reserve:hover {
-    background-color: var(--primary-dark, #0056b3);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-}
-
-.no-canchas-message { /* Renombrado de no-canchas a no-complejos-message */
-    grid-column: 1 / -1; 
+/* <-- NUEVO: Estilos para la sección cuando no hay complejos --> */
+.no-complejos-section {
+    grid-column: 1 / -1; /* Ocupa todas las columnas */
     font-size: 1.3em;
     color: var(--text-light, #777);
     padding: 40px;
@@ -59,36 +47,60 @@
     border-radius: 10px;
     border: 2px dashed var(--gray, #cccccc);
     margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.no-complejos-message {
+    font-size: 1.3em;
+    color: var(--text-light, #777);
+    margin-bottom: 15px;
+    line-height: 1.5;
 }
 
 .loading-message, .error-message {
     text-align: center;
-    font-size: 1.2em;
-    padding: 20px;
+    font-size: 1.5em; /* <-- MEJORA DE DISEÑO: Fuente más grande */
+    padding: 40px; /* <-- MEJORA DE DISEÑO: Más padding */
     color: var(--text, #333);
+    font-weight: bold;
 }
 
 .error-message {
     color: var(--danger, #dc3545);
-    font-weight: bold;
+    background-color: rgba(220, 53, 69, 0.1);
+    border-radius: 10px;
+    border: 1px solid var(--danger, #dc3545);
 }
 
 /* Media Queries */
 @media (max-width: 768px) {
-    .canchas-list-title {
-        font-size: 2.2em;
+    .complejos-title {
+        font-size: 2.5em;
     }
-    .canchas-container {
+    .complejos-subtitle {
+        font-size: 1.2em;
+    }
+    .complejos-container {
         padding: 20px 15px;
         margin: 30px auto;
     }
 }
 
 @media (max-width: 480px) {
-    .canchas-list-title {
-        font-size: 1.8em;
+    .complejos-title {
+        font-size: 2em;
+    }
+    .complejos-subtitle {
+        font-size: 1em;
     }
     .complejos-grid {
-        grid-template-columns: 1fr; 
+        grid-template-columns: 1fr;
+    }
+    .no-complejos-message {
+        font-size: 1.1em;
     }
 }
