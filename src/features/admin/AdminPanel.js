@@ -104,7 +104,7 @@ function AdminPanel() {
         setMensaje({ text: '', type: '' });
         try {
             const endpoint = isAdmin ? '/complejos' : '/complejos/mis-complejos';
-            // Esperamos Complejo del backend (con propietario cargado por JOIN FETCH)
+            // Aquí el backend devuelve la entidad Complejo con el propietario cargado
             const res = await api.get(endpoint);
             setComplejos(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
@@ -120,19 +120,19 @@ function AdminPanel() {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            // El backend debe tener un endpoint para COMPLEX_OWNER si no lo tiene ya.
-            // Por ahora, usa la ruta de ADMIN si no hay una específica para COMPLEX_OWNER.
-            const endpoint = isAdmin ? '/reservas/admin/todas' : '/reservas/complejo/mis-reservas'; // Ajustar según tu backend real para COMPLEX_OWNER
+            // Asumiendo que el endpoint '/reservas/complejo/mis-reservas' existe y funciona para COMPLEX_OWNER
+            // Si no existe en el backend, debes crearlo o usar solo la ruta de admin.
+            const endpoint = isAdmin ? '/reservas/admin/todas' : '/reservas/complejo/mis-reservas';
             const res = await api.get(endpoint);
             setReservas(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Error al obtener reservas:', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Error al cargar la lista de reservas.';
+            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al cargar la lista de reservas.';
             setMensaje({ text: errorMsg, type: 'error' });
         } finally {
             setIsLoadingData(false);
         }
-    }, [isAdmin]);
+    }, [isAdmin]); // Dependencia isAdmin
 
     const fetchUsuarios = useCallback(async () => {
         setIsLoadingData(true);
@@ -247,7 +247,7 @@ function AdminPanel() {
             canchaTecho[cancha.tipoCancha] = cancha.techo;
         });
 
-        // Los datos a enviar al backend deben coincidir con la entidad Complejo (sin el propietario, se usa el token)
+        // Los datos a enviar al backend deben coincidir con la entidad Complejo
         const payload = {
             id, // Para la actualización, el ID es importante
             nombre,
@@ -706,7 +706,8 @@ function AdminPanel() {
                                             <tr key={c.id}>
                                                 <td data-label="ID">{c.id}</td>
                                                 <td data-label="Nombre">{c.nombre}</td>
-                                                <td data-label="Propietario">{c.propietario?.username || 'N/A'}</td> {/* Acceder al username del objeto propietario */}
+                                                {/* Aquí accedemos al username del propietario. Si el JOIN FETCH funcionó, esto estará disponible. */}
+                                                <td data-label="Propietario">{c.propietario?.username || 'N/A'}</td> 
                                                 <td data-label="Ubicación">{c.ubicacion || 'N/A'}</td>
                                                 <td data-label="Horario">{c.horarioApertura || 'N/A'} - {c.horarioCierre || 'N/A'}</td>
                                                 <td data-label="Canchas">
@@ -732,7 +733,7 @@ function AdminPanel() {
                 </div>
             )}
 
-            {activeTab === 'reservas' && (isAdmin || isComplexOwner) && ( // Ahora visible para COMPLEX_OWNER
+            {activeTab === 'reservas' && (isAdmin || isComplexOwner) && (
                 <div className="admin-tab-content">
                     <h2>Reservas Registradas</h2>
                     {isLoadingData ? <p>Cargando reservas...</p> : (
