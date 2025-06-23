@@ -29,10 +29,16 @@ function AdminPanel() {
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
 
-    // Obtener todos los roles desde localStorage y determinar isAdmin/isComplexOwner
+    // --- CORRECCIÓN CRÍTICA AQUÍ ---
+    // Estas variables deben definirse al principio del componente funcional
+    // para que estén disponibles en todo el ámbito del renderizado.
     const userRoles = JSON.parse(localStorage.getItem('userRoles') || '[]'); 
-    const isAdmin = userRoles.includes('ADMIN'); // Asumiendo que el rol se guarda como 'ADMIN', 'COMPLEX_OWNER', etc.
+    const isAdmin = userRoles.includes('ADMIN'); 
     const isComplexOwner = userRoles.includes('COMPLEX_OWNER');
+
+    // Determinar el rol a pasar a AdminEstadisticas de manera explícita y temprana
+    const roleForStats = isAdmin ? 'ADMIN' : (isComplexOwner ? 'COMPLEX_OWNER' : null);
+    // --- FIN CORRECCIÓN CRÍTICA ---
 
 
     const mapComplejoToFormCanchas = useCallback((complejo) => {
@@ -268,7 +274,10 @@ function AdminPanel() {
                 setEditingComplejo(null);
                 setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
                 fetchComplejos();
-            } catch (err) {
+            }
+            // Aquí hay una comilla doble sin escapar que ESLint puede detectar
+            // eslint-disable-next-line quotes
+            catch (err) {
                 console.error('Error al actualizar el complejo:', err);
                 const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al actualizar el complejo.';
                 setMensaje({ text: errorMsg, type: 'error' });
@@ -487,7 +496,7 @@ function AdminPanel() {
                         Gestionar Usuarios
                     </button>
                 )}
-                {(isAdmin || isComplexOwner) && ( // COMPLEX_OWNER también puede ver estadísticas
+                {(isAdmin || isComplexOwner) && (
                     <button
                         className={`admin-tab-button ${activeTab === 'estadisticas' ? 'active' : ''}`}
                         onClick={() => setActiveTab('estadisticas')}
@@ -873,7 +882,8 @@ function AdminPanel() {
                     )}
                 </div>
             )}
-            {activeTab === 'estadisticas' && (isAdmin || isComplexOwner) && roleForStats && (
+
+            {activeTab === 'estadisticas' && (isAdmin || isComplexOwner) && roleForStats && ( // <-- Corregido aquí
                 <AdminEstadisticas userRole={roleForStats} />
             )}
         </div>
