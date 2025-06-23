@@ -57,7 +57,7 @@ a:hover {
 .hero {
     position: relative;
     height: 600px; /* Puedes ajustar la altura según tus necesidades */
-    background-color: #343a40; /* Puedes usar este color (gris oscuro) o cualquier otro color sólido */
+    background-color: #343a40; /* Usando un color sólido */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -72,7 +72,7 @@ a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Oscurece la imagen de fondo */
+    background-color: rgba(0, 0, 0, 0.6); /* Oscurece el fondo */
     z-index: 1;
 }
 
@@ -341,7 +341,7 @@ a:hover {
 .cta {
     position: relative;
     padding: 100px 0;
-    background-color: var(--primary-dark);
+    background-color: var(--primary-dark); /* Color sólido para el CTA */
     color: white;
     text-align: center;
 }
@@ -375,12 +375,12 @@ a:hover {
     margin-bottom: 40px;
 }
 
-/* NUEVA: Sección de FAQ en Home */
-.faq-preview {
+/* ELIMINADO: Sección de FAQ en Home */
+/* .faq-preview {
     padding: 80px 0;
     background-color: var(--background-light);
     text-align: center;
-    border-top: 1px solid var(--border-light); /* Separador visual */
+    border-top: 1px solid var(--border-light);
 }
 
 .faq-preview h2 {
@@ -416,7 +416,7 @@ a:hover {
     background-color: var(--primary);
     color: white;
     transform: translateY(-2px);
-}
+} */
 
 
 /* WhatsApp Button */
@@ -453,52 +453,64 @@ a:hover {
 
 .footer-content {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start; /* Alinea los elementos al inicio */
+    justify-content: space-around; /* Distribuye espacio entre elementos */
+    align-items: center; /* Centra verticalmente */
     flex-wrap: wrap;
     gap: 30px;
     margin-bottom: 30px;
 }
 
-.footer-logo {
-    flex: 1;
-    min-width: 200px;
-    text-align: left;
+.footer-logo-link {
+    text-decoration: none; /* Elimina subrayado por defecto */
+    display: flex; /* Para alinear el span correctamente */
+    align-items: center;
 }
 
-.footer-logo h3 {
+.footer-logo-link h3 {
     font-size: 1.8em;
-    color: var(--primary-light);
-    margin-bottom: 15px;
+    color: white; /* Color blanco para el texto base */
+    margin: 0; /* Elimina márgenes extra */
+    font-weight: 700; /* Igual que en Navbar */
+    letter-spacing: -1px; /* Igual que en Navbar */
 }
 
-.footer-links {
-    flex: 1;
-    min-width: 200px;
+.footer-logo-span {
+    color: var(--primary-light); /* Resalta la palabra "JUEGO" */
+    font-weight: 800; /* Más peso para la palabra resaltada */
+}
+
+.footer-links-group {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Alinea enlaces a la izquierda */
+    flex-direction: row; /* Enlaces en fila */
+    flex-wrap: wrap; /* Permite que se envuelvan */
+    justify-content: center; /* Centra los enlaces */
+    gap: 20px; /* Espacio entre los enlaces */
+    list-style: none; /* Quita las viñetas por si acaso */
+    padding: 0;
+    margin: 0;
 }
 
-.footer-links a {
-    color: white;
-    margin-bottom: 10px;
-    transition: color 0.3s ease;
+.footer-link {
+    color: white; /* Color blanco para los enlaces del footer */
     font-size: 1em;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-family: 'Poppins', sans-serif; /* Mismo font que el body/Navbar */
+    font-weight: 600; /* Mismo peso que los links del Navbar */
+    text-transform: uppercase; /* Mismo que el Navbar */
+    white-space: nowrap; /* Evita que el texto se rompa */
 }
 
-.footer-links a:hover {
-    color: var(--primary-light);
+.footer-link:hover {
+    color: var(--primary-light); /* Hover igual que en Navbar */
 }
-
-/* ELIMINADO: .footer-social (ya no hay iconos de redes sociales) */
 
 
 .footer-bottom {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 20px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Centrar el copyright */
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
@@ -508,27 +520,11 @@ a:hover {
     font-size: 0.9em;
     color: rgba(255, 255, 255, 0.7);
     margin: 0;
-    flex: 1;
-    text-align: left; /* Alinea copyright a la izquierda */
+    flex: none; /* Para que no ocupe todo el espacio y se centre mejor */
+    text-align: center; /* Centra el texto */
 }
 
-.footer-nav {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    gap: 20px;
-}
-
-.footer-nav li a {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9em;
-    transition: color 0.3s ease;
-}
-
-.footer-nav li a:hover {
-    color: white;
-}
+/* ELIMINADO: .footer-nav y sus elementos li a */
 
 
 /* Media Queries */
@@ -569,9 +565,11 @@ a:hover {
         align-items: center;
         text-align: center;
     }
-    .footer-logo, .footer-links {
-        text-align: center;
-        align-items: center;
+    .footer-logo-link {
+        margin-bottom: 20px; /* Espacio debajo del logo en móvil */
+    }
+    .footer-links-group {
+        text-align: center; /* Centra los enlaces si se envuelven */
     }
     .footer-bottom {
         flex-direction: column;
@@ -593,10 +591,10 @@ a:hover {
     .hero-content p {
         font-size: 1.1em;
     }
-    .how, .platform-preview, .benefits, .cta, .faq-preview {
+    .how, .platform-preview, .benefits, .cta { /* Se elimina .faq-preview de aquí */
         padding: 60px 0;
     }
-    .how h2, .benefits h2, .cta-content h2, .faq-preview h2 {
+    .how h2, .benefits h2, .cta-content h2 { /* Se elimina .faq-preview h2 de aquí */
         font-size: 2.2em;
     }
     .how .step, .benefit {
@@ -625,13 +623,13 @@ a:hover {
     .btn-main, .btn-secondary {
         width: 100%;
     }
-    .how h2, .platform-content h2, .benefits h2, .cta-content h2, .faq-preview h2 {
+    .how h2, .platform-content h2, .benefits h2, .cta-content h2 { /* Se elimina .faq-preview h2 de aquí */
         font-size: 1.8em;
     }
     .step-content h4, .benefit-content h4 {
         font-size: 1.4em;
     }
-    .footer-links {
+    .footer-links-group {
         width: 100%;
     }
 }
