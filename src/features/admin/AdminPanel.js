@@ -6,6 +6,12 @@ import './AdminPanel.css';
 // Estado inicial para un formulario de COMPLEJO nuevo
 const estadoInicialComplejoAdmin = {
     nombre: '',
+    descripcion: '',
+    ubicacion: '',
+    telefono: '',
+    fotoUrl: '',
+    horarioApertura: '10:00', // Valor por defecto
+    horarioCierre: '23:00',   // Valor por defecto
     emailPropietario: '',
     canchas: [{ tipoCancha: '', cantidad: '', precioHora: '', superficie: '', iluminacion: false, techo: false }]
 };
@@ -23,21 +29,42 @@ function AdminPanel() {
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
 
-    const userRole = localStorage.getItem('userRole');
+    // Obtener todos los roles desde localStorage y determinar isAdmin/isComplexOwner
+    const userRoles = JSON.parse(localStorage.getItem('userRoles') || '[]'); 
+    const isAdmin = userRoles.includes('ADMIN'); // Asumiendo que el rol se guarda como 'ADMIN', 'COMPLEX_OWNER', etc.
+    const isComplexOwner = userRoles.includes('COMPLEX_OWNER');
+
 
     const mapComplejoToFormCanchas = useCallback((complejo) => {
         const canchasArray = [];
-        if (complejo.canchaCounts) {
-            Object.keys(complejo.canchaCounts).forEach(tipoCancha => {
+        const tiposExistentes = new Set(); // Para evitar duplicados en el formulario
+        
+        // Iterar sobre los mapas y combinarlos
+        const allCanchaTypes = new Set([
+            ...Object.keys(complejo.canchaCounts || {}),
+            ...Object.keys(complejo.canchaPrices || {}),
+            ...Object.keys(complejo.canchaSurfaces || {}),
+            ...Object.keys(complejo.canchaIluminacion || {}),
+            ...Object.keys(complejo.canchaTecho || {})
+        ]);
+
+        allCanchaTypes.forEach(tipoCancha => {
+            if (!tiposExistentes.has(tipoCancha)) {
                 canchasArray.push({
                     tipoCancha: tipoCancha,
-                    cantidad: complejo.canchaCounts[tipoCancha] || 0,
-                    precioHora: complejo.canchaPrices[tipoCancha] || 0,
-                    superficie: complejo.canchaSurfaces[tipoCancha] || '',
-                    iluminacion: complejo.canchaIluminacion[tipoCancha] || false,
-                    techo: complejo.canchaTecho[tipoCancha] || false
+                    cantidad: complejo.canchaCounts?.[tipoCancha] || '',
+                    precioHora: complejo.canchaPrices?.[tipoCancha] || '',
+                    superficie: complejo.canchaSurfaces?.[tipoCancha] || '',
+                    iluminacion: complejo.canchaIluminacion?.[tipoCancha] || false,
+                    techo: complejo.canchaTecho?.[tipoCancha] || false
                 });
-            });
+                tiposExistentes.add(tipoCancha);
+            }
+        });
+        
+        // Si no hay canchas configuradas, añadir una vacía por defecto para el formulario
+        if (canchasArray.length === 0) {
+            canchasArray.push({ tipoCancha: '', cantidad: '', precioHora: '', superficie: '', iluminacion: false, techo: false });
         }
         return canchasArray;
     }, []);
@@ -45,10 +72,15 @@ function AdminPanel() {
     useEffect(() => {
         if (editingComplejo) {
             setNuevoComplejoAdmin({
-                ...editingComplejo,
-                emailPropietario: editingComplejo.propietario?.username || '',
+                id: editingComplejo.id, // Asegurarse de tener el ID para la actualización
+                nombre: editingComplejo.nombre || '',
+                descripcion: editingComplejo.descripcion || '',
+                ubicacion: editingComplejo.ubicacion || '',
+                telefono: editingComplejo.telefono || '',
+                fotoUrl: editingComplejo.fotoUrl || '',
                 horarioApertura: editingComplejo.horarioApertura ? editingComplejo.horarioApertura.substring(0, 5) : '10:00',
                 horarioCierre: editingComplejo.horarioCierre ? editingComplejo.horarioCierre.substring(0, 5) : '23:00',
+                emailPropietario: editingComplejo.propietario?.username || '', // Solo para referencia, no se edita aquí
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
         } else {
@@ -71,10 +103,10 @@ function AdminPanel() {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            let res;
-            // <-- CAMBIO: ComplejoServicio ahora filtra complejos por rol -->
-            // ADMIN obtiene todos, COMPLEX_OWNER solo los suyos.
-            res = await api.get('/complejos'); // Este endpoint ya maneja la lógica de rol en el backend
+            // El endpoint /api/complejos/mis-complejos ya filtra por propietario si el usuario es COMPLEX_OWNER
+            // Si es ADMIN, el endpoint /api/complejos devuelve todos.
+            const endpoint = isAdmin ? '/complejos' : '/complejos/mis-complejos';
+            const res = await api.get(endpoint);
             setComplejos(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Error al obtener complejos:', err);
@@ -83,13 +115,15 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, [userRole]); // Dependencia del userRole para fetchComplejos
+    }, [isAdmin]);
 
     const fetchReservas = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            const res = await api.get('/reservas/admin/todas');
+            // Obtener reservas: ADMIN ve todas, COMPLEX_OWNER ve solo las de sus complejos.
+            const endpoint = isAdmin ? '/reservas/admin/todas' : '/reservas/complejo'; // Asume que este último existe o se implementará
+            const res = await api.get(endpoint);
             setReservas(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Error al obtener reservas:', err);
@@ -98,15 +132,14 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, []);
+    }, [isAdmin]);
 
     const fetchUsuarios = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            if (userRole === 'ADMIN') {
-                // <-- CAMBIO: Obtener todos los usuarios, UsuarioServicio.findAllUsers() ya no filtra por enabled -->
-                const res = await api.get('/users'); // El endpoint /users ahora lista todos los usuarios
+            if (isAdmin) {
+                const res = await api.get('/users');
                 setUsuarios(Array.isArray(res.data) ? res.data : []);
             } else {
                 setUsuarios([]); // Otros roles no ven la lista de usuarios
@@ -118,7 +151,7 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, [userRole]);
+    }, [isAdmin]);
 
     useEffect(() => {
         const token = localStorage.getItem('jwtToken');
@@ -127,17 +160,16 @@ function AdminPanel() {
             return;
         }
 
-        // <-- CAMBIO: Ajustar la carga inicial de datos según la pestaña activa y el rol -->
         if (activeTab === 'complejos') {
             fetchComplejos();
-        } else if (activeTab === 'reservas' && userRole === 'ADMIN') {
+        } else if (activeTab === 'reservas') { // Ahora COMPLEX_OWNER también puede ver reservas
             fetchReservas();
-        } else if (activeTab === 'usuarios' && userRole === 'ADMIN') {
+        } else if (activeTab === 'usuarios' && isAdmin) { // Solo ADMIN puede ver usuarios
             fetchUsuarios();
         } else if (activeTab === 'estadisticas') {
-            // No necesita un fetch explícito aquí porque AdminEstadisticas lo hace internamente
+            // AdminEstadisticas se encarga de su propia carga de datos
         }
-    }, [activeTab, fetchComplejos, fetchReservas, fetchUsuarios, userRole]);
+    }, [activeTab, fetchComplejos, fetchReservas, fetchUsuarios, isAdmin]);
 
 
     const handleComplejoFormChange = (e) => {
@@ -180,14 +212,23 @@ function AdminPanel() {
             setMensaje({ text: 'El nombre del complejo es obligatorio.', type: 'error' });
             return;
         }
+        if (!ubicacion?.trim()) {
+            setMensaje({ text: 'La ubicación del complejo es obligatoria.', type: 'error' });
+            return;
+        }
+        if (!horarioApertura || !horarioCierre) {
+            setMensaje({ text: 'Los horarios de apertura y cierre son obligatorios.', type: 'error' });
+            return;
+        }
 
-        if (userRole === 'ADMIN' && !editingComplejo && !emailPropietario?.trim()) {
+        if (!editingComplejo && isAdmin && !emailPropietario?.trim()) { // Solo para nuevos complejos creados por ADMIN
             setMensaje({ text: 'El email del propietario es obligatorio para nuevos complejos (Administrador).', type: 'error' });
             return;
         }
 
-        if (canchas.length === 0 || canchas.some(c => !c.tipoCancha?.trim() || isNaN(parseFloat(c.precioHora)) || parseFloat(c.precioHora) <= 0 || isNaN(parseInt(c.cantidad, 10)) || parseInt(c.cantidad, 10) <= 0 || !c.superficie?.trim())) {
-            setMensaje({ text: 'Todas las canchas deben tener un tipo, cantidad, precio, y superficie válidos.', type: 'error' });
+        const formattedCanchas = canchas.filter(c => c.tipoCancha.trim() !== ''); // Filtrar canchas vacías
+        if (formattedCanchas.length === 0 || formattedCanchas.some(c => !c.tipoCancha?.trim() || isNaN(parseFloat(c.precioHora)) || parseFloat(c.precioHora) <= 0 || isNaN(parseInt(c.cantidad, 10)) || parseInt(c.cantidad, 10) <= 0 || !c.superficie?.trim())) {
+            setMensaje({ text: 'Todos los tipos de canchas deben tener un tipo, cantidad, precio, y superficie válidos.', type: 'error' });
             return;
         }
 
@@ -197,24 +238,22 @@ function AdminPanel() {
         const canchaIluminacion = {};
         const canchaTecho = {};
 
-        canchas.forEach(cancha => {
-            if (cancha.tipoCancha.trim()) {
-                canchaCounts[cancha.tipoCancha] = parseInt(cancha.cantidad, 10);
-                canchaPrices[cancha.tipoCancha] = parseFloat(cancha.precioHora);
-                canchaSurfaces[cancha.tipoCancha] = cancha.superficie;
-                canchaIluminacion[cancha.tipoCancha] = cancha.iluminacion;
-                canchaTecho[cancha.tipoCancha] = cancha.techo;
-            }
+        formattedCanchas.forEach(cancha => {
+            canchaCounts[cancha.tipoCancha] = parseInt(cancha.cantidad, 10);
+            canchaPrices[cancha.tipoCancha] = parseFloat(cancha.precioHora);
+            canchaSurfaces[cancha.tipoCancha] = cancha.superficie;
+            canchaIluminacion[cancha.tipoCancha] = cancha.iluminacion;
+            canchaTecho[cancha.tipoCancha] = cancha.techo;
         });
 
         const complejoData = {
             nombre,
-            descripcion: descripcion || '',
-            ubicacion: ubicacion || '',
-            telefono: telefono || '',
-            fotoUrl: fotoUrl || '',
-            horarioApertura: horarioApertura || '10:00',
-            horarioCierre: horarioCierre || '23:00',
+            descripcion: descripcion || null,
+            ubicacion: ubicacion,
+            telefono: telefono || null,
+            fotoUrl: fotoUrl || null,
+            horarioApertura: horarioApertura,
+            horarioCierre: horarioCierre,
             canchaCounts,
             canchaPrices,
             canchaSurfaces,
@@ -236,19 +275,8 @@ function AdminPanel() {
             }
         } else {
             const crearComplejoRequest = {
-                nombre: nombre,
-                propietarioUsername: emailPropietario,
-                canchaCounts,
-                canchaPrices,
-                canchaSurfaces,
-                canchaIluminacion,
-                canchaTecho,
-                descripcion: descripcion || '',
-                ubicacion: ubicacion || '',
-                telefono: telefono || '',
-                fotoUrl: fotoUrl || '',
-                horarioApertura: horarioApertura || '10:00',
-                horarioCierre: horarioCierre || '23:00',
+                ...complejoData,
+                propietarioUsername: emailPropietario // Solo para la creación por ADMIN
             };
 
             try {
@@ -264,31 +292,8 @@ function AdminPanel() {
         }
     };
     
-    const handleDeleteTipoCancha = async (tipo) => {
-        if (window.confirm(`¿Estás seguro de eliminar el tipo de cancha "${tipo}" del complejo "${editingComplejo.nombre}"? Esta acción es irreversible.`)) {
-            setMensaje({ text: '', type: '' });
-            if (!editingComplejo) return;
-
-            const updatedComplejo = { ...editingComplejo };
-
-            if (updatedComplejo.canchaCounts) delete updatedComplejo.canchaCounts[tipo];
-            if (updatedComplejo.canchaPrices) delete updatedComplejo.canchaPrices[tipo];
-            if (updatedComplejo.canchaSurfaces) delete updatedComplejo.canchaSurfaces[tipo];
-            if (updatedComplejo.canchaIluminacion) delete updatedComplejo.canchaIluminacion[tipo];
-            if (updatedComplejo.canchaTecho) delete updatedComplejo.canchaTecho[tipo];
-
-            try {
-                await api.put(`/complejos/${updatedComplejo.id}`, updatedComplejo);
-                setMensaje({ text: `Tipo de cancha "${tipo}" eliminado correctamente.`, type: 'success' });
-                fetchComplejos();
-                setEditingComplejo(updatedComplejo);
-            } catch (err) {
-                console.error('Error al eliminar el tipo de cancha:', err);
-                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el tipo de cancha.';
-                setMensaje({ text: errorMsg, type: 'error' });
-            }
-        }
-    };
+    // No se necesita `handleDeleteTipoCancha` ya que la edición maneja la actualización del mapa completo.
+    // Si un tipo de cancha se elimina del formulario, al guardar se enviará el mapa sin ese tipo.
 
     const startEditingComplejo = (complejoParaEditar) => {
         setEditingComplejo(complejoParaEditar);
@@ -362,6 +367,7 @@ function AdminPanel() {
 
     const startManagingUserRoles = (user) => {
         setManagingUserRoles(user);
+        // Asegúrate de que los roles se transformen correctamente a un array de strings simples
         const currentRoles = user.authorities ? user.authorities.map(auth => auth.authority.replace('ROLE_', '')) : [];
         setSelectedRoles(currentRoles);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -375,12 +381,22 @@ function AdminPanel() {
     const handleRoleChange = (e) => {
         const { value, checked } = e.target;
         setSelectedRoles(prevRoles => {
-            if (checked) {
+            // Lógica para asegurar que ADMIN y COMPLEX_OWNER sean excluyentes
+            if (value === 'ADMIN' && checked) {
+                return ['ADMIN'].concat(prevRoles.filter(role => role !== 'COMPLEX_OWNER' && role !== 'ADMIN' && role !== 'USER')); // Solo ADMIN, y si tenía USER, mantenerlo.
+            } else if (value === 'COMPLEX_OWNER' && checked) {
+                return ['COMPLEX_OWNER'].concat(prevRoles.filter(role => role !== 'ADMIN' && role !== 'COMPLEX_OWNER' && role !== 'USER')); // Solo COMPLEX_OWNER, y si tenía USER, mantenerlo.
+            } else if (value === 'USER' && checked) {
+                 // Si se marca USER, asegúrate de que no se eliminen ADMIN/COMPLEX_OWNER si ya están seleccionados
+                if (prevRoles.includes('ADMIN') || prevRoles.includes('COMPLEX_OWNER')) {
+                    return prevRoles;
+                }
                 return [...prevRoles, value];
             } else {
+                // Si se desmarca, simplemente lo filtra
                 return prevRoles.filter(role => role !== value);
             }
-        });
+        }).filter(Boolean); // Elimina cualquier valor nulo o indefinido que pueda quedar
     };
 
     const handleSaveUserRoles = async () => {
@@ -388,8 +404,14 @@ function AdminPanel() {
         if (!managingUserRoles) return;
 
         try {
-            const rolesToSend = selectedRoles.map(role => `ROLE_${role}`);
-            await api.put(`/users/${managingUserRoles.id}/roles`, rolesToSend);
+            // Asegúrate de que si solo queda USER o si no hay roles, se mande USER
+            let rolesToActualSend = selectedRoles.length === 0 ? ['ROLE_USER'] : selectedRoles.map(role => `ROLE_${role}`);
+            
+            // Si solo se selecciona USER pero antes tenía ADMIN/COMPLEX_OWNER, 
+            // esto podría llevar a un problema si el backend no lo maneja para limpiar.
+            // La lógica en el backend ya debería manejar la exclusividad entre ADMIN y COMPLEX_OWNER.
+            
+            await api.put(`/users/${managingUserRoles.id}/roles`, rolesToActualSend);
             
             setMensaje({ text: `Roles de ${managingUserRoles.username} actualizados correctamente.`, type: 'success' });
             fetchUsuarios(); // Vuelve a cargar la lista de usuarios para reflejar los cambios
@@ -402,12 +424,11 @@ function AdminPanel() {
         }
     };
 
-    // <-- NUEVA FUNCIÓN: handleActivateUser -->
     const handleActivateUser = async (userId, username) => {
         if (window.confirm(`¿Estás seguro de activar la cuenta del usuario ${username}?`)) {
             setMensaje({ text: '', type: '' });
             try {
-                await api.put(`/auth/admin/users/${userId}/activate`);
+                await api.put(`/users/admin/users/${userId}/activate`); // Endpoint ajustado
                 setMensaje({ text: `Cuenta de ${username} activada correctamente.`, type: 'success' });
                 fetchUsuarios(); // Vuelve a cargar la lista de usuarios para actualizar el estado 'Activo'
             } catch (err) {
@@ -416,11 +437,6 @@ function AdminPanel() {
                 setMensaje({ text: errorMsg, type: 'error' });
             }
         }
-    };
-
-    const getCanchaTypesFromComplejo = (complejo) => {
-        if (!complejo || !complejo.canchaCounts) return [];
-        return Object.keys(complejo.canchaCounts);
     };
 
     const handleDeleteComplejo = async (id) => {
@@ -453,7 +469,7 @@ function AdminPanel() {
                 >
                     Gestionar Complejos
                 </button>
-                {userRole === 'ADMIN' && (
+                {(isAdmin || isComplexOwner) && ( // COMPLEX_OWNER también puede ver sus reservas
                     <button
                         className={`admin-tab-button ${activeTab === 'reservas' ? 'active' : ''}`}
                         onClick={() => setActiveTab('reservas')}
@@ -462,7 +478,7 @@ function AdminPanel() {
                         Gestionar Reservas
                     </button>
                 )}
-                {userRole === 'ADMIN' && (
+                {isAdmin && ( // Solo ADMIN ve usuarios
                     <button
                         className={`admin-tab-button ${activeTab === 'usuarios' ? 'active' : ''}`}
                         onClick={() => setActiveTab('usuarios')}
@@ -471,71 +487,70 @@ function AdminPanel() {
                         Gestionar Usuarios
                     </button>
                 )}
-                <button
-                    className={`admin-tab-button ${activeTab === 'estadisticas' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('estadisticas')}
-                    disabled={isLoadingData}
-                >
-                    Ver Estadísticas
-                </button>
+                {(isAdmin || isComplexOwner) && ( // COMPLEX_OWNER también puede ver estadísticas
+                    <button
+                        className={`admin-tab-button ${activeTab === 'estadisticas' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('estadisticas')}
+                        disabled={isLoadingData}
+                    >
+                        Ver Estadísticas
+                    </button>
+                )}
             </div>
 
             {activeTab === 'complejos' && (
                 <div className="admin-tab-content">
                     <h2>{editingComplejo ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
 
-                    {userRole === 'ADMIN' && (
-                        <p className="info-message">Como Administrador General, puedes crear y editar cualquier complejo. Los complejos creados por ti también te pertenecerán por defecto, pero puedes asignarlos a otro propietario al crearlos.</p>
+                    {isAdmin && (
+                        <p className="info-message">Como Administrador General, puedes crear y editar cualquier complejo. Puedes asignarlos a un propietario existente.</p>
                     )}
-                    {userRole === 'COMPLEX_OWNER' && (
+                    {isComplexOwner && !editingComplejo && (
                         <p className="info-message">Como Dueño de Complejo, puedes gestionar solo los complejos que te pertenecen. Selecciona un complejo de la lista para editarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
                     )}
 
-                    {userRole === 'ADMIN' || (userRole === 'COMPLEX_OWNER' && editingComplejo) ? (
+                    {(isAdmin || (isComplexOwner && editingComplejo)) ? (
                         <form className="admin-complejo-form" onSubmit={handleSaveComplejo}>
                             <h3>Datos Generales del Complejo</h3>
                             <div className="admin-form-group">
                                 <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
-                                <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre || ''} onChange={handleComplejoFormChange} required placeholder='Ej: El Alargue' />
+                                <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre} onChange={handleComplejoFormChange} required placeholder='Ej: El Alargue' />
                             </div>
 
-                            {userRole === 'ADMIN' && !editingComplejo && (
+                            {isAdmin && !editingComplejo && ( // Solo el ADMIN puede asignar propietario al crear
                                 <div className="admin-form-group">
                                     <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
-                                    <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario || ''} onChange={handleComplejoFormChange} required placeholder='dueño@ejemplo.com' />
-                                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol &quot;COMPLEX_OWNER&quot; si no lo tiene.</p>
+                                    <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo && isAdmin} placeholder='dueño@ejemplo.com' />
+                                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol "COMPLEX_OWNER" si no lo tiene.</p>
                                 </div>
                             )}
-
-                            {editingComplejo && (
-                                <>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="descripcion">Descripción:</label>
-                                        <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion || ''} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
-                                        <input type="text" id="ubicacion" name="ubicacion" value={nuevoComplejoAdmin.ubicacion || ''} onChange={handleComplejoFormChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="telefono">Teléfono:</label>
-                                        <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono || ''} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="fotoUrl">URL de Foto Principal:</label>
-                                        <input type="url" id="fotoUrl" name="fotoUrl" value={nuevoComplejoAdmin.fotoUrl || ''} onChange={handleComplejoFormChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="horarioApertura">Horario Apertura: <span className="obligatorio">*</span></label>
-                                        <input type="time" id="horarioApertura" name="horarioApertura" value={nuevoComplejoAdmin.horarioApertura || ''} onChange={handleComplejoFormChange} required />
-                                    </div>
-                                    <div className="admin-form-group">
-                                        <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
-                                        <input type="time" id="horarioCierre" name="horarioCierre" value={nuevoComplejoAdmin.horarioCierre || ''} onChange={handleComplejoFormChange} required />
-                                    </div>
-                                </>
-                            )}
-
+                            
+                            {/* Campos para editar (siempre visibles en modo edición, y para crear si es ADMIN) */}
+                            <div className="admin-form-group">
+                                <label htmlFor="descripcion">Descripción:</label>
+                                <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
+                            </div>
+                            <div className="admin-form-group">
+                                <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
+                                <input type="text" id="ubicacion" name="ubicacion" value={nuevoComplejoAdmin.ubicacion} onChange={handleComplejoFormChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
+                            </div>
+                            <div className="admin-form-group">
+                                <label htmlFor="telefono">Teléfono:</label>
+                                <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
+                            </div>
+                            <div className="admin-form-group">
+                                <label htmlFor="fotoUrl">URL de Foto Principal:</label>
+                                <input type="url" id="fotoUrl" name="fotoUrl" value={nuevoComplejoAdmin.fotoUrl} onChange={handleComplejoFormChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
+                            </div>
+                            <div className="admin-form-group">
+                                <label htmlFor="horarioApertura">Horario Apertura: <span className="obligatorio">*</span></label>
+                                <input type="time" id="horarioApertura" name="horarioApertura" value={nuevoComplejoAdmin.horarioApertura} onChange={handleComplejoFormChange} required />
+                            </div>
+                            <div className="admin-form-group">
+                                <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
+                                <input type="time" id="horarioCierre" name="horarioCierre" value={nuevoComplejoAdmin.horarioCierre} onChange={handleComplejoFormChange} required />
+                            </div>
+                            
                             <h3>Detalles de Canchas</h3>
                             <div className="canchas-dinamicas-container">
                                 {nuevoComplejoAdmin.canchas.map((cancha, index) => (
@@ -646,13 +661,13 @@ function AdminPanel() {
                             </div>
                         </form>
                     ) : (
-                        userRole === 'COMPLEX_OWNER' && !editingComplejo && (
+                        isComplexOwner && !editingComplejo && (
                             <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
                         )
                     )}
 
                     <div className="admin-list-container">
-                        <h3>{userRole === 'ADMIN' ? 'Todos los Complejos' : 'Mis Complejos'}</h3>
+                        <h3>{isAdmin ? 'Todos los Complejos' : 'Mis Complejos'}</h3>
                         {isLoadingData ? <p>Cargando complejos...</p> : (
                             <div className="admin-table-container">
                                 <table>
@@ -698,7 +713,7 @@ function AdminPanel() {
                 </div>
             )}
 
-            {activeTab === 'reservas' && userRole === 'ADMIN' && (
+            {activeTab === 'reservas' && (isAdmin || isComplexOwner) && ( // Ahora visible para COMPLEX_OWNER
                 <div className="admin-tab-content">
                     <h2>Reservas Registradas</h2>
                     {isLoadingData ? <p>Cargando reservas...</p> : (
@@ -762,7 +777,7 @@ function AdminPanel() {
                 </div>
             )}
 
-            {activeTab === 'usuarios' && userRole === 'ADMIN' && (
+            {activeTab === 'usuarios' && isAdmin && (
                 <div className="admin-tab-content">
                     <h2>Gestionar Usuarios y Roles</h2>
                     {isLoadingData ? <p>Cargando usuarios...</p> : (
@@ -821,18 +836,35 @@ function AdminPanel() {
                             <h3>Gestionar Roles para: {managingUserRoles.username}</h3>
                             <div className="form-group checkbox-group">
                                 <label>
-                                    <input type="checkbox" value="USER" checked={selectedRoles.includes('USER')} onChange={handleRoleChange} />
+                                    <input 
+                                        type="checkbox" 
+                                        value="USER" 
+                                        checked={selectedRoles.includes('USER')} 
+                                        onChange={handleRoleChange} 
+                                    />
                                     Usuario Estándar
                                 </label>
                                 <label>
-                                    <input type="checkbox" value="COMPLEX_OWNER" checked={selectedRoles.includes('COMPLEX_OWNER')} onChange={handleRoleChange} />
+                                    <input 
+                                        type="checkbox" 
+                                        value="COMPLEX_OWNER" 
+                                        checked={selectedRoles.includes('COMPLEX_OWNER')} 
+                                        onChange={handleRoleChange} 
+                                    />
                                     Dueño de Complejo
                                 </label>
                                 <label>
-                                    <input type="checkbox" value="ADMIN" checked={selectedRoles.includes('ADMIN')} onChange={handleRoleChange} disabled={true} />
-                                    Administrador General (gestión manual)
+                                    <input 
+                                        type="checkbox" 
+                                        value="ADMIN" 
+                                        checked={selectedRoles.includes('ADMIN')} 
+                                        onChange={handleRoleChange} 
+                                    />
+                                    Administrador General
                                 </label>
                             </div>
+                            <p className="small-info">Un usuario no puede tener los roles ADMIN y DUEÑO_COMPLEJO al mismo tiempo. Al seleccionar uno, el otro se desmarcará automáticamente.</p>
+
                             <div className="admin-form-buttons">
                                 <button className="admin-btn-save" onClick={handleSaveUserRoles}>Guardar Roles</button>
                                 <button className="admin-btn-cancel" onClick={cancelManagingUserRoles}>Cancelar</button>
@@ -841,9 +873,8 @@ function AdminPanel() {
                     )}
                 </div>
             )}
-
-            {activeTab === 'estadisticas' && (
-                <AdminEstadisticas userRole={userRole} />
+            {activeTab === 'estadisticas' && (isAdmin || isComplexOwner) && roleForStats && (
+                <AdminEstadisticas userRole={roleForStats} />
             )}
         </div>
     );

@@ -23,6 +23,7 @@ import OAuth2Success from './features/auth/OAuth2Success';
 import PagoExitoso from './features/pago/PagoExitoso';
 import PagoFallido from './features/pago/PagoFallido';
 import PagoPendiente from './features/pago/PagoPendiente';
+import FAQPage from './pages/FAQPage/FAQPage'; // <-- NUEVA IMPORTACIÓN DEL COMPONENTE FAQ
 
 import './App.css';
 
@@ -40,15 +41,22 @@ function RedireccionSiAutenticado({ children, destino = "/dashboard" }) {
 // Helper: Ruta Protegida para manejar roles
 function RutaProtegida({ children, rolesRequeridos }) {
     const estaAutenticado = !!localStorage.getItem('jwtToken');
-    const userRole = localStorage.getItem('userRole');
+    const userRole = localStorage.getItem('userRole'); // Obtiene el rol desde localStorage
     const location = useLocation();
 
     if (!estaAutenticado) {
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    if (rolesRequeridos && !rolesRequeridos.includes(userRole)) {
-        console.warn(`Acceso denegado: Rol ${userRole} no autorizado para ${location.pathname}. Roles requeridos: ${rolesRequeridos}`);
+    // Si no se requieren roles específicos, cualquier usuario autenticado puede acceder
+    if (!rolesRequeridos || rolesRequeridos.length === 0) {
+        return children;
+    }
+
+    // Verificar si el rol del usuario está en la lista de roles requeridos
+    if (!rolesRequeridos.includes(userRole)) {
+        console.warn(`Acceso denegado: Rol ${userRole} no autorizado para ${location.pathname}. Roles requeridos: ${rolesRequeridos.join(', ')}`);
+        // Redirige al dashboard si el usuario no tiene el rol necesario
         return <Navigate to="/dashboard" replace />;
     }
 
@@ -65,7 +73,7 @@ function App() {
         localStorage.removeItem('jwtToken');
         localStorage.removeItem('username');
         localStorage.removeItem('nombreCompleto');
-        localStorage.removeItem('userRole');
+        localStorage.removeItem('userRole'); // Asegúrate de limpiar el rol
         setEstaAutenticado(false);
         setNombreUsuario('');
         setUserRole(null);
@@ -75,7 +83,7 @@ function App() {
         localStorage.setItem('jwtToken', token);
         localStorage.setItem('username', usernameFromJwt);
         localStorage.setItem('nombreCompleto', nombreCompletoFromJwt);
-        localStorage.setItem('userRole', roleFromJwt);
+        localStorage.setItem('userRole', roleFromJwt); // Guarda el rol recibido
         setEstaAutenticado(true);
         setNombreUsuario(nombreCompletoFromJwt);
         setUserRole(roleFromJwt);
@@ -85,7 +93,7 @@ function App() {
         const verificarToken = async () => {
             const token = localStorage.getItem('jwtToken');
             const nombre = localStorage.getItem('nombreCompleto');
-            const role = localStorage.getItem('userRole');
+            const role = localStorage.getItem('userRole'); // Lee el rol desde localStorage
 
             if (!token) {
                 setEstaAutenticado(false);
@@ -96,6 +104,7 @@ function App() {
             }
 
             try {
+                // Validación del token en el backend
                 const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/validate-token`, {
                     method: "GET",
                     headers: {
@@ -105,6 +114,7 @@ function App() {
 
                 if (!res.ok) throw new Error("Token inválido o expirado");
 
+                // Decodificación del token para verificar la expiración en el frontend
                 const decodedToken = jwtDecode(token);
                 const currentTime = Date.now() / 1000;
                 if (decodedToken.exp < currentTime) {
@@ -113,10 +123,10 @@ function App() {
 
                 setEstaAutenticado(true);
                 setNombreUsuario(nombre || '');
-                setUserRole(role);
+                setUserRole(role); // Establece el rol desde localStorage
             } catch (error) {
                 console.log("Token inválido o expirado:", error);
-                handleLogout();
+                handleLogout(); // Limpia la sesión si el token no es válido o está expirado
             } finally {
                 setIsLoadingAuth(false);
             }
@@ -131,7 +141,8 @@ function App() {
         if (isLoadingAuth) {
             return (
                 <>
-                    <Navbar isLoggedIn={false} nombreUsuario="" onLogout={() => { }} />
+                    {/* Puedes mostrar un spinner o un mensaje de carga aquí */}
+                    <Navbar isLoggedIn={false} nombreUsuario="" onLogout={() => {}} userRole={null} />
                     <div className="loading-message">
                         <p>Verificando sesión...</p>
                     </div>
@@ -139,6 +150,7 @@ function App() {
             );
         }
 
+        // Determina si se debe mostrar la barra de navegación
         const shouldShowNavbar = ![
             '/login',
             '/register',
@@ -154,7 +166,7 @@ function App() {
                         isLoggedIn={estaAutenticado}
                         nombreUsuario={nombreUsuario}
                         onLogout={handleLogout}
-                        userRole={userRole}
+                        userRole={userRole} // Pasa el userRole a Navbar para la visibilidad de enlaces
                     />
                 )}
 
@@ -169,8 +181,9 @@ function App() {
                     <Route path="/oauth2/redirect" element={<OAuth2Success onLoginSuccess={handleLoginSuccess} />} />
 
                     {/* Rutas principales y de usuario autenticado */}
-                    <Route path="/complejos" element={<Complejos />} />
-                    {/* Asegúrate que las rutas de reserva especifiquen el ID de complejo y cancha, si es necesario */}
+                    {/* Complejos no requiere autenticación para ser listado, solo para reservar */}
+                    <Route path="/complejos" element={<Complejos />} /> 
+                    
                     <Route path="/reservar/:complejoId/:canchaId" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} />
                     <Route path="/reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaDetail /></RutaProtegida>} />
                     <Route path="/dashboard" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><DashboardUsuario /></RutaProtegida>} />
@@ -181,10 +194,12 @@ function App() {
                     <Route path="/pago-pendiente" element={<PagoPendiente />} />
 
                     {/* Rutas de Administración Protegidas por Rol */}
-                    {/* AdminPanel ahora maneja la lógica interna de roles para la visibilidad de secciones */}
                     <Route path="/admin" element={<RutaProtegida rolesRequeridos={['ADMIN', 'COMPLEX_OWNER']}><AdminPanel /></RutaProtegida>} />
 
-                    {/* Ruta de fallback para 404 */}
+                    {/* NUEVA RUTA: Página de Preguntas Frecuentes (FAQ) */}
+                    <Route path="/faq" element={<FAQPage />} />
+
+                    {/* Ruta de fallback para 404 (o redireccionar a home) */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </>

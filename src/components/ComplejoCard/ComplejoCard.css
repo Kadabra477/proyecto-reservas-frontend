@@ -2,34 +2,34 @@
 
 .complejo-card-item {
     background-color: var(--white, #ffffff);
-    border-radius: 12px; /* <-- MEJORA DE DISEÑO: Bordes más suaves */
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); /* <-- MEJORA DE DISEÑO: Sombra más pronunciada */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* <-- MEJORA DE DISEÑO: Transiciones suaves */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
-    min-height: 450px; /* <-- MEJORA DE DISEÑO: Altura mínima para uniformidad */
+    min-height: 480px; /* Ajustada altura mínima para más uniformidad */
     width: 100%;
 }
 
 .complejo-card-item:hover {
-    transform: translateY(-8px); /* <-- MEJORA DE DISEÑO: Efecto hover de elevación */
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); /* <-- MEJORA DE DISEÑO: Sombra más grande en hover */
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
 .complejo-card-img {
     width: 100%;
-    height: 200px; /* <-- MEJORA DE DISEÑO: Altura fija para imágenes */
-    object-fit: cover; /* <-- MEJORA DE DISEÑO: Recorta para cubrir el espacio */
-    object-position: center; /* <-- MEJORA DE DISEÑO: Centra la imagen */
-    border-bottom: 1px solid var(--gray-light, #eee); /* <-- MEJORA DE DISEÑO: Separador sutil */
+    height: 220px; /* Altura fija para imágenes un poco más grandes */
+    object-fit: cover;
+    object-position: center;
+    border-bottom: 1px solid var(--gray-light, #eee);
 }
 
 .complejo-card-content {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* <-- MEJORA DE DISEÑO: Permite que el contenido crezca */
+    flex-grow: 1;
 }
 
 .complejo-card-title {
@@ -44,13 +44,19 @@
     color: var(--text-light, #666);
     line-height: 1.5;
     margin-bottom: 15px;
-    flex-grow: 1; /* <-- MEJORA DE DISEÑO: Permite que la descripción empuje el botón hacia abajo */
+    flex-grow: 1;
+    overflow: hidden; /* Evita desbordamiento si la descripción es muy larga */
+    text-overflow: ellipsis; /* Añade puntos suspensivos si se desborda */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Limita a 3 líneas */
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
 }
 
 .complejo-details-grid {
     display: grid;
-    grid-template-columns: 1fr; /* Por defecto una columna */
-    gap: 8px; /* Espacio entre detalles */
+    grid-template-columns: 1fr;
+    gap: 8px;
     margin-bottom: 15px;
     font-size: 0.9em;
     color: var(--text-dark, #444);
@@ -60,7 +66,6 @@
     margin: 0;
 }
 
-/* <-- MEJORA DE DISEÑO: Estilos para la lista de tipos de cancha --> */
 h4 {
     font-size: 1.1em;
     color: var(--primary-dark, #0056b3);
@@ -70,7 +75,7 @@ h4 {
 }
 
 .complejo-card-cancha-types {
-    list-style: none; /* Sin viñetas */
+    list-style: none;
     padding: 0;
     margin-bottom: 20px;
 }
@@ -80,9 +85,9 @@ h4 {
     border-radius: 5px;
     padding: 8px 12px;
     margin-bottom: 5px;
-    display: flex; /* Para alinear elementos en la misma línea */
-    flex-wrap: wrap; /* Permite que los elementos se envuelvan si hay poco espacio */
-    align-items: center;
+    display: flex;
+    flex-direction: column; /* Cambia a columna para mejor organización */
+    align-items: flex-start; /* Alinea texto a la izquierda */
     font-size: 0.9em;
     color: var(--text-dark, #333);
 }
@@ -94,14 +99,28 @@ h4 {
 
 .cancha-type-item .type-price {
     font-weight: bold;
-    color: var(--success, #28a745); /* Precio en verde */
-    margin-left: 5px;
+    color: var(--success, #28a745);
+    margin-left: 0; /* Reinicia el margen */
+    margin-top: 5px; /* Espacio con el tipo/cantidad */
+    display: block; /* Ocupa su propia línea */
+}
+
+.cancha-type-item .type-features {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre los íconos */
+    font-size: 0.9em;
+    margin-top: 5px;
 }
 
 .cancha-type-item .type-surface {
     font-style: italic;
     color: var(--text-light, #666);
-    margin-left: 5px;
+}
+
+.cancha-type-item .type-features span {
+    font-size: 1.2em; /* Tamaño de los íconos */
+    line-height: 1; /* Asegura que el icono no añada espacio extra */
 }
 
 .no-canchas-info {
@@ -121,8 +140,8 @@ h4 {
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    width: 100%; /* <-- MEJORA DE DISEÑO: Botón de ancho completo */
-    margin-top: auto; /* <-- MEJORA DE DISEÑO: Empuja el botón hacia abajo */
+    width: 100%;
+    margin-top: auto;
 }
 
 .complejo-card-button:hover {
@@ -133,7 +152,7 @@ h4 {
 /* Media Queries para ComplejoCard */
 @media (min-width: 768px) {
     .complejo-details-grid {
-        grid-template-columns: repeat(2, 1fr); /* Dos columnas en tablets y desktops */
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 @media (max-width: 480px) {
@@ -142,5 +161,8 @@ h4 {
     }
     .complejo-card-content {
         padding: 15px;
+    }
+    .complejo-card-img {
+        height: 180px;
     }
 }

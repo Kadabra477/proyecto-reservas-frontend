@@ -13,31 +13,32 @@ function ComplejoCard({ complejo }) {
 
     const formatPrice = (price) => {
         const numericPrice = Number(price);
-        if (isNaN(numericPrice)) {
-            return 'Precio no disp.';
+        if (isNaN(numericPrice) || numericPrice === 0) {
+            return 'Consultar';
         }
-        // <-- MEJORA DE DISEÑO: Formato de moneda consistente y sin el símbolo si ya lo pones en el CSS -->
         return new Intl.NumberFormat('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(numericPrice);
     };
 
     const renderCanchaTypes = () => {
         if (!complejo.canchaCounts || Object.keys(complejo.canchaCounts).length === 0) {
-            return <p className="no-canchas-info">No hay tipos de canchas configurados.</p>; // <-- MEJORA: Clase para estilo
+            return <p className="no-canchas-info">No hay tipos de canchas configurados.</p>;
         }
 
         return (
             <ul className="complejo-card-cancha-types">
                 {Object.keys(complejo.canchaCounts).map(tipo => (
-                    <li key={tipo} className="cancha-type-item"> {/* <-- MEJORA: Clase para estilo de cada item */}
+                    <li key={tipo} className="cancha-type-item">
                         <span className="type-name"><strong>{tipo}</strong>: {complejo.canchaCounts[tipo]} canchas</span>
                         {complejo.canchaPrices && complejo.canchaPrices[tipo] != null && (
-                            <span className="type-price"> - ${formatPrice(complejo.canchaPrices[tipo])}/hr</span> // <-- MEJORA: Clase y formato
+                            <span className="type-price"> - ${formatPrice(complejo.canchaPrices[tipo])}/hr</span>
                         )}
-                        {complejo.canchaSurfaces && complejo.canchaSurfaces[tipo] && (
-                            <span className="type-surface"> ({complejo.canchaSurfaces[tipo]})</span> // <-- MEJORA: Clase
-                        )}
-                        {complejo.canchaIluminacion && complejo.canchaIluminacion[tipo] ? ' 💡' : ''}
-                        {complejo.canchaTecho && complejo.canchaTecho[tipo] ? ' ☂️' : ''}
+                        <div className="type-features">
+                            {complejo.canchaSurfaces && complejo.canchaSurfaces[tipo] && (
+                                <span className="type-surface"> ({complejo.canchaSurfaces[tipo]})</span>
+                            )}
+                            {complejo.canchaIluminacion && complejo.canchaIluminacion[tipo] ? <span title="Con Iluminación">💡</span> : ''}
+                            {complejo.canchaTecho && complejo.canchaTecho[tipo] ? <span title="Con Techo">☂️</span> : ''}
+                        </div>
                     </li>
                 ))}
             </ul>
@@ -61,9 +62,8 @@ function ComplejoCard({ complejo }) {
                 
                 <div className="complejo-details-grid">
                     <p><strong>Ubicación:</strong> {complejo.ubicacion || 'No disponible'}</p>
-                    {/* <-- MEJORA DE DISEÑO: Más claridad en horarios --> */}
-                    <p><strong>Horario:</strong> {complejo.horarioApertura || 'N/A'} - {complejo.horarioCierre || 'N/A'}</p>
-                    <p><strong>Teléfono:</strong> {complejo.telefono || 'No disponible'}</p> {/* Mantener si es importante en la tarjeta */}
+                    <p><strong>Horario:</strong> {complejo.horarioApertura ? complejo.horarioApertura.substring(0, 5) : 'N/A'} - {complejo.horarioCierre ? complejo.horarioCierre.substring(0, 5) : 'N/A'}</p>
+                    <p><strong>Teléfono:</strong> {complejo.telefono || 'No disponible'}</p>
                 </div>
 
                 <h4>Tipos de Canchas:</h4>

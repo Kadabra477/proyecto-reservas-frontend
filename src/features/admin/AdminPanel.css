@@ -89,6 +89,8 @@
     justify-content: center;
     margin-bottom: 30px;
     border-bottom: 1px solid var(--gray-light, #eee);
+    flex-wrap: wrap; /* Permite que las pestañas se envuelvan */
+    gap: 5px; /* Espacio entre pestañas */
 }
 
 .admin-tab-button {
@@ -249,6 +251,40 @@
     transform: scale(1.2);
 }
 
+/* Contenedor de canchas dinámicas */
+.canchas-dinamicas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Espacio entre cada bloque de cancha */
+    margin-bottom: 20px;
+}
+
+.cancha-item-form {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px dashed var(--gray-light);
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.remove-cancha-btn {
+    background-color: var(--danger);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.remove-cancha-btn:hover {
+    background-color: #c82333;
+}
+
+
 /* Botones del Formulario */
 .admin-form-buttons {
     display: flex;
@@ -302,6 +338,16 @@
     background-color: #a71d2a;
 }
 
+/* NUEVO: Botón de activar cuenta */
+.admin-btn-activate {
+    background-color: #20c997; /* Un verde-cian */
+    color: white;
+}
+
+.admin-btn-activate:hover {
+    background-color: #1a9c7b;
+}
+
 
 /* Estilo de Tablas */
 .admin-complejo-list h3,
@@ -351,7 +397,8 @@ td[data-label="Descripción"],
 td[data-label="Ubicación"],
 td[data-label="Cliente"],
 td[data-label="Fecha y Hora"],
-td[data-label="Tipos de Cancha"] { /* Añadido para tipos de cancha del complejo */
+td[data-label="Tipos de Cancha"],
+td[data-label="Roles"] { /* Añadido para tipos de cancha del complejo y roles */
     white-space: normal; /* Permitir que el texto se envuelva */
 }
 
@@ -421,6 +468,18 @@ td a.admin-btn-pdf { /* Estilo específico para enlaces que parecen botones */
     color: #dc3545;
 }
 
+/* Badge de tipos de cancha en la tabla */
+.cancha-type-badge {
+    display: inline-block;
+    background-color: var(--primary-lightest);
+    color: var(--primary-dark);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    margin: 2px;
+    border: 1px solid var(--primary);
+    white-space: normal; /* Permitir que el texto se envuelva */
+}
 
 /* Mensaje para cuando no hay datos en la tabla */
 .admin-no-data {
@@ -494,10 +553,29 @@ td a.admin-btn-pdf { /* Estilo específico para enlaces que parecen botones */
     .admin-panel h1 {
         font-size: 2rem;
     }
+    .admin-tabs {
+        flex-direction: column; /* Pila las pestañas en pantallas pequeñas */
+        align-items: stretch; /* Estira las pestañas a todo el ancho */
+    }
     .admin-tab-button {
         font-size: 0.95rem;
         padding: 12px 20px;
+        text-align: center; /* Centra el texto en las pestañas apiladas */
+        border-bottom: 1px solid var(--gray-light); /* Borde entre pestañas apiladas */
+        margin-bottom: 0;
     }
+    .admin-tab-button.active {
+        border-bottom-color: var(--primary);
+    }
+    .admin-tab-button:first-child {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .admin-tab-button:last-child {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
     .admin-tab-content h2 {
         font-size: 1.8rem;
     }
@@ -510,7 +588,7 @@ td a.admin-btn-pdf { /* Estilo específico para enlaces que parecen botones */
     }
     /* Las tablas se harán scroll horizontal automáticamente */
     /* Aquí puedes considerar usar display: block en thead, tbody, tr y td
-       y text-align: right para td, con data-label en :before para vista móvil */
+        y text-align: right para td, con data-label en :before para vista móvil */
     .admin-table-container table {
         min-width: unset; /* Quitar ancho mínimo en móviles para permitir reestructuración */
     }
@@ -560,7 +638,6 @@ td a.admin-btn-pdf { /* Estilo específico para enlaces que parecen botones */
 
 @media (max-width: 600px) {
     .admin-tabs {
-        flex-wrap: wrap;
         gap: 10px;
     }
     .admin-tab-button {
