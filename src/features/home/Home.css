@@ -1,4 +1,4 @@
-/* frontend/src/components/Home/Home.css */
+/* frontend/src/features/home/Home.css */
 
 :root {
     --primary: #007bff; /* Azul vibrante */
@@ -16,14 +16,28 @@
     --border-light: #dee2e6;
 }
 
-body {
-    font-family: 'Poppins', sans-serif; /* Fuente más moderna y limpia */
+/* IMPORTANTE: Asegura que el HTML y BODY ocupen todo el alto disponible */
+html, body, #root {
+    height: 100%;
     margin: 0;
     padding: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif; /* Fuente más moderna y limpia */
     background-color: var(--background);
     color: var(--text);
     line-height: 1.6;
 }
+
+/* Asegura que el contenedor principal de la app o el main ocupe el espacio restante */
+/* Si tu App.jsx no tiene un div envolvente con clase "App", este selector podría ser diferente */
+.App, main {
+    min-height: 100vh; /* Asegura que ocupe al menos el alto de la ventana */
+    display: flex;
+    flex-direction: column; /* Permite que el footer se empuje hacia abajo */
+}
+
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif; /* Fuente para encabezados */
@@ -56,8 +70,8 @@ a:hover {
 /* Hero Section */
 .hero {
     position: relative;
-    height: 600px; /* Puedes ajustar la altura según tus necesidades */
-    background-color: #343a40; /* Usando un color sólido */
+    height: 600px;
+    background-color: #343a40; /* Color sólido para el fondo */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -83,7 +97,7 @@ a:hover {
 }
 
 .hero-content h1 {
-    font-size: 4.5em; /* Más grande y llamativo */
+    font-size: 4.5em;
     margin-bottom: 15px;
     color: white;
     font-weight: 800;
@@ -92,7 +106,7 @@ a:hover {
 }
 
 .hero-content h1 span {
-    color: var(--primary-light); /* Resalta la palabra "JUEGO" */
+    color: var(--primary-light);
 }
 
 .hero-content p {
@@ -163,8 +177,8 @@ a:hover {
 }
 
 .how .step {
-    flex-basis: 30%; /* Ajusta el ancho de los pasos */
-    min-width: 280px; /* Ancho mínimo para cada paso */
+    flex-basis: 30%;
+    min-width: 280px;
     padding: 30px;
     background-color: var(--background-light);
     border-radius: 12px;
@@ -260,10 +274,10 @@ a:hover {
 }
 
 .feature-list li::before {
-    content: '✓'; /* Icono de check */
+    content: '✓';
     position: absolute;
     left: 0;
-    color: var(--success, #28a745); /* Color verde para el check */
+    color: var(--success, #28a745);
     font-weight: bold;
 }
 
@@ -304,8 +318,8 @@ a:hover {
 }
 
 .benefit {
-    flex-basis: 22%; /* Ajusta el ancho para 4 columnas */
-    min-width: 220px; /* Ancho mínimo */
+    flex-basis: 22%;
+    min-width: 220px;
     padding: 30px;
     background-color: var(--background-light);
     border-radius: 12px;
@@ -321,7 +335,7 @@ a:hover {
 }
 
 .benefit-icon {
-    font-size: 3em; /* Iconos más grandes */
+    font-size: 3em;
     margin-bottom: 20px;
     color: var(--primary);
 }
@@ -341,7 +355,7 @@ a:hover {
 .cta {
     position: relative;
     padding: 100px 0;
-    background-color: var(--primary-dark); /* Color sólido para el CTA */
+    background-color: var(--primary-dark);
     color: white;
     text-align: center;
 }
@@ -376,47 +390,6 @@ a:hover {
 }
 
 /* ELIMINADO: Sección de FAQ en Home */
-/* .faq-preview {
-    padding: 80px 0;
-    background-color: var(--background-light);
-    text-align: center;
-    border-top: 1px solid var(--border-light);
-}
-
-.faq-preview h2 {
-    font-size: 2.8em;
-    color: var(--primary-dark);
-    margin-bottom: 20px;
-}
-
-.faq-preview p {
-    font-size: 1.1em;
-    color: var(--text-light);
-    margin-bottom: 30px;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.btn-secondary-outline {
-    display: inline-block;
-    padding: 12px 25px;
-    border-radius: 8px;
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-    font-size: 1em;
-    white-space: nowrap;
-    background-color: transparent;
-    color: var(--primary);
-    border: 2px solid var(--primary);
-}
-
-.btn-secondary-outline:hover {
-    background-color: var(--primary);
-    color: white;
-    transform: translateY(-2px);
-} */
 
 
 /* WhatsApp Button */
@@ -427,12 +400,12 @@ a:hover {
     background-color: #25d366;
     color: white;
     border-radius: 50%;
-    width: 55px; /* Más grande */
-    height: 55px; /* Más grande */
+    width: 55px;
+    height: 55px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2em; /* Icono más grande */
+    font-size: 2em;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     transition: transform 0.3s ease, background-color 0.3s ease;
     z-index: 1000;
@@ -443,66 +416,70 @@ a:hover {
     transform: scale(1.1);
 }
 
-/* Footer */
+/* Footer mejorado */
 .footer {
-    background-color: var(--gray-dark); /* Fondo oscuro para el footer */
+    background-color: var(--gray-dark); /* Fondo oscuro principal para el footer */
     color: white;
-    padding: 40px 0 20px; /* Más padding superior */
+    padding: 40px 0 20px;
     text-align: center;
+    margin-top: auto; /* Empuja el footer al final de la página si el contenido es corto */
+    width: 100%; /* Asegura que ocupe todo el ancho */
 }
 
 .footer-content {
     display: flex;
-    justify-content: space-around; /* Distribuye espacio entre elementos */
-    align-items: center; /* Centra verticalmente */
+    justify-content: space-around;
+    align-items: center;
     flex-wrap: wrap;
     gap: 30px;
     margin-bottom: 30px;
 }
 
 .footer-logo-link {
-    text-decoration: none; /* Elimina subrayado por defecto */
-    display: flex; /* Para alinear el span correctamente */
+    text-decoration: none;
+    display: flex;
     align-items: center;
+    font-family: 'Montserrat', sans-serif; /* Misma fuente que los títulos */
+    font-weight: 700;
+    letter-spacing: -1px;
 }
 
 .footer-logo-link h3 {
-    font-size: 1.8em;
-    color: white; /* Color blanco para el texto base */
-    margin: 0; /* Elimina márgenes extra */
-    font-weight: 700; /* Igual que en Navbar */
-    letter-spacing: -1px; /* Igual que en Navbar */
+    font-size: 1.8em; /* Tamaño similar al Navbar */
+    color: white;
+    margin: 0;
 }
 
 .footer-logo-span {
-    color: var(--primary-light); /* Resalta la palabra "JUEGO" */
-    font-weight: 800; /* Más peso para la palabra resaltada */
+    color: var(--primary-light);
+    font-weight: 800;
 }
 
 .footer-links-group {
     display: flex;
-    flex-direction: row; /* Enlaces en fila */
-    flex-wrap: wrap; /* Permite que se envuelvan */
-    justify-content: center; /* Centra los enlaces */
-    gap: 20px; /* Espacio entre los enlaces */
-    list-style: none; /* Quita las viñetas por si acaso */
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px; /* Más espacio entre enlaces para mejor legibilidad */
+    list-style: none;
     padding: 0;
     margin: 0;
 }
 
 .footer-link {
-    color: white; /* Color blanco para los enlaces del footer */
-    font-size: 1em;
+    color: white;
+    font-size: 1.05em; /* Un poco más grande que antes */
     text-decoration: none;
-    transition: color 0.3s ease;
-    font-family: 'Poppins', sans-serif; /* Mismo font que el body/Navbar */
-    font-weight: 600; /* Mismo peso que los links del Navbar */
-    text-transform: uppercase; /* Mismo que el Navbar */
-    white-space: nowrap; /* Evita que el texto se rompa */
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+    font-family: 'Poppins', sans-serif; /* Mismo font que el body/Navbar links */
+    font-weight: 600; /* Coincide con Navbar links */
+    text-transform: uppercase; /* Coincide con Navbar links */
+    white-space: nowrap;
 }
 
 .footer-link:hover {
-    color: var(--primary-light); /* Hover igual que en Navbar */
+    color: var(--primary-light);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4); /* Efecto de sombra al pasar el mouse */
 }
 
 
@@ -510,7 +487,7 @@ a:hover {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 20px;
     display: flex;
-    justify-content: center; /* Centrar el copyright */
+    justify-content: center;
     align-items: center;
     flex-wrap: wrap;
     gap: 15px;
@@ -520,11 +497,9 @@ a:hover {
     font-size: 0.9em;
     color: rgba(255, 255, 255, 0.7);
     margin: 0;
-    flex: none; /* Para que no ocupe todo el espacio y se centre mejor */
-    text-align: center; /* Centra el texto */
+    flex: none;
+    text-align: center;
 }
-
-/* ELIMINADO: .footer-nav y sus elementos li a */
 
 
 /* Media Queries */
@@ -540,7 +515,7 @@ a:hover {
         font-size: 1em;
     }
     .how .step, .benefit {
-        flex-basis: 45%; /* Dos columnas en tablets */
+        flex-basis: 45%;
     }
     .platform-preview .section-container {
         flex-direction: column;
@@ -550,7 +525,7 @@ a:hover {
         width: 100%;
     }
     .platform-content {
-        order: 2; /* Cambia el orden en pantallas pequeñas */
+        order: 2;
     }
     .platform-image-container {
         order: 1;
@@ -566,10 +541,11 @@ a:hover {
         text-align: center;
     }
     .footer-logo-link {
-        margin-bottom: 20px; /* Espacio debajo del logo en móvil */
+        margin-bottom: 20px;
     }
     .footer-links-group {
-        text-align: center; /* Centra los enlaces si se envuelven */
+        text-align: center;
+        gap: 15px; /* Menos espacio en pantallas más pequeñas */
     }
     .footer-bottom {
         flex-direction: column;
@@ -591,14 +567,14 @@ a:hover {
     .hero-content p {
         font-size: 1.1em;
     }
-    .how, .platform-preview, .benefits, .cta { /* Se elimina .faq-preview de aquí */
+    .how, .platform-preview, .benefits, .cta {
         padding: 60px 0;
     }
-    .how h2, .benefits h2, .cta-content h2 { /* Se elimina .faq-preview h2 de aquí */
+    .how h2, .benefits h2, .cta-content h2 {
         font-size: 2.2em;
     }
     .how .step, .benefit {
-        flex-basis: 100%; /* Una columna en móviles */
+        flex-basis: 100%;
     }
     .whatsapp-button {
         width: 50px;
@@ -606,6 +582,10 @@ a:hover {
         font-size: 1.8em;
         bottom: 20px;
         right: 20px;
+    }
+    .footer-link {
+        font-size: 0.95em; /* Ajuste para móviles */
+        padding: 5px 10px; /* Para que parezcan más "botones" */
     }
 }
 
@@ -623,7 +603,7 @@ a:hover {
     .btn-main, .btn-secondary {
         width: 100%;
     }
-    .how h2, .platform-content h2, .benefits h2, .cta-content h2 { /* Se elimina .faq-preview h2 de aquí */
+    .how h2, .platform-content h2, .benefits h2, .cta-content h2 {
         font-size: 1.8em;
     }
     .step-content h4, .benefit-content h4 {
@@ -631,5 +611,11 @@ a:hover {
     }
     .footer-links-group {
         width: 100%;
+        flex-direction: column; /* Apila los enlaces en móviles muy pequeños */
+        gap: 10px;
+    }
+    .footer-link {
+        width: fit-content; /* Asegura que el enlace no ocupe todo el ancho si se apila */
+        margin: 0 auto; /* Centra los enlaces apilados */
     }
 }

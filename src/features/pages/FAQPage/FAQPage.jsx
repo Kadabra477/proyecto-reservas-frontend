@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useLayoutEffect } from 'react'; // Importa useLayoutEffect
 import './FAQPage.css';
 
 function FAQPage() {
+    // Usa useLayoutEffect para desplazar la ventana al principio
+    // Se ejecuta de forma síncrona después de todas las mutaciones del DOM.
+    useLayoutEffect(() => {
+        window.scrollTo(0, 0);
+    }, []); // El array vacío asegura que se ejecute solo una vez al montar
+
     const faqData = [
         {
             question: "¿Cómo puedo reservar una cancha?",
