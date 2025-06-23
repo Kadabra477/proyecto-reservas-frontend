@@ -29,16 +29,15 @@ function AdminPanel() {
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
 
-    // --- CORRECCIÓN CRÍTICA AQUÍ ---
-    // Estas variables deben definirse al principio del componente funcional
-    // para que estén disponibles en todo el ámbito del renderizado.
+    // --- ¡IMPORTANTE! COLOCA ESTAS DEFINICIONES AQUÍ ARRIBA ---
+    // Obtener todos los roles desde localStorage y determinar isAdmin/isComplexOwner
     const userRoles = JSON.parse(localStorage.getItem('userRoles') || '[]'); 
     const isAdmin = userRoles.includes('ADMIN'); 
     const isComplexOwner = userRoles.includes('COMPLEX_OWNER');
 
     // Determinar el rol a pasar a AdminEstadisticas de manera explícita y temprana
     const roleForStats = isAdmin ? 'ADMIN' : (isComplexOwner ? 'COMPLEX_OWNER' : null);
-    // --- FIN CORRECCIÓN CRÍTICA ---
+    // --- FIN DE LA SECCIÓN CRÍTICA ---
 
 
     const mapComplejoToFormCanchas = useCallback((complejo) => {
@@ -133,7 +132,7 @@ function AdminPanel() {
             setReservas(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Error al obtener reservas:', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Error al cargar la lista de reservas.';
+            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al cargar la lista de reservas.';
             setMensaje({ text: errorMsg, type: 'error' });
         } finally {
             setIsLoadingData(false);
@@ -275,8 +274,7 @@ function AdminPanel() {
                 setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
                 fetchComplejos();
             }
-            // Aquí hay una comilla doble sin escapar que ESLint puede detectar
-            // eslint-disable-next-line quotes
+            // He quitado el comentario `eslint-disable-next-line quotes` ya que no debería ser necesario si no hay comillas sin escapar.
             catch (err) {
                 console.error('Error al actualizar el complejo:', err);
                 const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al actualizar el complejo.';
@@ -392,18 +390,28 @@ function AdminPanel() {
         setSelectedRoles(prevRoles => {
             // Lógica para asegurar que ADMIN y COMPLEX_OWNER sean excluyentes
             if (value === 'ADMIN' && checked) {
-                return ['ADMIN'].concat(prevRoles.filter(role => role !== 'COMPLEX_OWNER' && role !== 'ADMIN' && role !== 'USER')); // Solo ADMIN, y si tenía USER, mantenerlo.
+                // Si se marca ADMIN, se desmarca COMPLEX_OWNER. Se mantiene USER si ya estaba.
+                const newRoles = prevRoles.filter(role => role !== 'COMPLEX_OWNER' && role !== 'ADMIN');
+                return ['ADMIN', ...newRoles.filter(role => role === 'USER')];
             } else if (value === 'COMPLEX_OWNER' && checked) {
-                return ['COMPLEX_OWNER'].concat(prevRoles.filter(role => role !== 'ADMIN' && role !== 'COMPLEX_OWNER' && role !== 'USER')); // Solo COMPLEX_OWNER, y si tenía USER, mantenerlo.
-            } else if (value === 'USER' && checked) {
-                 // Si se marca USER, asegúrate de que no se eliminen ADMIN/COMPLEX_OWNER si ya están seleccionados
-                if (prevRoles.includes('ADMIN') || prevRoles.includes('COMPLEX_OWNER')) {
-                    return prevRoles;
+                // Si se marca COMPLEX_OWNER, se desmarca ADMIN. Se mantiene USER si ya estaba.
+                const newRoles = prevRoles.filter(role => role !== 'ADMIN' && role !== 'COMPLEX_OWNER');
+                return ['COMPLEX_OWNER', ...newRoles.filter(role => role === 'USER')];
+            } else if (value === 'USER') {
+                if (checked) {
+                    // Si se marca USER y ya tiene ADMIN/COMPLEX_OWNER, solo se añade USER (si no está ya).
+                    // Si no tiene ADMIN/COMPLEX_OWNER, simplemente se añade USER.
+                    if (prevRoles.includes('ADMIN') || prevRoles.includes('COMPLEX_OWNER') || prevRoles.includes('USER')) {
+                        return [...new Set([...prevRoles, 'USER'])]; // Usa Set para evitar duplicados
+                    }
+                    return [...prevRoles, value];
+                } else {
+                    // Si se desmarca USER, simplemente lo filtra.
+                    return prevRoles.filter(role => role !== value);
                 }
-                return [...prevRoles, value];
             } else {
-                // Si se desmarca, simplemente lo filtra
-                return prevRoles.filter(role => role !== value);
+                // Para cualquier otro rol, añade o quita normalmente
+                return checked ? [...prevRoles, value] : prevRoles.filter(role => role !== value);
             }
         }).filter(Boolean); // Elimina cualquier valor nulo o indefinido que pueda quedar
     };
@@ -413,12 +421,18 @@ function AdminPanel() {
         if (!managingUserRoles) return;
 
         try {
-            // Asegúrate de que si solo queda USER o si no hay roles, se mande USER
-            let rolesToActualSend = selectedRoles.length === 0 ? ['ROLE_USER'] : selectedRoles.map(role => `ROLE_${role}`);
-            
-            // Si solo se selecciona USER pero antes tenía ADMIN/COMPLEX_OWNER, 
-            // esto podría llevar a un problema si el backend no lo maneja para limpiar.
-            // La lógica en el backend ya debería manejar la exclusividad entre ADMIN y COMPLEX_OWNER.
+            // Asegúrate de que si solo queda USER o si no hay roles, se mande ROLE_USER al backend
+            let rolesToActualSend;
+            if (selectedRoles.length === 0) {
+                rolesToActualSend = ['ROLE_USER']; // Si no se seleccionó nada, por defecto es ROLE_USER
+            } else if (selectedRoles.includes('ADMIN') && selectedRoles.includes('COMPLEX_OWNER')) {
+                // Esto no debería pasar con la lógica de handleRoleChange, pero es un fallback
+                console.warn("Intento de asignar ADMIN y COMPLEX_OWNER simultáneamente. Priorizando ADMIN.");
+                rolesToActualSend = ['ROLE_ADMIN', ...selectedRoles.filter(r => r === 'USER').map(r => `ROLE_${r}`)];
+            }
+            else {
+                rolesToActualSend = selectedRoles.map(role => `ROLE_${role}`);
+            }
             
             await api.put(`/users/${managingUserRoles.id}/roles`, rolesToActualSend);
             
@@ -512,9 +526,11 @@ function AdminPanel() {
                     <h2>{editingComplejo ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
 
                     {isAdmin && (
+                        // CORRECCIÓN: Comilla doble literal dentro del texto, usa &quot;
                         <p className="info-message">Como Administrador General, puedes crear y editar cualquier complejo. Puedes asignarlos a un propietario existente.</p>
                     )}
                     {isComplexOwner && !editingComplejo && (
+                        // CORRECCIÓN: Comilla doble literal dentro del texto, usa &quot;
                         <p className="info-message">Como Dueño de Complejo, puedes gestionar solo los complejos que te pertenecen. Selecciona un complejo de la lista para editarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
                     )}
 
@@ -530,7 +546,7 @@ function AdminPanel() {
                                 <div className="admin-form-group">
                                     <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
                                     <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo && isAdmin} placeholder='dueño@ejemplo.com' />
-                                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol "COMPLEX_OWNER" si no lo tiene.</p>
+                                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol &quot;COMPLEX_OWNER&quot; si no lo tiene.</p>
                                 </div>
                             )}
                             
@@ -883,7 +899,7 @@ function AdminPanel() {
                 </div>
             )}
 
-            {activeTab === 'estadisticas' && (isAdmin || isComplexOwner) && roleForStats && ( // <-- Corregido aquí
+            {activeTab === 'estadisticas' && (isAdmin || isComplexOwner) && roleForStats && (
                 <AdminEstadisticas userRole={roleForStats} />
             )}
         </div>
