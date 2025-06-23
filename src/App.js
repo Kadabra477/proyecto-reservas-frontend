@@ -19,11 +19,10 @@ import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
 import OAuth2Success from './features/auth/OAuth2Success';
-
 import PagoExitoso from './features/pago/PagoExitoso';
 import PagoFallido from './features/pago/PagoFallido';
 import PagoPendiente from './features/pago/PagoPendiente';
-import FAQPage from './pages/FAQPage/FAQPage'; // <-- NUEVA IMPORTACIÓN DEL COMPONENTE FAQ
+import FAQPage from './features/pages/FAQPage/FAQPage';
 
 import './App.css';
 
