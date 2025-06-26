@@ -2,45 +2,50 @@
 
 /* Definición de Variables CSS Globales */
 :root {
+    /* Ajustes generales de grises */
     --gray: #ccc;
     --gray-lightest: #f7f7f7;
-    
-    --primary: #4CAF50;
-    --primary-dark: #388E3C;
-    --primary-light: #81C784;
-    
-    --secondary: #2196F3;
-    --secondary-dark: #1976D2;
-    
-    --background: #f0f2f5;
-    --white: #ffffff;
-    --gray-lightest: #f8f9fa;
     --gray-light: #e9ecef;
     --gray-medium: #ced4da;
     --gray-dark: #343a40;
     
-    --text: #343a40;
-    --text-light: #6c757d;
+    /* Colores principales - Ajustados para ser más vibrantes y deportivos */
+    --primary: #4CAF50;     /* Verde vibrante (similar al césped) */
+    --primary-dark: #388E3C; /* Verde más oscuro para hover */
+    --primary-light: #81C784; /* Verde más claro */
     
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
+    --secondary: #2196F3;   /* Azul deportivo */
+    --secondary-dark: #1976D2; /* Azul más oscuro */
     
-    --highlight: #FFC107;
-    --danger: #DC3545;
+    /* Fondos y textos */
+    --background: #f0f2f5;   /* Fondo general de la página (gris muy claro) */
+    --white: #ffffff;
+    --text: #343a40;          /* Color de texto principal */
+    --text-light: #6c757d;    /* Color de texto más claro */
+    
+    /* Sombras */
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra por defecto, más suave */
+    --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15); /* Sombra al pasar el mouse, más pronunciada */
+    
+    /* Colores de estado */
+    --highlight: #FFC107;     /* Amarillo para destacar */
+    --danger: #DC3545;        /* Rojo para errores/eliminar */
     --danger-dark: #C82333;
-    --info: #17A2B8;
+    --info: #17A2B8;          /* Azul para información/admin */
     --info-dark: #138496;
-    --warning: #FFC107;
+    --warning: #FFC107;       /* Naranja para advertencias/pendiente */
     --warning-dark: #E0A800;
-    --success: #28A745;
+    --success: #28A745;       /* Verde para éxito/confirmado */
     --success-dark: #218838;
 
+    /* Otros */
     --accent: #ffcc00;
     --accent-light: #ffde59;
     --radius: 8px;
     --radius-lg: 12px;
     --max-width: 1200px;
 
+    /* Transiciones CSS */
     --transition-fast: all 0.2s ease-in-out;
     --transition-medium: all 0.3s ease-in-out;
     --transition: all 0.3s ease;
