@@ -1,21 +1,10 @@
 /* frontend/src/features/home/Home.css */
 
 /* Tus variables :root si las tienes aquí, o asegúrate de que App.css las defina */
+/* No dupliques variables, App.css debe ser la única fuente de :root */
 :root {
-    --primary: #007bff; /* Azul vibrante */
-    --primary-dark: #0056b3;
-    --primary-light: #66b5ff;
-    --secondary: #6c757d; /* Gris para botones secundarios */
-    --secondary-dark: #5a6268;
-    --text: #343a40; /* Color de texto principal */
-    --text-light: #6c757d; /* Color de texto secundario */
-    --background: #f8f9fa; /* Fondo general */
-    --background-light: #f1f4f8; /* Fondo para secciones ligeras */
-    --white: #ffffff;
-    --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
-    --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.1);
-    --border-light: #dee2e6;
-    /* Asegúrate que estas variables estén consistentes con App.css */
+    /* Aquí solo deberían ir variables si son EXCLUSIVAS de Home.css y no globales */
+    /* De lo contrario, deben estar en App.css */
 }
 
 /* IMPORTANTE: Asegura que el HTML y BODY ocupen todo el alto disponible */
@@ -53,7 +42,7 @@ p {
 a {
     text-decoration: none;
     color: var(--primary);
-    transition: color 0.3s ease;
+    transition: color var(--transition-fast);
 }
 
 a:hover {
@@ -61,7 +50,7 @@ a:hover {
 }
 
 .section-container {
-    max-width: 1200px;
+    max-width: var(--max-width);
     margin: 0 auto;
     padding: 0 20px;
 }
@@ -128,7 +117,7 @@ a:hover {
     border-radius: 8px;
     font-weight: 600;
     text-transform: uppercase;
-    transition: all 0.3s ease;
+    transition: var(--transition-medium);
     font-size: 1.1em;
     white-space: nowrap;
 }
@@ -409,21 +398,20 @@ a:hover {
     z-index: 1000;
     text-decoration: none;
     line-height: 1; 
-    /* CAMBIO CLAVE: Asegurarse de que el contenido no se desborde y el background no se duplique */
-    overflow: hidden; /* Oculta cualquier parte del icono que se salga del círculo */
-    border: none; /* Asegura que no haya un borde adicional creando el efecto duplicado */
-    outline: none; /* Elimina cualquier contorno al enfocar */
-    padding: 0; /* Asegura que no haya padding interno que pueda desplazar el icono */
+    /* CAMBIO CLAVE: Eliminar cualquier borde o padding que pueda causar el "duplicado" */
+    border: none; 
+    outline: none;
+    padding: 0; 
+    overflow: hidden; /* Asegura que no haya nada saliendo del círculo */
 }
 
 /* Asegurarse que el icono dentro del botón no tenga márgenes o paddings extra */
 .whatsapp-button i {
     margin: 0;
     padding: 0;
-    display: block; /* Ocupa todo el espacio disponible dentro del flex item */
-    line-height: 1; /* Centra el icono */
+    display: block; /* Asegura que ocupe todo el espacio */
+    line-height: 1; /* Ayuda al centrado */
 }
-
 
 .whatsapp-button:hover {
     background-color: #128c7e;

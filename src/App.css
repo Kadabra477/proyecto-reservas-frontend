@@ -1,49 +1,53 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap");
 
-/* Definición de Variables CSS Globales */
+/* Definición ÚNICA de Variables CSS Globales */
 :root {
-    /* Ajustes generales de grises */
+    /* Grises */
     --gray: #ccc;
     --gray-lightest: #f7f7f7;
-    --gray-light: #e9ecef;
-    --gray-medium: #ced4da;
-    --gray-dark: #343a40;
+    --gray-light: #e9ecef; /* Más claro para borders */
+    --gray-medium: #ced4da; /* Para bordes de inputs */
+    --gray-dark: #343a40; /* Para texto oscuro y footer */
     
-    /* Colores principales - Ajustados para ser más vibrantes y deportivos */
-    --primary: #4CAF50;     /* Verde vibrante (similar al césped) */
+    /* Colores Principales (Verdes y Azules para Temática Deportiva) */
+    --primary: #4CAF50;      /* Verde vibrante */
     --primary-dark: #388E3C; /* Verde más oscuro para hover */
     --primary-light: #81C784; /* Verde más claro */
     
-    --secondary: #2196F3;   /* Azul deportivo */
+    --secondary: #2196F3;    /* Azul deportivo */
     --secondary-dark: #1976D2; /* Azul más oscuro */
     
-    /* Fondos y textos */
-    --background: #f0f2f5;   /* Fondo general de la página (gris muy claro) */
+    /* Fondos y Textos */
+    --background: #f0f2f5;   /* Fondo general claro */
+    --background-light: #f1f4f8; /* Para secciones claras */
     --white: #ffffff;
-    --text: #343a40;          /* Color de texto principal */
-    --text-light: #6c757d;    /* Color de texto más claro */
+    --text: #343a40;           /* Color de texto principal */
+    --text-light: #6c757d;     /* Color de texto secundario */
     
     /* Sombras */
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra por defecto, más suave */
-    --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15); /* Sombra al pasar el mouse, más pronunciada */
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra estándar */
+    --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra ligera (mismo que shadow) */
+    --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.1); /* Sombra media */
+    --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15); /* Sombra al pasar el mouse */
     
-    /* Colores de estado */
-    --highlight: #FFC107;     /* Amarillo para destacar */
-    --danger: #DC3545;        /* Rojo para errores/eliminar */
+    /* Colores de Estado / Énfasis */
+    --highlight: #FFC107;      /* Amarillo para destacar */
+    --danger: #DC3545;         /* Rojo para errores/eliminar */
     --danger-dark: #C82333;
-    --info: #17A2B8;          /* Azul para información/admin */
+    --info: #17A2B8;           /* Azul para información/admin */
     --info-dark: #138496;
-    --warning: #FFC107;       /* Naranja para advertencias/pendiente */
+    --warning: #FFC107;        /* Naranja para advertencias/pendiente */
     --warning-dark: #E0A800;
-    --success: #28A745;       /* Verde para éxito/confirmado */
+    --success: #28A745;        /* Verde para éxito/confirmado */
     --success-dark: #218838;
 
-    /* Otros */
-    --accent: #ffcc00;
+    /* Otros valores */
+    --accent: #ffcc00;         /* Acento adicional (amarillo) */
     --accent-light: #ffde59;
-    --radius: 8px;
-    --radius-lg: 12px;
-    --max-width: 1200px;
+    --radius: 8px;             /* Radio de borde estándar */
+    --radius-lg: 12px;         /* Radio de borde grande */
+    --max-width: 1200px;       /* Ancho máximo de contenido */
+    --border-light: #dee2e6;   /* Borde claro */
 
     /* Transiciones CSS */
     --transition-fast: all 0.2s ease-in-out;
@@ -52,38 +56,57 @@
 }
 
 /* Estilos base para el body */
-body {
-    background-color: var(--background);
+html, body, #root {
+    height: 100%; /* Asegura que ocupen todo el alto de la ventana */
     margin: 0;
     padding: 0;
-    font-family: 'Poppins', sans-serif; 
+}
+
+body {
+    background-color: var(--background);
+    font-family: 'Poppins', sans-serif; /* Poppins para el texto del cuerpo */
     color: var(--text);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-html, body, #root {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
 .App {
-    min-height: 100vh;
+    min-height: 100vh; /* Asegura que la app ocupe al menos la altura de la ventana */
     display: flex;
     flex-direction: column;
 }
 
-.full-page-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0; 
+/* Encabezados */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif; /* Montserrat para encabezados */
+    color: var(--text);
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    font-weight: 700;
 }
 
+p {
+    margin-bottom: 1em;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary);
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary-dark);
+}
+
+.section-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Estilos genéricos para botones */
 .btn {
     display: inline-block;
     padding: 10px 22px;
@@ -124,13 +147,14 @@ html, body, #root {
     color: white;
 }
 
+/* Mensajes de Carga y Error globales */
 .loading-message,
 .error-message {
     text-align: center;
     padding: 60px 20px;
     font-size: 1.3rem;
     color: var(--text-light);
-    flex-grow: 1;
+    flex-grow: 1; /* Para que ocupen el espacio central */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -141,8 +165,9 @@ html, body, #root {
     font-weight: 600;
 }
 
+/* Responsive general para la aplicación */
 @media (max-width: 768px) {
     .App {
-        padding: 0 15px 15px 15px;
+        padding: 0 15px 15px 15px; /* Reducir padding horizontal en móviles */
     }
 }

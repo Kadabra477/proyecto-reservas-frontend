@@ -26,26 +26,25 @@
 .register-image-banner {
     background: linear-gradient(45deg, var(--secondary), var(--secondary-dark));
     color: white;
-    padding: 15px 25px; /* Ajustado */
+    padding: 10px 20px; /* REDUCIDO el padding */
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     text-align: center;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    /* CAMBIO CLAVE: Eliminar margen inferior para que se adhiera al formulario */
     margin-bottom: 0; 
     position: relative;
     z-index: 3;
 }
 
 .register-banner-title {
-    font-size: 2rem; 
+    font-size: 1.8rem; /* REDUCIDO */
     font-weight: 700;
     margin-bottom: 5px;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
 .register-banner-subtitle {
-    font-size: 1rem; 
+    font-size: 0.9rem; /* REDUCIDO */
     font-weight: 400;
     opacity: 0.9;
 }
@@ -53,11 +52,7 @@
 .register-form {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    /* CAMBIO CLAVE: Reducir padding-top ya que el banner ya tiene espacio */
-    padding-top: 1.2em; 
+    padding-top: 0.8em; /* REDUCIDO */
     position: relative;
     z-index: 3;
 }
-
-/* El resto de los estilos compartidos para input-group, auth-input, auth-icon ya se manejan en AuthForm.css */
-/* No es necesario re-definirlos aquí a menos que quieras overrides específicos para register */
