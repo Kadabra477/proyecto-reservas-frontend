@@ -70,7 +70,6 @@ a:hover {
 .hero {
     position: relative;
     height: 600px;
-    /* RUTA CORRECTA: Desde src/features/home/Home.css, sube dos niveles para llegar a src/ y luego entra a assets */
     background-image: url('../../assets/fondo-cancha-hero.jpg'); 
     background-size: cover;
     background-position: center;
@@ -402,15 +401,29 @@ a:hover {
     width: 55px;
     height: 55px;
     display: flex;
-    align-items: center; /* Centrado vertical */
-    justify-content: center; /* Centrado horizontal */
-    font-size: 2em; /* Esto escala el icono */
+    align-items: center; 
+    justify-content: center; 
+    font-size: 2em;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     transition: transform 0.3s ease, background-color 0.3s ease;
     z-index: 1000;
     text-decoration: none;
-    line-height: 1; /* Ajusta la altura de línea para centrar verticalmente mejor el icono */
+    line-height: 1; 
+    /* CAMBIO CLAVE: Asegurarse de que el contenido no se desborde y el background no se duplique */
+    overflow: hidden; /* Oculta cualquier parte del icono que se salga del círculo */
+    border: none; /* Asegura que no haya un borde adicional creando el efecto duplicado */
+    outline: none; /* Elimina cualquier contorno al enfocar */
+    padding: 0; /* Asegura que no haya padding interno que pueda desplazar el icono */
 }
+
+/* Asegurarse que el icono dentro del botón no tenga márgenes o paddings extra */
+.whatsapp-button i {
+    margin: 0;
+    padding: 0;
+    display: block; /* Ocupa todo el espacio disponible dentro del flex item */
+    line-height: 1; /* Centra el icono */
+}
+
 
 .whatsapp-button:hover {
     background-color: #128c7e;
@@ -586,8 +599,8 @@ a:hover {
         right: 20px;
     }
     .footer-link {
-        font-size: 0.95em;
-        padding: 5px 10px;
+        font-size: 0.95em; 
+        padding: 5px 10px; 
     }
 }
 
@@ -613,11 +626,11 @@ a:hover {
     }
     .footer-links-group {
         width: 100%;
-        flex-direction: column;
+        flex-direction: column; 
         gap: 10px;
     }
     .footer-link {
         width: fit-content;
-        margin: 0 auto;
+        margin: 0 auto; 
     }
 }

@@ -2,21 +2,20 @@
 
 /* Contenedor de fondo que ocupa toda la pantalla */
 .auth-background {
-    /* CAMBIO CLAVE: Ya no fixed, sino que ocupa la altura de la ventana y es un flex container */
     min-height: 100vh; 
     width: 100%;
-    display: flex; /* Para centrar el auth-container */
-    align-items: center; /* Centra verticalmente */
-    justify-content: center; /* Centra horizontalmente */
-    padding: 20px; /* Padding general para no pegar al borde */
+    display: flex;
+    /* CAMBIO CLAVE: Alineación al inicio para dar más espacio arriba */
+    align-items: flex-start; /* OJO: Ahora el contenido no estará centrado verticalmente por defecto */
+    justify-content: center; 
+    padding: 30px 20px; /* Aumentado el padding superior para dar más espacio */
     box-sizing: border-box;
-    overflow-y: auto; /* Permite scroll si el contenido es más alto que la ventana */
-    position: relative; /* Necesario para que el ::before sea relativo a él */
-    z-index: 10; /* Asegura que esté al frente */
+    overflow-y: auto; 
+    position: relative; 
+    z-index: 10; 
 }
 
 /* Imagen de fondo común para login y register */
-/* Usamos ::before para la imagen y el filtro, para que los elementos hijos no hereden el filtro */
 .sport-theme-background::before {
     content: '';
     position: absolute;
@@ -27,31 +26,31 @@
     /* La URL de la imagen se define en Login.css y Register.css */
     background-size: cover;
     background-position: center;
-    filter: blur(3px) brightness(0.6); /* Desenfoque y oscurecimiento */
-    z-index: 1; /* Detrás del auth-container */
-    pointer-events: none; /* No interfiere con eventos del mouse */
+    filter: blur(3px) brightness(0.6);
+    z-index: 1; 
+    pointer-events: none; 
 }
-
 
 /* Contenedor principal del formulario y las gotas decorativas */
 .auth-container {
     position: relative;
-    max-width: 360px; /* REDUCIDO para mejorar la visibilidad en 1360x768 y con zoom */
+    max-width: 360px; 
     width: 100%;
     display: flex;
     flex-direction: column;
     border-radius: 20px;
-    overflow: hidden; /* Muy importante para que el banner redondee bien */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Sombra para resaltar */
-    z-index: 2; /* Sobre la imagen de fondo */
-    /* No margin-bottom aquí, se maneja el espaciado con el padding del auth-background si es necesario */
+    overflow: hidden; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
+    z-index: 2; 
+    margin-top: auto; /* Permite que el contenedor se empuje hacia abajo si hay espacio extra */
+    margin-bottom: auto; /* Permite que el contenedor se empuje hacia arriba si hay espacio extra */
 }
 
 /* Estilo base del formulario (la parte blanca transparente) */
 .auth-form {
     background: rgba(255, 255, 255, 0.15);
-    padding: 2em 2.2em; /* Reducido ligeramente el padding interno */
-    border-radius: 20px; /* Mantener si no hay banner, si hay banner, se sobrescribe en Login/Register.css */
+    padding: 2em 2.2em; 
+    border-radius: 20px; 
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
@@ -59,14 +58,14 @@
     color: white;
     font-family: 'Montserrat', sans-serif;
     position: relative;
-    z-index: 3; /* Sobre las gotas y la imagen de fondo */
+    z-index: 3; 
 }
 
-/* Título del formulario (Iniciar Sesión / Crear Cuenta) */
+/* Título del formulario */
 .auth-form .auth-title {
-    font-size: 1.8rem; /* Ajustado */
+    font-size: 1.8rem; 
     font-weight: 700;
-    margin-bottom: 20px;
+    margin-bottom: 20px; 
     text-shadow: 1px 1px 5px rgba(0,0,0,0.4);
     color: white;
 }
@@ -74,8 +73,8 @@
 /* Enlace para cambiar entre Login/Register */
 .auth-form .auth-link {
     color: #e0e0e0;
-    font-size: 0.85rem; /* Ajustado */
-    margin-top: 12px; /* Ajustado */
+    font-size: 0.85rem; 
+    margin-top: 12px; 
     display: block;
     text-decoration: none;
     transition: color 0.3s ease, text-shadow 0.3s ease;
@@ -89,16 +88,15 @@
 /* Contenedor de un input y su icono */
 .input-group {
     position: relative;
-    margin-bottom: 1.2em; /* Ligeramente reducido */
-    display: flex; /* Hacemos el grupo un flex container */
-    align-items: center; /* Centra verticalmente el input y el icono */
+    margin-bottom: 1.2em; 
+    display: flex; 
+    align-items: center; 
 }
 
 /* Estilo de los campos de entrada */
 .auth-input {
     width: 100%;
     box-sizing: border-box;
-    /* Ajuste de padding: top, right, bottom, left. Izquierda con más espacio para el icono */
     padding: 0.9em 1.2em 0.9em 3.2em; 
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 30px;
@@ -106,11 +104,11 @@
     color: white;
     font-family: 'Montserrat', sans-serif;
     font-weight: 500;
-    font-size: 0.95rem; /* Ligeramente más pequeño */
+    font-size: 0.95rem; 
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
     outline: none;
     transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    height: 44px; /* Altura fija para consistencia */
+    height: 44px; 
 }
 
 .auth-input::placeholder {
@@ -125,31 +123,28 @@
 
 /* Ajuste del icono para centrado perfecto */
 .auth-icon {
-    position: absolute; /* Sigue siendo absolute respecto a input-group */
-    left: 1.1em; /* Ajuste fino de la posición izquierda */
-    /* top: 50%; transform: translateY(-50%); ya no es estrictamente necesario con flexbox en input-group,
-       pero lo mantenemos como fallback o si el icono tiene un tamaño diferente */
+    position: absolute; 
+    left: 1.1em; 
     top: 50%; 
     transform: translateY(-50%);
     color: rgba(255, 255, 255, 0.7);
-    font-size: 1rem; /* Tamaño del icono */
+    font-size: 1rem; 
     pointer-events: none;
-    z-index: 1; /* Asegura que el icono esté sobre el input */
+    z-index: 1; 
 }
-
 
 /* Estilo de los botones principales */
 .auth-button {
     display: block;
     width: 100%;
-    padding: 0.9em 1.5em; /* Ajustado */
-    margin-top: 1.5em; /* Ajustado */
+    padding: 0.9em 1.5em; 
+    margin-top: 1.5em; 
     border: none;
     border-radius: 30px;
     background-color: var(--primary);
     color: white;
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.05rem; /* Ajustado */
+    font-size: 1.05rem; 
     font-weight: 700;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
@@ -159,8 +154,8 @@
 
 .auth-button:hover:not(:disabled) {
     background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); 
 }
 
 .auth-button:disabled {
@@ -172,23 +167,22 @@
 
 /* Contenedor de notificación GLOBAL (aparece por encima del formulario) */
 .notification-container {
-    /* CAMBIO CLAVE: Propiedad position relative para que fluya en el DOM */
     position: relative; 
-    width: calc(100% - 4.4em); /* auth-form padding-left + padding-right es 2.2em * 2 = 4.4em */
+    width: calc(100% - 4.4em); /* Ancho del formulario - padding */
     max-width: 360px; /* Igual que el max-width del auth-container */
     margin: 15px auto; /* Centrado y con margen superior/inferior para separarse */
-    background-color: rgba(255, 255, 255, 0.95); /* Más opaco */
-    padding: 10px 15px;
+    background-color: rgba(255, 255, 255, 0.95); 
+    padding: 10px 15px; 
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    z-index: 4; /* Debe estar sobre el fondo pero debajo del formulario */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15); 
+    z-index: 4; 
     text-align: center;
-    font-size: 0.9rem; /* Ajustado */
+    font-size: 0.9rem; 
     font-weight: 600;
     line-height: 1.3;
     overflow: hidden;
-    box-sizing: border-box;
-    color: var(--text); /* Color de texto más legible */
+    box-sizing: border-box; 
+    color: var(--text); 
 }
 
 .notification-container.error {
@@ -205,13 +199,13 @@
 
 .notification-message {
     margin: 0;
-    font-size: inherit;
+    font-size: inherit; 
 }
 
 /* Mensajes de error/éxito DENTRO del formulario */
 .auth-message { 
-    margin-top: 1em;
-    padding: 0.7em 1em;
+    margin-top: 1em; 
+    padding: 0.7em 1em; 
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 600;
@@ -237,7 +231,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    z-index: 1; /* Detrás del auth-container */
+    z-index: 1; 
     pointer-events: none;
 }
 
@@ -245,12 +239,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.8em 1.2em;
+    padding: 0.8em 1.2em; 
     border-radius: 30px;
     background-color: #ffffff;
     color: #444;
     font-family: 'Montserrat', sans-serif;
-    font-size: 0.95rem; /* Ajustado */
+    font-size: 0.95rem; 
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -261,7 +255,7 @@
 
 .google-auth-button:hover {
     background-color: var(--gray-lightest);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); 
     transform: translateY(-1px);
 }
 
@@ -300,17 +294,17 @@
 .auth-links-group {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* Ajustado */
-    margin-top: 12px; /* Ajustado */
+    gap: 8px; 
+    margin-top: 12px; 
 }
 
 .auth-divider {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 20px 0; /* Ajustado */
+    margin: 20px 0; 
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.85em; /* Ajustado */
+    font-size: 0.85em; 
 }
 
 .auth-divider::before,
@@ -318,24 +312,24 @@
     content: '';
     flex: 1;
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
-    margin: 0 0.4em; /* Ajustado */
+    margin: 0 0.4em; 
 }
 
 /* Responsive para el contenedor del formulario */
 @media (max-width: 480px) {
     .auth-container {
-        padding: 0; /* Eliminar padding para que el banner y el formulario usen el 100% del ancho del contenedor */
-        border-radius: 0; /* Eliminar redondeo si se ocupa todo el ancho de la pantalla */
-        max-width: 100%; /* Ocupa todo el ancho disponible */
+        padding: 0; 
+        border-radius: 0; 
+        max-width: 100%; 
     }
     .auth-form {
-        padding: 1.5em 1.5em; /* Reducir padding interno en móviles */
-        border-radius: 0; /* Eliminar redondeo si se ocupa todo el ancho */
-        box-shadow: none; /* Eliminar sombra si no hay espacio */
+        padding: 1.5em 1.5em; 
+        border-radius: 0; 
+        box-shadow: none; 
     }
     .login-image-banner, .register-image-banner {
-        padding: 10px 15px; /* Reducir padding del banner en móviles */
-        border-radius: 0; /* Eliminar redondeo del banner en móviles */
+        padding: 10px 15px; 
+        border-radius: 0; 
     }
     .login-banner-title, .register-banner-title {
         font-size: 1.6rem;
@@ -344,8 +338,8 @@
         font-size: 0.9rem;
     }
     .auth-input {
-        padding: 0.8em 1em 0.8em 3em; /* Ajuste para el icono en móviles */
-        height: 40px; /* Reducir altura del input */
+        padding: 0.8em 1em 0.8em 3em; 
+        height: 40px; 
         font-size: 0.9rem;
     }
     .auth-icon {
@@ -364,8 +358,8 @@
         padding: 8px 12px;
         font-size: 0.85rem;
         margin: 5px auto 10px auto;
-        width: calc(100% - 30px); /* Ajustar el ancho del mensaje para móviles */
-        max-width: none; /* Eliminar max-width */
-        border-radius: 0; /* Sin redondeo en móvil para este mensaje */
+        width: calc(100% - 30px); 
+        max-width: none; 
+        border-radius: 0; 
     }
 }
