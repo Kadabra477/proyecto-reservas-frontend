@@ -1,3 +1,5 @@
+/* src/components/Navbar/NavBar.css */
+
 .navbar {
    background-color: var(--white);
    border-bottom: 1px solid var(--gray-light);
@@ -17,15 +19,17 @@
 }
  
 .navbar-logo {
-   font-size: 1.8rem; /* Aumentado a 1.8rem para que coincida con el Home */
-   font-weight: 800; /* Más audaz */
-   color: var(--text, #333); /* Color del texto por defecto */
+   font-size: 1.8rem; 
+   font-weight: 800; 
+   color: var(--text); /* CAMBIO CLAVE: El color base del logo "Donde" será el de texto oscuro */
    text-decoration: none;
-   letter-spacing: 0.5px; /* Añadido espaciado de letras */
+   letter-spacing: 0.5px; 
+   /* Asegurarse de que no haya otros estilos de color que sobrescriban este */
 }
+
 /* Estilo específico para el span dentro del logo (JUEGO?) */
 .navbar-logo-span {
-    color: var(--primary); /* Usar el color primario para el 'JUEGO?' */
+   color: var(--primary); /* Esto usa el verde de tus variables globales */
 }
  
 .navbar-menu {
@@ -62,7 +66,7 @@
    white-space: nowrap;
 }
  
-/* Responsive */
+/* Responsive Navbar */
 @media (max-width: 768px) {
    .navbar-menu {
      flex-direction: column;
@@ -85,7 +89,7 @@
  
 @media (max-width: 480px) {
    .navbar-logo {
-     font-size: 1.5rem; /* Ajuste para pantallas aún más pequeñas */
+     font-size: 1.5rem; 
    }
  
    .navbar-link {

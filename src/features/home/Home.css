@@ -1,11 +1,6 @@
 /* frontend/src/features/home/Home.css */
 
-/* Tus variables :root si las tienes aquí, o asegúrate de que App.css las defina */
-/* No dupliques variables, App.css debe ser la única fuente de :root */
-:root {
-    /* Aquí solo deberían ir variables si son EXCLUSIVAS de Home.css y no globales */
-    /* De lo contrario, deben estar en App.css */
-}
+/* NO HAY DECLARACIONES :root AQUÍ - Todas en App.css */
 
 /* IMPORTANTE: Asegura que el HTML y BODY ocupen todo el alto disponible */
 html, body, #root {
@@ -41,7 +36,7 @@ p {
 
 a {
     text-decoration: none;
-    color: var(--primary);
+    color: var(--primary); /* Esto es para enlaces generales, Navbar.css lo sobrescribe para el logo */
     transition: color var(--transition-fast);
 }
 
@@ -393,16 +388,15 @@ a:hover {
     align-items: center; 
     justify-content: center; 
     font-size: 2em;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); /* CAMBIO CLAVE: Sombra sin desplazamiento */
     transition: transform 0.3s ease, background-color 0.3s ease;
     z-index: 1000;
     text-decoration: none;
     line-height: 1; 
-    /* CAMBIO CLAVE: Eliminar cualquier borde o padding que pueda causar el "duplicado" */
     border: none; 
     outline: none;
     padding: 0; 
-    overflow: hidden; /* Asegura que no haya nada saliendo del círculo */
+    overflow: hidden; 
 }
 
 /* Asegurarse que el icono dentro del botón no tenga márgenes o paddings extra */
@@ -411,6 +405,7 @@ a:hover {
     padding: 0;
     display: block; /* Asegura que ocupe todo el espacio */
     line-height: 1; /* Ayuda al centrado */
+    transform: none !important; /* CAMBIO CLAVE: Reinicia cualquier transformación aplicada por User Agent o librerías */
 }
 
 .whatsapp-button:hover {

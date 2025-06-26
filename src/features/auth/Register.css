@@ -26,7 +26,7 @@
 .register-image-banner {
     background: linear-gradient(45deg, var(--secondary), var(--secondary-dark));
     color: white;
-    padding: 10px 20px; /* REDUCIDO el padding */
+    padding: 8px 15px; /* REDUCIDO aún más el padding */
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     text-align: center;
@@ -37,14 +37,14 @@
 }
 
 .register-banner-title {
-    font-size: 1.8rem; /* REDUCIDO */
+    font-size: 1.6rem; /* REDUCIDO */
     font-weight: 700;
     margin-bottom: 5px;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
 .register-banner-subtitle {
-    font-size: 0.9rem; /* REDUCIDO */
+    font-size: 0.8rem; /* REDUCIDO */
     font-weight: 400;
     opacity: 0.9;
 }
@@ -52,7 +52,7 @@
 .register-form {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    padding-top: 0.8em; /* REDUCIDO */
+    padding-top: 0.7em; /* REDUCIDO */
     position: relative;
     z-index: 3;
 }

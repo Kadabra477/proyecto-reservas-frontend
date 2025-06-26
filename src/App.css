@@ -21,7 +21,7 @@
     --background: #f0f2f5;   /* Fondo general claro */
     --background-light: #f1f4f8; /* Para secciones claras */
     --white: #ffffff;
-    --text: #343a40;           /* Color de texto principal */
+    --text: #343a40;           /* Color de texto principal (gris muy oscuro) */
     --text-light: #6c757d;     /* Color de texto secundario */
     
     /* Sombras */
@@ -154,7 +154,7 @@ a:hover {
     padding: 60px 20px;
     font-size: 1.3rem;
     color: var(--text-light);
-    flex-grow: 1; /* Para que ocupen el espacio central */
+    flex-grow: 1; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -168,6 +168,6 @@ a:hover {
 /* Responsive general para la aplicación */
 @media (max-width: 768px) {
     .App {
-        padding: 0 15px 15px 15px; /* Reducir padding horizontal en móviles */
+        padding: 0 15px 15px 15px; 
     }
 }
