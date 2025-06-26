@@ -10,7 +10,8 @@ function OAuth2Success({ onLoginSuccess }) {
         const token = params.get('token');
         const username = params.get('username');
         const nombreCompleto = params.get('name');
-        const userRole = params.get('role'); // <-- Captura el rol desde la URL
+        // 'role' desde Google OAuth puede venir como una cadena simple (ej: "USER" o "ROLE_USER")
+        const roleFromUrl = params.get('role'); 
 
         if (token) {
             localStorage.setItem('jwtToken', token);
@@ -22,21 +23,19 @@ function OAuth2Success({ onLoginSuccess }) {
             if (nombreCompleto) {
                 localStorage.setItem('nombreCompleto', nombreCompleto);
             }
-            if (userRole) {
-                localStorage.setItem('userRole', userRole); // <-- Guarda el rol en localStorage
-            } else {
-                console.warn("OAuth2Success: El rol no se recibió de la URL. Asumiendo 'USER'.");
-                localStorage.setItem('userRole', 'USER'); // Rol por defecto si no viene
-            }
-
+            
+            // **CAMBIO CLAVE AQUÍ:** Aseguramos que 'roleFromUrl' se convierta en un array para pasar a onLoginSuccess
+            const rolesToPass = roleFromUrl ? [roleFromUrl.replace('ROLE_', '')] : ['USER']; // Asume "USER" si no hay rol y limpia "ROLE_"
+            
+            // Llama a onLoginSuccess con el array de roles
             if (onLoginSuccess) {
-                onLoginSuccess(token, username, nombreCompleto, userRole || 'USER');
+                onLoginSuccess(token, username, nombreCompleto, rolesToPass);
             }
 
-            navigate('/dashboard'); // Redirige al dashboard después del éxito
+            navigate('/dashboard');
         } else {
             console.error("OAuth2Success: No se encontró el token en la URL.");
-            navigate('/login?error=oauth_failed'); // Redirige a login con error
+            navigate('/login?error=oauth_failed');
         }
     }, [location, navigate, onLoginSuccess]);
 

@@ -1,4 +1,3 @@
-// src/features/auth/Register.js
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig';
@@ -164,7 +163,6 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
                     )}
                 </form>
 
-                {/* Gotas decorativas */}
                 <div className="auth-drops">
                     <div className="drop drop-1"></div>
                     <div className="drop drop-2"></div>

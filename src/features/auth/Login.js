@@ -1,4 +1,3 @@
-// src/features/auth/Login.jsx
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
@@ -6,7 +5,7 @@ import './Login.css';
 import '../../styles/AuthForm.css';
 
 function Login({ onLoginSuccess }) {
-    const [emailInput, setEmailInput] = useState(''); // Ahora este input es para el email (que es el username de login)
+    const [emailInput, setEmailInput] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -50,24 +49,21 @@ function Login({ onLoginSuccess }) {
 
         try {
             const response = await api.post('/auth/login', {
-                username: emailInput, // Envía el email del input como username para el backend
+                username: emailInput,
                 password: password,
             });
 
-            const { token, username, nombreCompleto, role, error: loginError } = response.data; // Recibe username (email) y nombreCompleto
+            // Asumo que 'role' en response.data es una cadena simple (ej: "ADMIN")
+            // Si tu backend ya envía un array, esto seguirá funcionando.
+            const { token, username, nombreCompleto, role, error: loginError } = response.data; 
 
             if (loginError) {
                 setIsLoading(false);
                 setError(loginError);
-            } else if (token && username && nombreCompleto && role) {
-                localStorage.setItem('jwtToken', token);
-                localStorage.setItem('username', username); // Guarda el email (que es el username de login)
-                localStorage.setItem('nombreCompleto', nombreCompleto); // Guarda el nombre completo
-                localStorage.setItem('userRole', role);
-                
-                if (onLoginSuccess) {
-                    onLoginSuccess(token, username, nombreCompleto, role); // Pasa username (email) y nombreCompleto
-                }
+            } else if (token && username && nombreCompleto) {
+                // **CAMBIO CLAVE AQUÍ:** Siempre pasar un ARRAY de roles a onLoginSuccess
+                const rolesArray = Array.isArray(role) ? role : [role]; 
+                onLoginSuccess(token, username, nombreCompleto, rolesArray); // Pasa un array de roles
                 navigate('/dashboard'); 
             } else {
                 setIsLoading(false);
@@ -105,7 +101,7 @@ function Login({ onLoginSuccess }) {
 
                     <input
                         className="auth-input"
-                        type="email" // Pedimos explícitamente el email
+                        type="email"
                         placeholder="Correo electrónico"
                         value={emailInput}
                         onChange={(e) => setEmailInput(e.target.value)}
@@ -135,7 +131,6 @@ function Login({ onLoginSuccess }) {
                         ¿Olvidaste tu contraseña?
                     </Link>
 
-                    {/* Botón para iniciar sesión con Google */}
                     <div
                         style={{
                             marginTop: '20px',

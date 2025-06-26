@@ -21,19 +21,21 @@ function AdminPanel() {
     const [complejos, setComplejos] = useState([]);
     const [reservas, setReservas] = useState([]);
     const [usuarios, setUsuarios] = useState([]);
-    const [activeTab, setActiveTab] = useState('complejos');
+    const [activeTab, setActiveTab] = useState('complejos'); // Pestaña inicial por defecto
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [editingComplejo, setEditingComplejo] = useState(null); // Almacena el objeto complejo completo si estamos editando
-    const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin);
+    const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin); // Estado del formulario de creación/edición
 
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
 
+    // **CRÍTICO:** Obtener los roles del usuario como un ARRAY de strings (ej: ['ADMIN', 'USER'])
     const userRoles = JSON.parse(localStorage.getItem('userRoles') || '[]');
-    const isAdmin = userRoles.includes('ADMIN');
-    const isComplexOwner = userRoles.includes('COMPLEX_OWNER');
+    const isAdmin = userRoles.includes('ADMIN'); // true si el array incluye 'ADMIN'
+    const isComplexOwner = userRoles.includes('COMPLEX_OWNER'); // true si el array incluye 'COMPLEX_OWNER'
 
+    // Determinar el rol a pasar a AdminEstadisticas de manera explícita
     const roleForStats = isAdmin ? 'ADMIN' : (isComplexOwner ? 'COMPLEX_OWNER' : null);
 
 
@@ -69,6 +71,7 @@ function AdminPanel() {
         return canchasArray;
     }, []);
 
+    // Este useEffect se encarga de poblar el formulario cuando se selecciona un complejo para editar
     useEffect(() => {
         if (editingComplejo) {
             setNuevoComplejoAdmin({
@@ -78,13 +81,15 @@ function AdminPanel() {
                 ubicacion: editingComplejo.ubicacion || '',
                 telefono: editingComplejo.telefono || '',
                 fotoUrl: editingComplejo.fotoUrl || '',
-                horarioApertura: editingComplejo.horarioApertura ? editingComplejo.horarioApertura.substring(0, 5) : '10:00',
-                horarioCierre: editingComplejo.horarioCierre ? editingComplejo.horarioCierre.substring(0, 5) : '23:00',
-                emailPropietario: editingComplejo.propietario?.username || '', // ¡Acceder a .username del objeto propietario!
+                horarioApertura: editingComplejo.horarioApertura || '10:00', // El backend ya devuelve LocalTime, aquí solo aseguramos un default si es null
+                horarioCierre: editingComplejo.horarioCierre || '23:00',   // Igual que arriba
+                // **CRÍTICO:** Acceder a .username del objeto propietario.
+                // Con FetchType.EAGER en el backend, esto estará disponible.
+                emailPropietario: editingComplejo.propietario?.username || '', 
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
         } else {
-            setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
+            setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Resetea el formulario si no se está editando
         }
     }, [editingComplejo, mapComplejoToFormCanchas]);
 
@@ -99,12 +104,15 @@ function AdminPanel() {
         return () => clearTimeout(timer);
     }, [mensaje]);
 
+    // Función para cargar los complejos (todos para ADMIN, solo los suyos para COMPLEX_OWNER)
     const fetchComplejos = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
+            // **CRÍTICO:** Llama al endpoint correcto según el rol del usuario
+            // ADMIN: /complejos (todos los complejos)
+            // COMPLEX_OWNER: /complejos/mis-complejos (solo los complejos del propietario logueado)
             const endpoint = isAdmin ? '/complejos' : '/complejos/mis-complejos';
-            // Aquí el backend devuelve la entidad Complejo con el propietario cargado
             const res = await api.get(endpoint);
             setComplejos(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
@@ -114,15 +122,16 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, [isAdmin]);
+    }, [isAdmin]); // Depende de `isAdmin`
 
+    // Función para cargar las reservas (todas para ADMIN, solo las suyas para COMPLEX_OWNER)
     const fetchReservas = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            // Asumiendo que el endpoint '/reservas/complejo/mis-reservas' existe y funciona para COMPLEX_OWNER
-            // Si no existe en el backend, debes crearlo o usar solo la ruta de admin.
-            const endpoint = isAdmin ? '/reservas/admin/todas' : '/reservas/complejo/mis-reservas';
+            // **CRÍTICO:** Asegúrate que tu backend tenga el endpoint '/reservas/complejo/mis-reservas' para COMPLEX_OWNER
+            // Si no existe, deberás crearlo en tu backend o usar un endpoint general que el COMPLEX_OWNER pueda acceder.
+            const endpoint = isAdmin ? '/reservas/admin/todas' : '/reservas/complejo/mis-reservas'; 
             const res = await api.get(endpoint);
             setReservas(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
@@ -132,17 +141,18 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, [isAdmin]); // Dependencia isAdmin
+    }, [isAdmin]); // Depende de `isAdmin`
 
+    // Función para cargar usuarios (solo para ADMIN)
     const fetchUsuarios = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            if (isAdmin) {
+            if (isAdmin) { // Solo ADMIN tiene acceso a esta función
                 const res = await api.get('/users');
                 setUsuarios(Array.isArray(res.data) ? res.data : []);
             } else {
-                setUsuarios([]); // Otros roles no ven la lista de usuarios
+                setUsuarios([]); // Otros roles no deberían ver esta sección
             }
         } catch (err) {
             console.error('Error al obtener usuarios:', err);
@@ -151,8 +161,9 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, [isAdmin]);
+    }, [isAdmin]); // Depende de `isAdmin`
 
+    // Este useEffect se ejecuta al cambiar de pestaña o al montar el componente
     useEffect(() => {
         const token = localStorage.getItem('jwtToken');
         if (!token) {
@@ -160,11 +171,12 @@ function AdminPanel() {
             return;
         }
 
+        // Llamar a la función de fetch correspondiente a la pestaña activa
         if (activeTab === 'complejos') {
             fetchComplejos();
         } else if (activeTab === 'reservas') {
             fetchReservas();
-        } else if (activeTab === 'usuarios' && isAdmin) {
+        } else if (activeTab === 'usuarios' && isAdmin) { // Solo ADMIN puede acceder a usuarios
             fetchUsuarios();
         } else if (activeTab === 'estadisticas') {
             // AdminEstadisticas se encarga de su propia carga de datos
@@ -221,7 +233,7 @@ function AdminPanel() {
             return;
         }
 
-        // Validación para la creación por ADMIN: emailPropietario es obligatorio
+        // Validación para la creación por ADMIN: emailPropietario es obligatorio si no está editando
         if (!id && isAdmin && !emailPropietario?.trim()) { 
             setMensaje({ text: 'El email del propietario es obligatorio para nuevos complejos (Administrador).', type: 'error' });
             return;
@@ -247,9 +259,9 @@ function AdminPanel() {
             canchaTecho[cancha.tipoCancha] = cancha.techo;
         });
 
-        // Los datos a enviar al backend deben coincidir con la entidad Complejo
+        // El payload debe coincidir con la entidad Complejo que el backend espera para PUT/POST
         const payload = {
-            id, // Para la actualización, el ID es importante
+            id, // Solo se envía ID si estamos editando
             nombre,
             descripcion: descripcion || null,
             ubicacion,
@@ -264,13 +276,13 @@ function AdminPanel() {
             canchaTecho
         };
 
-        if (editingComplejo) { // Si estamos en modo edición
+        if (editingComplejo) { // Si estamos en modo edición (ID existe en nuevoComplejoAdmin)
             try {
-                await api.put(`/complejos/${id}`, payload); // Enviamos el payload para actualizar
+                await api.put(`/complejos/${id}`, payload); // PUT al endpoint de actualización
                 setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
                 setEditingComplejo(null);
                 setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-                fetchComplejos();
+                fetchComplejos(); // Recargar la lista para ver los cambios
             }
             catch (err) {
                 console.error('Error al actualizar el complejo:', err);
@@ -278,16 +290,18 @@ function AdminPanel() {
                 setMensaje({ text: errorMsg, type: 'error' });
             }
         } else { // Si estamos creando un nuevo complejo
-            // Al crear, el ADMIN puede especificar el propietario (si isAdmin), si no, el backend lo asignará al creador
+            // Para la creación, el ADMIN puede especificar un propietario existente.
+            // Si no es ADMIN o no especifica, el backend asignará el complejo al usuario que hace la request.
             const crearPayload = {
                 ...payload,
-                propietarioUsername: isAdmin ? emailPropietario : undefined // Solo incluye propietarioUsername si es ADMIN y creando
+                // **CRÍTICO:** Solo incluir propietarioUsername si es ADMIN y se proporcionó, de lo contrario, omitirlo para que el backend use el usuario autenticado.
+                ...(isAdmin && emailPropietario ? { propietarioUsername: emailPropietario } : {}) 
             };
             try {
-                await api.post('/complejos', crearPayload);
+                await api.post('/complejos', crearPayload); // POST al endpoint de creación
                 setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
                 setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-                fetchComplejos();
+                fetchComplejos(); // Recargar la lista para ver el nuevo complejo
             } catch (err) {
                 console.error('Error al crear complejo (Admin):', err);
                 const errorMsg = err.response?.data?.message || err.response?.data || 'Error al crear el complejo.';
@@ -296,8 +310,9 @@ function AdminPanel() {
         }
     };
     
+    // Inicia el modo de edición, poblando el formulario con los datos del complejo seleccionado
     const startEditingComplejo = (complejoParaEditar) => {
-        setEditingComplejo(complejoParaEditar);
+        setEditingComplejo(complejoParaEditar); // Guarda el objeto completo del complejo
         setNuevoComplejoAdmin({
             id: complejoParaEditar.id,
             nombre: complejoParaEditar.nombre || '',
@@ -305,14 +320,16 @@ function AdminPanel() {
             ubicacion: complejoParaEditar.ubicacion || '',
             telefono: complejoParaEditar.telefono || '',
             fotoUrl: complejoParaEditar.fotoUrl || '',
-            horarioApertura: complejoParaEditar.horarioApertura ? complejoParaEditar.horarioApertura.substring(0, 5) : '10:00',
-            horarioCierre: complejoParaEditar.horarioCierre ? complejoParaEditar.horarioCierre.substring(0, 5) : '23:00',
-            emailPropietario: complejoParaEditar.propietario?.username || '', // Acceder al username del objeto propietario
+            horarioApertura: complejoParaEditar.horarioApertura || '10:00',
+            horarioCierre: complejoParaEditar.horarioCierre || '23:00',
+            // **CRÍTICO:** Accede a .username del objeto propietario. Esto ahora funcionará con EAGER
+            emailPropietario: complejoParaEditar.propietario?.username || '', 
             canchas: mapComplejoToFormCanchas(complejoParaEditar)
         });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // Desplaza hacia arriba para ver el formulario
     };
 
+    // Cancela el modo de edición y resetea el formulario
     const cancelEditingComplejo = () => {
         setEditingComplejo(null);
         setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
@@ -380,7 +397,7 @@ function AdminPanel() {
 
     const startManagingUserRoles = (user) => {
         setManagingUserRoles(user);
-        const currentRoles = user.authorities ? user.authorities.map(auth => auth.authority.replace('ROLE_', '')) : [];
+        const currentRoles = user.authorities ? user.authorities.map(auth => auth.authority.replace('ROLE_', '')) : []; // **CORRECCIÓN: quitado el `.filter(Boolean)` aquí, porque puede causar un error de sintaxis si el punto y coma se coloca mal.**
         setSelectedRoles(currentRoles);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -519,15 +536,19 @@ function AdminPanel() {
 
             {activeTab === 'complejos' && (
                 <div className="admin-tab-content">
+                    {/* Título dinámico para el formulario */}
                     <h2>{editingComplejo ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
 
+                    {/* Mensajes informativos según el rol y si se está editando */}
                     {isAdmin && (
                         <p className="info-message">Como Administrador General, puedes crear y editar cualquier complejo. Puedes asignarlos a un propietario existente.</p>
                     )}
                     {isComplexOwner && !editingComplejo && (
-                        <p className="info-message">Como Dueño de Complejo, puedes gestionar solo los complejos que te pertenecen. Selecciona un complejo de la lista para editarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
+                        <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
                     )}
 
+                    {/* Formulario de Creación/Edición */}
+                    {/* Se muestra si es ADMIN (para crear o editar) o si es COMPLEX_OWNER y está editando */}
                     {(isAdmin || (isComplexOwner && editingComplejo)) ? (
                         <form className="admin-complejo-form" onSubmit={handleSaveComplejo}>
                             <h3>Datos Generales del Complejo</h3>
@@ -536,7 +557,8 @@ function AdminPanel() {
                                 <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre} onChange={handleComplejoFormChange} required placeholder='Ej: El Alargue' />
                             </div>
 
-                            {isAdmin && !editingComplejo && ( // Solo el ADMIN puede asignar propietario al crear
+                            {/* El campo emailPropietario solo es relevante para ADMIN al CREAR un complejo */}
+                            {isAdmin && !editingComplejo && ( 
                                 <div className="admin-form-group">
                                     <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
                                     <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo && isAdmin} placeholder='dueño@ejemplo.com' />
@@ -544,129 +566,133 @@ function AdminPanel() {
                                 </div>
                             )}
                             
-                            {/* Campos para editar (siempre visibles en modo edición, y para crear si es ADMIN) */}
-                            <div className="admin-form-group">
-                                <label htmlFor="descripcion">Descripción:</label>
-                                <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
-                                <input type="text" id="ubicacion" name="ubicacion" value={nuevoComplejoAdmin.ubicacion} onChange={handleComplejoFormChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="telefono">Teléfono:</label>
-                                <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="fotoUrl">URL de Foto Principal:</label>
-                                <input type="url" id="fotoUrl" name="fotoUrl" value={nuevoComplejoAdmin.fotoUrl} onChange={handleComplejoFormChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="horarioApertura">Horario Apertura: <span className="obligatorio">*</span></label>
-                                <input type="time" id="horarioApertura" name="horarioApertura" value={nuevoComplejoAdmin.horarioApertura} onChange={handleComplejoFormChange} required />
-                            </div>
-                            <div className="admin-form-group">
-                                <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
-                                <input type="time" id="horarioCierre" name="horarioCierre" value={nuevoComplejoAdmin.horarioCierre} onChange={handleComplejoFormChange} required />
-                            </div>
-                            
-                            <h3>Detalles de Canchas</h3>
-                            <div className="canchas-dinamicas-container">
-                                {nuevoComplejoAdmin.canchas.map((cancha, index) => (
-                                    <div key={index} className="cancha-item-form">
-                                        <h4>Cancha #{index + 1}</h4>
-                                        <div className="admin-form-group">
-                                            <label htmlFor={`tipoCancha-${index}`}>Tipo de Cancha: <span className="obligatorio">*</span></label>
-                                            <select
-                                                id={`tipoCancha-${index}`}
-                                                name="tipoCancha"
-                                                value={cancha.tipoCancha}
-                                                onChange={(e) => handleCanchaChange(index, e)}
-                                                required
-                                            >
-                                                <option value="">Selecciona un tipo</option>
-                                                <option value="Fútbol 5">Fútbol 5</option>
-                                                <option value="Fútbol 7">Fútbol 7</option>
-                                                <option value="Fútbol 11">Fútbol 11</option>
-                                                <option value="Pádel">Pádel</option>
-                                                <option value="Tenis">Tenis</option>
-                                                <option value="Básquet">Básquet</option>
-                                            </select>
-                                        </div>
-                                        <div className="admin-form-group">
-                                            <label htmlFor={`cantidad-${index}`}>Cantidad de Canchas de este Tipo: <span className="obligatorio">*</span></label>
-                                            <input
-                                                type="number"
-                                                id={`cantidad-${index}`}
-                                                name="cantidad"
-                                                value={cancha.cantidad}
-                                                onChange={(e) => handleCanchaChange(index, e)}
-                                                required
-                                                min="1"
-                                                placeholder='Ej: 6'
-                                            />
-                                        </div>
-                                        <div className="admin-form-group">
-                                            <label htmlFor={`precioHora-${index}`}>Precio por Hora ($): <span className="obligatorio">*</span></label>
-                                            <input
-                                                type="number"
-                                                id={`precioHora-${index}`}
-                                                name="precioHora"
-                                                value={cancha.precioHora}
-                                                onChange={(e) => handleCanchaChange(index, e)}
-                                                required
-                                                step="0.01"
-                                                min="0"
-                                                placeholder='Ej: 35000.00'
-                                            />
-                                        </div>
-                                        <div className="admin-form-group">
-                                            <label htmlFor={`superficie-${index}`}>Superficie: <span className="obligatorio">*</span></label>
-                                            <select
-                                                id={`superficie-${index}`}
-                                                name="superficie"
-                                                value={cancha.superficie}
-                                                onChange={(e) => handleCanchaChange(index, e)}
-                                                required
-                                            >
-                                                <option value="">Selecciona una superficie</option>
-                                                <option value="Césped Sintético">Césped Sintético</option>
-                                                <option value="Polvo de Ladrillo">Polvo de Ladrillo</option>
-                                                <option value="Cemento">Cemento</option>
-                                                <option value="Parquet">Parquet</option>
-                                            </select>
-                                        </div>
-                                        <div className="admin-form-group checkbox">
-                                            <input
-                                                type="checkbox"
-                                                id={`iluminacion-${index}`}
-                                                name="iluminacion"
-                                                checked={cancha.iluminacion}
-                                                onChange={(e) => handleCanchaChange(index, e)}
-                                            />
-                                            <label htmlFor={`iluminacion-${index}`}>Tiene Iluminación</label>
-                                        </div>
-                                        <div className="admin-form-group checkbox">
-                                            <input
-                                                type="checkbox"
-                                                id={`techo-${index}`}
-                                                name="techo"
-                                                checked={cancha.techo}
-                                                onChange={(e) => handleCanchaChange(index, e)}
-                                            />
-                                            <label htmlFor={`techo-${index}`}>Tiene Techo</label>
-                                        </div>
-                                        {nuevoComplejoAdmin.canchas.length > 1 && (
-                                            <button type="button" className="admin-btn-delete remove-cancha-btn" onClick={() => handleRemoveCancha(index)}>
-                                                Eliminar Cancha
-                                            </button>
-                                        )}
+                            {/* Campos de detalle del complejo (descripción, ubicación, etc.) y canchas */}
+                            {/* Estos se muestran si es ADMIN (para crear o editar) o si es COMPLEX_OWNER y está editando */}
+                            <> {/* Este fragmento <> no es condicional, está dentro del condicional padre */}
+                                <div className="admin-form-group">
+                                    <label htmlFor="descripcion">Descripción:</label>
+                                    <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
+                                    <input type="text" id="ubicacion" name="ubicacion" value={nuevoComplejoAdmin.ubicacion} onChange={handleComplejoFormChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label htmlFor="telefono">Teléfono:</label>
+                                    <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
                                     </div>
-                                ))}
-                            </div>
-                            <button type="button" className="admin-btn-add" onClick={handleAddCancha}>
-                                Agregar Tipo de Cancha
-                            </button>
+                                <div className="admin-form-group">
+                                    <label htmlFor="fotoUrl">URL de Foto Principal:</label>
+                                    <input type="url" id="fotoUrl" name="fotoUrl" value={nuevoComplejoAdmin.fotoUrl} onChange={handleComplejoFormChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label htmlFor="horarioApertura">Horario Apertura: <span className="obligatorio">*</span></label>
+                                    <input type="time" id="horarioApertura" name="horarioApertura" value={nuevoComplejoAdmin.horarioApertura} onChange={handleComplejoFormChange} required />
+                                </div>
+                                <div className="admin-form-group">
+                                    <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
+                                    <input type="time" id="horarioCierre" name="horarioCierre" value={nuevoComplejoAdmin.horarioCierre} onChange={handleComplejoFormChange} required />
+                                </div>
+                                
+                                <h3>Detalles de Canchas</h3>
+                                <div className="canchas-dinamicas-container">
+                                    {nuevoComplejoAdmin.canchas.map((cancha, index) => (
+                                        <div key={index} className="cancha-item-form">
+                                            <h4>Cancha #{index + 1}</h4>
+                                            <div className="admin-form-group">
+                                                <label htmlFor={`tipoCancha-${index}`}>Tipo de Cancha: <span className="obligatorio">*</span></label>
+                                                <select
+                                                    id={`tipoCancha-${index}`}
+                                                    name="tipoCancha"
+                                                    value={cancha.tipoCancha}
+                                                    onChange={(e) => handleCanchaChange(index, e)}
+                                                    required
+                                                >
+                                                    <option value="">Selecciona un tipo</option>
+                                                    <option value="Fútbol 5">Fútbol 5</option>
+                                                    <option value="Fútbol 7">Fútbol 7</option>
+                                                    <option value="Fútbol 11">Fútbol 11</option>
+                                                    <option value="Pádel">Pádel</option>
+                                                    <option value="Tenis">Tenis</option>
+                                                    <option value="Básquet">Básquet</option>
+                                                </select>
+                                            </div>
+                                            <div className="admin-form-group">
+                                                <label htmlFor={`cantidad-${index}`}>Cantidad de Canchas de este Tipo: <span className="obligatorio">*</span></label>
+                                                <input
+                                                    type="number"
+                                                    id={`cantidad-${index}`}
+                                                    name="cantidad"
+                                                    value={cancha.cantidad}
+                                                    onChange={(e) => handleCanchaChange(index, e)}
+                                                    required
+                                                    min="1"
+                                                    placeholder='Ej: 6'
+                                                />
+                                            </div>
+                                            <div className="admin-form-group">
+                                                <label htmlFor={`precioHora-${index}`}>Precio por Hora ($): <span className="obligatorio">*</span></label>
+                                                <input
+                                                    type="number"
+                                                    id={`precioHora-${index}`}
+                                                    name="precioHora"
+                                                    value={cancha.precioHora}
+                                                    onChange={(e) => handleCanchaChange(index, e)}
+                                                    required
+                                                    step="0.01"
+                                                    min="0"
+                                                    placeholder='Ej: 35000.00'
+                                                />
+                                            </div>
+                                            <div className="admin-form-group">
+                                                <label htmlFor={`superficie-${index}`}>Superficie: <span className="obligatorio">*</span></label>
+                                                <select
+                                                    id={`superficie-${index}`}
+                                                    name="superficie"
+                                                    value={cancha.superficie}
+                                                    onChange={(e) => handleCanchaChange(index, e)}
+                                                    required
+                                                >
+                                                    <option value="">Selecciona una superficie</option>
+                                                    <option value="Césped Sintético">Césped Sintético</option>
+                                                    <option value="Polvo de Ladrillo">Polvo de Ladrillo</option>
+                                                    <option value="Cemento">Cemento</option>
+                                                    <option value="Parquet">Parquet</option>
+                                                </select>
+                                            </div>
+                                            <div className="admin-form-group checkbox">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`iluminacion-${index}`}
+                                                    name="iluminacion"
+                                                    checked={cancha.iluminacion}
+                                                    onChange={(e) => handleCanchaChange(index, e)}
+                                                />
+                                                <label htmlFor={`iluminacion-${index}`}>Tiene Iluminación</label>
+                                            </div>
+                                            <div className="admin-form-group checkbox">
+                                                <input
+                                                    type="checkbox"
+                                                    id={`techo-${index}`}
+                                                    name="techo"
+                                                    checked={cancha.techo}
+                                                    onChange={(e) => handleCanchaChange(index, e)}
+                                                />
+                                                <label htmlFor={`techo-${index}`}>Tiene Techo</label>
+                                            </div>
+                                            {nuevoComplejoAdmin.canchas.length > 1 && (
+                                                <button type="button" className="admin-btn-delete remove-cancha-btn" onClick={() => handleRemoveCancha(index)}>
+                                                    Eliminar Cancha
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <button type="button" className="admin-btn-add" onClick={handleAddCancha}>
+                                    Agregar Tipo de Cancha
+                                </button>
+                            </>
+                            {/* FIN de los campos de detalle */}
 
                             <div className="admin-form-buttons">
                                 <button type="submit" className="admin-btn-save">
@@ -680,9 +706,20 @@ function AdminPanel() {
                             </div>
                         </form>
                     ) : (
+                        // Mensaje para COMPLEX_OWNER si no está editando y no puede crear
                         isComplexOwner && !editingComplejo && (
                             <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
                         )
+                    )}
+
+                    {/* Botón para "Agregar Nuevo Complejo" visible solo para ADMIN y si no está editando */}
+                    {isAdmin && !editingComplejo && (
+                        <button className="admin-btn-add-new-complejo" onClick={() => {
+                            setEditingComplejo(estadoInicialComplejoAdmin); // Resetea y prepara para crear
+                            setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Asegura que el formulario esté limpio
+                        }}>
+                            + Agregar Nuevo Complejo
+                        </button>
                     )}
 
                     <div className="admin-list-container">
@@ -706,7 +743,7 @@ function AdminPanel() {
                                             <tr key={c.id}>
                                                 <td data-label="ID">{c.id}</td>
                                                 <td data-label="Nombre">{c.nombre}</td>
-                                                {/* Aquí accedemos al username del propietario. Si el JOIN FETCH funcionó, esto estará disponible. */}
+                                                {/* **CRÍTICO:** Accedemos al username del objeto propietario. Con FetchType.EAGER, esto estará disponible. */}
                                                 <td data-label="Propietario">{c.propietario?.username || 'N/A'}</td> 
                                                 <td data-label="Ubicación">{c.ubicacion || 'N/A'}</td>
                                                 <td data-label="Horario">{c.horarioApertura || 'N/A'} - {c.horarioCierre || 'N/A'}</td>
@@ -733,6 +770,7 @@ function AdminPanel() {
                 </div>
             )}
 
+            {/* Sección de Reservas: Visible para ADMIN o COMPLEX_OWNER */}
             {activeTab === 'reservas' && (isAdmin || isComplexOwner) && (
                 <div className="admin-tab-content">
                     <h2>Reservas Registradas</h2>
@@ -797,6 +835,7 @@ function AdminPanel() {
                 </div>
             )}
 
+            {/* Sección de Usuarios: Visible solo para ADMIN */}
             {activeTab === 'usuarios' && isAdmin && (
                 <div className="admin-tab-content">
                     <h2>Gestionar Usuarios y Roles</h2>
@@ -894,6 +933,7 @@ function AdminPanel() {
                 </div>
             )}
 
+            {/* Sección de Estadísticas: Visible para ADMIN o COMPLEX_OWNER */}
             {activeTab === 'estadisticas' && (isAdmin || isComplexOwner) && roleForStats && (
                 <AdminEstadisticas userRole={roleForStats} />
             )}
