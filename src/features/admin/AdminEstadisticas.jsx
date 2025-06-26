@@ -31,32 +31,34 @@ const AdminEstadisticas = ({ userRole }) => { // Recibe userRole como prop
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const API_ESTADISTICAS_URL = '/estadisticas/admin';
+    // Determina el endpoint de la API según el rol
+    const API_ESTADISTICAS_URL = userRole === 'ADMIN' ? '/estadisticas/admin' : '/estadisticas/owner';
+    // Ojo: Si el backend no tiene un endpoint específico para el owner,
+    // y el /estadisticas/admin ya devuelve lo filtrado para el owner si se llama con su token,
+    // entonces usa solo '/estadisticas/admin'.
 
     const fetchEstadisticas = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
             const response = await api.get(API_ESTADISTICAS_URL);
-            setEstadisticas(response.data);
+            // Asegúrate de que la data sea un objeto o manejar el caso de array si el backend lo devuelve así
+            setEstadisticas(response.data); 
         } catch (err) {
             console.error("Error al cargar las estadísticas:", err);
             if (err.response && err.response.status === 403) {
-                // Mensaje más específico basado en el rol si es posible
-                if (userRole === 'COMPLEX_OWNER') {
-                    setError('Acceso denegado. No tienes permisos para ver las estadísticas globales. Se mostrarán las de tus complejos.');
-                    // Nota: Si el backend ya filtra, este mensaje puede no ser necesario si no hay error 403
-                    // y simplemente se muestran menos datos. Pero lo mantenemos si el backend realmente deniega.
-                } else {
-                    setError('Acceso denegado. No tienes permisos para ver las estadísticas.');
-                }
-            } else {
+                setError('Acceso denegado. No tienes permisos para ver las estadísticas solicitadas.');
+            } else if (err.response?.status === 404) { // Manejo explícito del 404 para datos no encontrados
+                setError('No se encontraron datos de estadísticas. Intenta registrar algunos complejos y reservas.');
+                setEstadisticas(null); // Asegura que las estadísticas estén limpias
+            }
+            else {
                 setError('Error al cargar las estadísticas. Intenta de nuevo.');
             }
         } finally {
             setLoading(false);
         }
-    }, [userRole]); // Depende de userRole para, hipotéticamente, ajustar la petición o el mensaje
+    }, [API_ESTADISTICAS_URL]); // Depende de API_ESTADISTICAS_URL (que a su vez depende de userRole)
 
     useEffect(() => {
         fetchEstadisticas();
@@ -70,17 +72,20 @@ const AdminEstadisticas = ({ userRole }) => { // Recibe userRole como prop
         return <div className="admin-estadisticas-container error-message">{error}</div>;
     }
 
-    if (!estadisticas) {
+    // **CRÍTICO:** Verificar si `estadisticas` es null o si sus propiedades son nulas antes de acceder a ellas.
+    // Esto previene el error "Cannot convert undefined or null to object".
+    if (!estadisticas || Object.keys(estadisticas).length === 0) {
         return <div className="admin-estadisticas-container">No hay datos de estadísticas disponibles.</div>;
     }
 
     // Datos para el gráfico de reservas por tipo de cancha
     const reservasPorCanchaData = {
-        labels: Object.keys(estadisticas.reservasPorTipoCancha), // Usar reservasPorTipoCancha
+        // Usa el operador OR (|| {}) para asegurar que sea un objeto vacío si es null/undefined
+        labels: Object.keys(estadisticas.reservasPorTipoCancha || {}), 
         datasets: [
             {
                 label: 'Número de Reservas',
-                data: Object.values(estadisticas.reservasPorTipoCancha), // Usar reservasPorTipoCancha
+                data: Object.values(estadisticas.reservasPorTipoCancha || {}), 
                 backgroundColor: [
                     'rgba(75, 192, 192, 0.7)',
                     'rgba(153, 102, 255, 0.7)',
@@ -156,10 +161,11 @@ const AdminEstadisticas = ({ userRole }) => { // Recibe userRole como prop
         labels: ['Confirmadas', 'Pendientes', 'Canceladas/Rechazadas'], // Añadido Canceladas
         datasets: [
             {
+                // Asegurarse de que las propiedades existen antes de acceder a ellas
                 data: [
-                    estadisticas.totalReservasConfirmadas,
-                    estadisticas.totalReservasPendientes,
-                    estadisticas.totalReservasCanceladas, // Incluye las canceladas
+                    estadisticas.totalReservasConfirmadas || 0,
+                    estadisticas.totalReservasPendientes || 0,
+                    estadisticas.totalReservasCanceladas || 0, // Incluye las canceladas
                 ],
                 backgroundColor: [
                     'rgba(40, 167, 69, 0.7)',   // Verde para confirmadas
@@ -211,7 +217,8 @@ const AdminEstadisticas = ({ userRole }) => { // Recibe userRole como prop
         },
     };
 
-    const horariosPicoLabels = Object.keys(estadisticas.horariosPico).sort((a, b) => {
+    // Horarios pico: asegurarse de que estadisticas.horariosPico existe
+    const horariosPicoLabels = Object.keys(estadisticas.horariosPico || {}).sort((a, b) => {
         const [ha, ma] = a.split(':').map(Number);
         const [hb, mb] = b.split(':').map(Number);
         if (ha !== hb) return ha - hb;
@@ -222,7 +229,7 @@ const AdminEstadisticas = ({ userRole }) => { // Recibe userRole como prop
         datasets: [
             {
                 label: 'Número de Reservas',
-                data: horariosPicoLabels.map(hora => estadisticas.horariosPico[hora]),
+                data: horariosPicoLabels.map(hora => estadisticas.horariosPico[hora] || 0),
                 backgroundColor: 'rgba(75, 192, 192, 0.7)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
@@ -297,33 +304,47 @@ const AdminEstadisticas = ({ userRole }) => { // Recibe userRole como prop
             <div className="estadisticas-resumen">
                 <div className="resumen-card ingresos">
                     <h3>Ingresos Confirmados</h3>
-                    <p>${estadisticas.ingresosTotalesConfirmados.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p>${(estadisticas.ingresosTotalesConfirmados || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
                 <div className="resumen-card reservas-confirmadas">
                     <h3>Reservas Confirmadas</h3>
-                    <p>{estadisticas.totalReservasConfirmadas}</p>
+                    <p>{estadisticas.totalReservasConfirmadas || 0}</p>
                 </div>
                 <div className="resumen-card reservas-pendientes">
                     <h3>Reservas Pendientes</h3>
-                    <p>{estadisticas.totalReservasPendientes}</p>
+                    <p>{estadisticas.totalReservasPendientes || 0}</p>
                 </div>
                 {/* Ahora el backend ya devuelve totalReservasCanceladas */}
                 <div className="resumen-card reservas-canceladas">
                     <h3>Reservas Canceladas/Rechazadas</h3>
-                    <p>{estadisticas.totalReservasCanceladas}</p>
+                    <p>{estadisticas.totalReservasCanceladas || 0}</p>
                 </div>
             </div>
 
             <div className="estadisticas-charts">
-                <div className="chart-item">
-                    <Bar data={reservasPorCanchaData} options={barOptions} />
-                </div>
-                <div className="chart-item">
-                    <Pie data={estadoReservasData} options={pieOptions} />
-                </div>
-                <div className="chart-item full-width-chart">
-                    <Bar data={horariosPicoData} options={horariosPicoOptions} />
-                </div>
+                {Object.keys(estadisticas.reservasPorTipoCancha || {}).length > 0 ? (
+                    <div className="chart-item">
+                        <Bar data={reservasPorCanchaData} options={barOptions} />
+                    </div>
+                ) : (
+                    <div className="chart-item no-data-message">No hay datos de reservas por tipo de cancha.</div>
+                )}
+                
+                {(estadisticas.totalReservasConfirmadas || estadisticas.totalReservasPendientes || estadisticas.totalReservasCanceladas) > 0 ? (
+                    <div className="chart-item">
+                        <Pie data={estadoReservasData} options={pieOptions} />
+                    </div>
+                ) : (
+                    <div className="chart-item no-data-message">No hay datos de estado de reservas.</div>
+                )}
+
+                {Object.keys(estadisticas.horariosPico || {}).length > 0 ? (
+                    <div className="chart-item full-width-chart">
+                        <Bar data={horariosPicoData} options={horariosPicoOptions} />
+                    </div>
+                ) : (
+                    <div className="chart-item no-data-message">No hay datos de horarios pico.</div>
+                )}
             </div>
 
             {/* Puedes mantener o eliminar este botón según tu navegación */}

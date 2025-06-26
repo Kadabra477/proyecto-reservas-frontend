@@ -73,7 +73,8 @@ function AdminPanel() {
 
     // Este useEffect se encarga de poblar el formulario cuando se selecciona un complejo para editar
     useEffect(() => {
-        if (editingComplejo) {
+        // Solo poblar si editingComplejo es un objeto con un ID válido (es decir, no es el estadoInicial vacío)
+        if (editingComplejo && editingComplejo.id) {
             setNuevoComplejoAdmin({
                 id: editingComplejo.id,
                 nombre: editingComplejo.nombre || '',
@@ -81,15 +82,14 @@ function AdminPanel() {
                 ubicacion: editingComplejo.ubicacion || '',
                 telefono: editingComplejo.telefono || '',
                 fotoUrl: editingComplejo.fotoUrl || '',
-                horarioApertura: editingComplejo.horarioApertura || '10:00', // El backend ya devuelve LocalTime, aquí solo aseguramos un default si es null
-                horarioCierre: editingComplejo.horarioCierre || '23:00',   // Igual que arriba
-                // **CRÍTICO:** Acceder a .username del objeto propietario.
-                // Con FetchType.EAGER en el backend, esto estará disponible.
+                horarioApertura: editingComplejo.horarioApertura || '10:00',
+                horarioCierre: editingComplejo.horarioCierre || '23:00',
                 emailPropietario: editingComplejo.propietario?.username || '', 
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
         } else {
-            setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Resetea el formulario si no se está editando
+            // Si no estamos editando o editingComplejo se reseteó a null, resetea el formulario
+            setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
         }
     }, [editingComplejo, mapComplejoToFormCanchas]);
 
@@ -109,9 +109,6 @@ function AdminPanel() {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            // **CRÍTICO:** Llama al endpoint correcto según el rol del usuario
-            // ADMIN: /complejos (todos los complejos)
-            // COMPLEX_OWNER: /complejos/mis-complejos (solo los complejos del propietario logueado)
             const endpoint = isAdmin ? '/complejos' : '/complejos/mis-complejos';
             const res = await api.get(endpoint);
             setComplejos(Array.isArray(res.data) ? res.data : []);
@@ -122,37 +119,40 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, [isAdmin]); // Depende de `isAdmin`
+    }, [isAdmin]);
 
     // Función para cargar las reservas (todas para ADMIN, solo las suyas para COMPLEX_OWNER)
     const fetchReservas = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            // **CRÍTICO:** Asegúrate que tu backend tenga el endpoint '/reservas/complejo/mis-reservas' para COMPLEX_OWNER
-            // Si no existe, deberás crearlo en tu backend o usar un endpoint general que el COMPLEX_OWNER pueda acceder.
             const endpoint = isAdmin ? '/reservas/admin/todas' : '/reservas/complejo/mis-reservas'; 
             const res = await api.get(endpoint);
             setReservas(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('Error al obtener reservas:', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al cargar la lista de reservas.';
-            setMensaje({ text: errorMsg, type: 'error' });
+            if (err.response?.status === 404) {
+                setReservas([]); // Limpia las reservas para que no intente renderizar data vieja
+                setMensaje({ text: 'No hay reservas registradas para mostrar.', type: 'info' });
+            } else {
+                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al cargar la lista de reservas.';
+                setMensaje({ text: errorMsg, type: 'error' });
+            }
         } finally {
             setIsLoadingData(false);
         }
-    }, [isAdmin]); // Depende de `isAdmin`
+    }, [isAdmin]);
 
     // Función para cargar usuarios (solo para ADMIN)
     const fetchUsuarios = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            if (isAdmin) { // Solo ADMIN tiene acceso a esta función
+            if (isAdmin) {
                 const res = await api.get('/users');
                 setUsuarios(Array.isArray(res.data) ? res.data : []);
             } else {
-                setUsuarios([]); // Otros roles no deberían ver esta sección
+                setUsuarios([]);
             }
         } catch (err) {
             console.error('Error al obtener usuarios:', err);
@@ -161,7 +161,7 @@ function AdminPanel() {
         } finally {
             setIsLoadingData(false);
         }
-    }, [isAdmin]); // Depende de `isAdmin`
+    }, [isAdmin]);
 
     // Este useEffect se ejecuta al cambiar de pestaña o al montar el componente
     useEffect(() => {
@@ -171,12 +171,14 @@ function AdminPanel() {
             return;
         }
 
-        // Llamar a la función de fetch correspondiente a la pestaña activa
+        setEditingComplejo(null); 
+        setManagingUserRoles(null);
+
         if (activeTab === 'complejos') {
             fetchComplejos();
         } else if (activeTab === 'reservas') {
             fetchReservas();
-        } else if (activeTab === 'usuarios' && isAdmin) { // Solo ADMIN puede acceder a usuarios
+        } else if (activeTab === 'usuarios' && isAdmin) {
             fetchUsuarios();
         } else if (activeTab === 'estadisticas') {
             // AdminEstadisticas se encarga de su propia carga de datos
@@ -233,7 +235,6 @@ function AdminPanel() {
             return;
         }
 
-        // Validación para la creación por ADMIN: emailPropietario es obligatorio si no está editando
         if (!id && isAdmin && !emailPropietario?.trim()) { 
             setMensaje({ text: 'El email del propietario es obligatorio para nuevos complejos (Administrador).', type: 'error' });
             return;
@@ -259,9 +260,8 @@ function AdminPanel() {
             canchaTecho[cancha.tipoCancha] = cancha.techo;
         });
 
-        // El payload debe coincidir con la entidad Complejo que el backend espera para PUT/POST
         const payload = {
-            id, // Solo se envía ID si estamos editando
+            id,
             nombre,
             descripcion: descripcion || null,
             ubicacion,
@@ -276,13 +276,13 @@ function AdminPanel() {
             canchaTecho
         };
 
-        if (editingComplejo) { // Si estamos en modo edición (ID existe en nuevoComplejoAdmin)
+        if (editingComplejo?.id) { // Si estamos en modo edición (ID existe)
             try {
-                await api.put(`/complejos/${id}`, payload); // PUT al endpoint de actualización
+                await api.put(`/complejos/${id}`, payload);
                 setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
                 setEditingComplejo(null);
                 setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-                fetchComplejos(); // Recargar la lista para ver los cambios
+                fetchComplejos();
             }
             catch (err) {
                 console.error('Error al actualizar el complejo:', err);
@@ -290,18 +290,15 @@ function AdminPanel() {
                 setMensaje({ text: errorMsg, type: 'error' });
             }
         } else { // Si estamos creando un nuevo complejo
-            // Para la creación, el ADMIN puede especificar un propietario existente.
-            // Si no es ADMIN o no especifica, el backend asignará el complejo al usuario que hace la request.
             const crearPayload = {
                 ...payload,
-                // **CRÍTICO:** Solo incluir propietarioUsername si es ADMIN y se proporcionó, de lo contrario, omitirlo para que el backend use el usuario autenticado.
                 ...(isAdmin && emailPropietario ? { propietarioUsername: emailPropietario } : {}) 
             };
             try {
-                await api.post('/complejos', crearPayload); // POST al endpoint de creación
+                await api.post('/complejos', crearPayload);
                 setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
                 setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-                fetchComplejos(); // Recargar la lista para ver el nuevo complejo
+                fetchComplejos();
             } catch (err) {
                 console.error('Error al crear complejo (Admin):', err);
                 const errorMsg = err.response?.data?.message || err.response?.data || 'Error al crear el complejo.';
@@ -310,26 +307,12 @@ function AdminPanel() {
         }
     };
     
-    // Inicia el modo de edición, poblando el formulario con los datos del complejo seleccionado
     const startEditingComplejo = (complejoParaEditar) => {
-        setEditingComplejo(complejoParaEditar); // Guarda el objeto completo del complejo
-        setNuevoComplejoAdmin({
-            id: complejoParaEditar.id,
-            nombre: complejoParaEditar.nombre || '',
-            descripcion: complejoParaEditar.descripcion || '',
-            ubicacion: complejoParaEditar.ubicacion || '',
-            telefono: complejoParaEditar.telefono || '',
-            fotoUrl: complejoParaEditar.fotoUrl || '',
-            horarioApertura: complejoParaEditar.horarioApertura || '10:00',
-            horarioCierre: complejoParaEditar.horarioCierre || '23:00',
-            // **CRÍTICO:** Accede a .username del objeto propietario. Esto ahora funcionará con EAGER
-            emailPropietario: complejoParaEditar.propietario?.username || '', 
-            canchas: mapComplejoToFormCanchas(complejoParaEditar)
-        });
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // Desplaza hacia arriba para ver el formulario
+        setEditingComplejo(complejoParaEditar);
+        // El useEffect ya se encarga de setNuevoComplejoAdmin cuando editingComplejo cambia
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Cancela el modo de edición y resetea el formulario
     const cancelEditingComplejo = () => {
         setEditingComplejo(null);
         setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
@@ -397,7 +380,7 @@ function AdminPanel() {
 
     const startManagingUserRoles = (user) => {
         setManagingUserRoles(user);
-        const currentRoles = user.authorities ? user.authorities.map(auth => auth.authority.replace('ROLE_', '')) : []; // **CORRECCIÓN: quitado el `.filter(Boolean)` aquí, porque puede causar un error de sintaxis si el punto y coma se coloca mal.**
+        const currentRoles = user.authorities ? user.authorities.map(auth => auth.authority.replace('ROLE_', '')) : [];
         setSelectedRoles(currentRoles);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -411,41 +394,47 @@ function AdminPanel() {
         const { value, checked } = e.target;
         setSelectedRoles(prevRoles => {
             if (value === 'ADMIN' && checked) {
-                const newRoles = prevRoles.filter(role => role !== 'COMPLEX_OWNER' && role !== 'ADMIN');
-                return ['ADMIN', ...newRoles.filter(role => role === 'USER')];
+                return ['ADMIN', 'USER']; // ADMIN incluye USER y es excluyente de COMPLEX_OWNER
             } else if (value === 'COMPLEX_OWNER' && checked) {
-                const newRoles = prevRoles.filter(role => role !== 'ADMIN' && role !== 'COMPLEX_OWNER');
-                return ['COMPLEX_OWNER', ...newRoles.filter(role => role === 'USER')];
+                return ['COMPLEX_OWNER', 'USER']; // COMPLEX_OWNER incluye USER y es excluyente de ADMIN
             } else if (value === 'USER') {
                 if (checked) {
-                    if (prevRoles.includes('ADMIN') || prevRoles.includes('COMPLEX_OWNER') || prevRoles.includes('USER')) {
-                        return [...new Set([...prevRoles, 'USER'])];
-                    }
-                    return [...prevRoles, value];
+                    return [...new Set([...prevRoles, 'USER'])];
                 } else {
-                    return prevRoles.filter(role => role !== value);
+                    // Si desmarcamos USER, y no hay ADMIN/COMPLEX_OWNER, lo quitamos
+                    // Si hay ADMIN/COMPLEX_OWNER, USER permanece implícitamente
+                    if (prevRoles.includes('ADMIN') || prevRoles.includes('COMPLEX_OWNER')) {
+                        return prevRoles.filter(role => role !== 'USER'); // Lo quitamos explícitamente si existe, para no mostrarlo dos veces
+                    }
+                    return prevRoles.filter(role => role !== 'USER');
                 }
-            } else {
+            } else { // Para otros roles si los hubiera (poco probable aquí)
                 return checked ? [...prevRoles, value] : prevRoles.filter(role => role !== value);
             }
         }).filter(Boolean);
     };
+
 
     const handleSaveUserRoles = async () => {
         setMensaje({ text: '', type: '' });
         if (!managingUserRoles) return;
 
         try {
-            let rolesToActualSend;
-            if (selectedRoles.length === 0) {
-                rolesToActualSend = ['ROLE_USER'];
-            } else if (selectedRoles.includes('ADMIN') && selectedRoles.includes('COMPLEX_OWNER')) {
-                console.warn("Intento de asignar ADMIN y COMPLEX_OWNER simultáneamente. Priorizando ADMIN.");
-                rolesToActualSend = ['ROLE_ADMIN', ...selectedRoles.filter(r => r === 'USER').map(r => `ROLE_${r}`)];
+            let rolesToActualSend = [];
+            // Si ADMIN está seleccionado, solo se envía ROLE_ADMIN y ROLE_USER
+            if (selectedRoles.includes('ADMIN')) {
+                rolesToActualSend = ['ROLE_ADMIN', 'ROLE_USER'];
+            } 
+            // Si COMPLEX_OWNER está seleccionado (y no ADMIN), solo se envía ROLE_COMPLEX_OWNER y ROLE_USER
+            else if (selectedRoles.includes('COMPLEX_OWNER')) {
+                rolesToActualSend = ['ROLE_COMPLEX_OWNER', 'ROLE_USER'];
+            } 
+            // Si no hay roles especiales, o solo USER estaba seleccionado, por defecto es ROLE_USER
+            else if (selectedRoles.includes('USER') || selectedRoles.length === 0) {
+                 rolesToActualSend = ['ROLE_USER'];
             }
-            else {
-                rolesToActualSend = selectedRoles.map(role => `ROLE_${role}`);
-            }
+            // Aseguramos que no haya duplicados si por alguna razón 'USER' se agregó manualmente
+            rolesToActualSend = [...new Set(rolesToActualSend)];
             
             await api.put(`/users/${managingUserRoles.id}/roles`, rolesToActualSend);
             
@@ -505,7 +494,8 @@ function AdminPanel() {
                 >
                     Gestionar Complejos
                 </button>
-                {(isAdmin || isComplexOwner) && (
+                {/* Modificación para que ADMIN no vea "Gestionar Reservas" ni "Ver Estadísticas" si esa es la intención */}
+                {isComplexOwner && (
                     <button
                         className={`admin-tab-button ${activeTab === 'reservas' ? 'active' : ''}`}
                         onClick={() => setActiveTab('reservas')}
@@ -523,7 +513,8 @@ function AdminPanel() {
                         Gestionar Usuarios
                     </button>
                 )}
-                {(isAdmin || isComplexOwner) && (
+                {/* Modificación para que ADMIN no vea "Ver Estadísticas" si esa es la intención */}
+                {isComplexOwner && ( 
                     <button
                         className={`admin-tab-button ${activeTab === 'estadisticas' ? 'active' : ''}`}
                         onClick={() => setActiveTab('estadisticas')}
@@ -537,19 +528,21 @@ function AdminPanel() {
             {activeTab === 'complejos' && (
                 <div className="admin-tab-content">
                     {/* Título dinámico para el formulario */}
-                    <h2>{editingComplejo ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
+                    <h2>{editingComplejo?.id ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
 
                     {/* Mensajes informativos según el rol y si se está editando */}
-                    {isAdmin && (
+                    {isAdmin && !editingComplejo?.id && ( 
                         <p className="info-message">Como Administrador General, puedes crear y editar cualquier complejo. Puedes asignarlos a un propietario existente.</p>
                     )}
-                    {isComplexOwner && !editingComplejo && (
-                        <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
+                    {isComplexOwner && !editingComplejo?.id && complejos.length > 0 && ( 
+                        <p className="info-message">Selecciona un complejo de la lista para gestionarlo.</p>
+                    )}
+                    {isComplexOwner && !editingComplejo?.id && complejos.length === 0 && ( 
+                        <p className="info-message">No tienes complejos registrados. Contacta a un administrador para agregar el tuyo.</p>
                     )}
 
-                    {/* Formulario de Creación/Edición */}
-                    {/* Se muestra si es ADMIN (para crear o editar) o si es COMPLEX_OWNER y está editando */}
-                    {(isAdmin || (isComplexOwner && editingComplejo)) ? (
+                    {/* Formulario de Creación/Edición: Se muestra si es ADMIN o si es COMPLEX_OWNER Y está editando */}
+                    {(isAdmin || (isComplexOwner && editingComplejo?.id)) ? ( 
                         <form className="admin-complejo-form" onSubmit={handleSaveComplejo}>
                             <h3>Datos Generales del Complejo</h3>
                             <div className="admin-form-group">
@@ -558,17 +551,15 @@ function AdminPanel() {
                             </div>
 
                             {/* El campo emailPropietario solo es relevante para ADMIN al CREAR un complejo */}
-                            {isAdmin && !editingComplejo && ( 
+                            {isAdmin && !editingComplejo?.id && ( 
                                 <div className="admin-form-group">
                                     <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
-                                    <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo && isAdmin} placeholder='dueño@ejemplo.com' />
+                                    <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo?.id && isAdmin} placeholder='dueño@ejemplo.com' />
                                     <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol &quot;COMPLEX_OWNER&quot; si no lo tiene.</p>
                                 </div>
                             )}
                             
-                            {/* Campos de detalle del complejo (descripción, ubicación, etc.) y canchas */}
-                            {/* Estos se muestran si es ADMIN (para crear o editar) o si es COMPLEX_OWNER y está editando */}
-                            <> {/* Este fragmento <> no es condicional, está dentro del condicional padre */}
+                            <> {/* Este fragmento <> está dentro del condicional padre */}
                                 <div className="admin-form-group">
                                     <label htmlFor="descripcion">Descripción:</label>
                                     <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
@@ -696,9 +687,9 @@ function AdminPanel() {
 
                             <div className="admin-form-buttons">
                                 <button type="submit" className="admin-btn-save">
-                                    {editingComplejo ? 'Actualizar Complejo' : 'Crear Complejo'}
+                                    {editingComplejo?.id ? 'Actualizar Complejo' : 'Crear Complejo'}
                                 </button>
-                                {editingComplejo && (
+                                {editingComplejo?.id && ( // Solo muestra el botón si hay un ID de complejo en edición
                                     <button type="button" className="admin-btn-cancel" onClick={cancelEditingComplejo}>
                                         Cancelar Edición
                                     </button>
@@ -706,20 +697,21 @@ function AdminPanel() {
                             </div>
                         </form>
                     ) : (
-                        // Mensaje para COMPLEX_OWNER si no está editando y no puede crear
-                        isComplexOwner && !editingComplejo && (
-                            <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Solo los Administradores Generales pueden crear nuevos complejos.</p>
+                        // Mensaje para COMPLEX_OWNER cuando no está editando y el formulario no se muestra
+                        isComplexOwner && !editingComplejo?.id && (
+                            <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Para crear nuevos complejos, contacta a un Administrador.</p>
                         )
                     )}
 
-                    {/* Botón para "Agregar Nuevo Complejo" visible solo para ADMIN y si no está editando */}
-                    {isAdmin && !editingComplejo && (
-                        <button className="admin-btn-add-new-complejo" onClick={() => {
-                            setEditingComplejo(estadoInicialComplejoAdmin); // Resetea y prepara para crear
-                            setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Asegura que el formulario esté limpio
-                        }}>
-                            + Agregar Nuevo Complejo
-                        </button>
+                    {/* El botón "Agregar Nuevo Complejo" visible solo para ADMIN y si no hay un complejo en edición */}
+                    {isAdmin && !editingComplejo?.id && (
+                         <button className="admin-btn-add-new-complejo" onClick={() => {
+                             // Esto ahora activará el formulario en modo "crear"
+                             setEditingComplejo(estadoInicialComplejoAdmin); // Usa el estado inicial para "indicar" que se va a crear
+                             setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Asegura que el formulario esté limpio
+                         }}>
+                             + Agregar Nuevo Complejo
+                         </button>
                     )}
 
                     <div className="admin-list-container">
@@ -743,7 +735,6 @@ function AdminPanel() {
                                             <tr key={c.id}>
                                                 <td data-label="ID">{c.id}</td>
                                                 <td data-label="Nombre">{c.nombre}</td>
-                                                {/* **CRÍTICO:** Accedemos al username del objeto propietario. Con FetchType.EAGER, esto estará disponible. */}
                                                 <td data-label="Propietario">{c.propietario?.username || 'N/A'}</td> 
                                                 <td data-label="Ubicación">{c.ubicacion || 'N/A'}</td>
                                                 <td data-label="Horario">{c.horarioApertura || 'N/A'} - {c.horarioCierre || 'N/A'}</td>
@@ -868,7 +859,7 @@ function AdminPanel() {
                                                         <button className="admin-btn-edit" onClick={() => startManagingUserRoles(u)}>
                                                             Gestionar Roles
                                                         </button>
-                                                        {!u.enabled && ( // Botón para activar solo si el usuario no está activo
+                                                        {!u.enabled && (
                                                             <button 
                                                                 className="admin-btn-activate" 
                                                                 onClick={() => handleActivateUser(u.id, u.username)}
