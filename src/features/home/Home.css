@@ -1,8 +1,5 @@
 /* frontend/src/features/home/Home.css */
 
-/* NO HAY DECLARACIONES :root AQUÍ - Todas en App.css */
-
-/* IMPORTANTE: Asegura que el HTML y BODY ocupen todo el alto disponible */
 html, body, #root {
     height: 100%;
     margin: 0;
@@ -403,8 +400,8 @@ a:hover {
 .whatsapp-button i {
     margin: 0;
     padding: 0;
-    display: block; /* Asegura que ocupe todo el espacio */
-    line-height: 1; /* Ayuda al centrado */
+    display: block; 
+    line-height: 1; 
     transform: none !important; /* CAMBIO CLAVE: Reinicia cualquier transformación aplicada por User Agent o librerías */
 }
 

@@ -1,27 +1,5 @@
 /* frontend/src/features/reservas/ReservaDetail.css */
 
-/* Variables de color (asumiendo que están definidas en otro lugar, como un archivo global.css) */
-:root {
-    --primary: #007bff; /* Azul vibrante */
-    --primary-dark: #0056b3;
-    --secondary: #6c757d; /* Gris oscuro para subtítulos */
-    --success: #28a745;
-    --success-dark: #218838;
-    --warning: #ffc107;
-    --warning-dark: #856404;
-    --info: #17a2b8;
-    --info-dark: #138496;
-    --danger: #dc3545;
-    --danger-dark: #c82333;
-    --gray: #ced4da; /* Borde de input */
-    --gray-light: #e9ecef; /* Fondo claro */
-    --gray-lightest: #f8f9fa; /* Fondo muy claro */
-    --text: #343a40; /* Color de texto principal */
-    --text-light: #495057; /* Color de texto secundario */
-    --white: #ffffff;
-    --shadow: 0 5px 20px rgba(0, 0, 0, 0.08); /* Sombra estándar */
-}
-
 .reserva-detail-container {
     padding: 20px;
     max-width: 700px;
@@ -30,7 +8,8 @@
     border-radius: 12px;
     box-shadow: var(--shadow);
     text-align: center;
-    font-family: 'Segoe UI', sans-serif; /* Usar Segoe UI para coherencia */
+    font-family: 'Poppins', sans-serif; /* Usar Poppins para consistencia global */
+    border: 1px solid var(--gray-light); 
 }
 
 .reserva-detail-title {
@@ -64,12 +43,12 @@
 
 .payment-options {
     margin-top: 30px;
-    border-top: 1px solid var(--gray-light); /* Borde más suave */
+    border-top: 1px solid var(--gray-light); 
     padding-top: 25px;
 }
 
 .payment-options h3 {
-    color: var(--primary-dark); /* Color más neutro para el título de pago */
+    color: var(--primary-dark); 
     margin-bottom: 20px;
     font-size: 1.6em;
     font-weight: 600;
@@ -79,7 +58,7 @@
 .payment-options {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Espacio entre los botones */
+    gap: 15px; 
     margin-bottom: 20px;
 }
 
@@ -103,12 +82,12 @@
     height: 30px;
     margin-right: 12px;
     vertical-align: middle;
-    object-fit: contain; /* Asegura que la imagen se escala dentro del contenedor manteniendo su proporción */
-    flex-shrink: 0; /* Evita que la imagen se encoja si el texto es muy largo */
+    object-fit: contain; 
+    flex-shrink: 0; 
 }
 
 .mercadopago-button {
-    background-color: #009ee3; /* Color oficial de Mercado Pago */
+    background-color: #009ee3; 
     color: white;
 }
 
@@ -129,7 +108,7 @@
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
-.payment-note { /* No se usa en el JS actual, pero se mantiene el estilo por si acaso */
+.payment-note { 
     font-size: 0.95em;
     color: var(--text-light);
     font-style: italic;
@@ -157,7 +136,7 @@
 }
 
 .back-button {
-    background-color: var(--secondary); /* Usar color secundario para el botón de volver */
+    background-color: var(--secondary); 
     color: white;
     padding: 12px 25px;
     border: none;
@@ -170,7 +149,7 @@
 }
 
 .back-button:hover {
-    background-color: var(--gray-dark); /* Color más oscuro al pasar el mouse */
+    background-color: var(--gray-dark); 
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }

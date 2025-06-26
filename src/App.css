@@ -57,7 +57,7 @@
 
 /* Estilos base para el body */
 html, body, #root {
-    height: 100%; /* Asegura que ocupen todo el alto de la ventana */
+    height: 100%; 
     margin: 0;
     padding: 0;
 }
@@ -72,7 +72,7 @@ body {
 }
 
 .App {
-    min-height: 100vh; /* Asegura que la app ocupe al menos la altura de la ventana */
+    min-height: 100vh; 
     display: flex;
     flex-direction: column;
 }
