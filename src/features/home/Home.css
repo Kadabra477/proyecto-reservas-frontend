@@ -71,7 +71,10 @@ a:hover {
 .hero {
     position: relative;
     height: 600px;
-    background-color: #343a40; /* Color sólido para el fondo */
+    /* RUTA CORREGIDA: Desde src/features/home/Home.css, necesitas subir dos niveles para llegar a src/ */
+    background-image: url('../../assets/fondo-cancha-hero.jpg'); /* ¡Ruta Ajustada! (asumiendo que tienes una imagen específica para el hero) */
+    background-size: cover;
+    background-position: center;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,12 +84,12 @@ a:hover {
 }
 
 .hero-overlay {
+    background-color: rgba(0, 0, 0, 0.7);
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Oscurece el fondo */
     z-index: 1;
 }
 
@@ -389,9 +392,6 @@ a:hover {
     margin-bottom: 40px;
 }
 
-/* ELIMINADO: Sección de FAQ en Home */
-
-
 /* WhatsApp Button */
 .whatsapp-button {
     position: fixed;
@@ -405,16 +405,20 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2em;
+    font-size: 2em; /* Esto escala el icono */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     transition: transform 0.3s ease, background-color 0.3s ease;
     z-index: 1000;
+    /* Asegura que el icono esté centrado si hay un problema */
+    text-decoration: none; /* Asegura que no haya subrayado */
+    line-height: 1; /* Ajusta la altura de línea para centrar verticalmente mejor el icono */
 }
 
 .whatsapp-button:hover {
     background-color: #128c7e;
     transform: scale(1.1);
 }
+
 
 /* Footer mejorado */
 .footer {

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './Register.css';
 import '../../styles/AuthForm.css';
 
-function Register() { // onGoToLogin no se usa, lo quité de los props
+function Register() {
     const [nombreCompleto, setNombreCompleto] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -12,14 +12,13 @@ function Register() { // onGoToLogin no se usa, lo quité de los props
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const navigate = useNavigate(); // Hook para la navegación
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setSuccessMessage('');
 
-        // Validaciones del lado del cliente
         if (!nombreCompleto.trim()) {
             setError('El nombre completo es obligatorio.');
             return;
@@ -42,20 +41,13 @@ function Register() { // onGoToLogin no se usa, lo quité de los props
         try {
             await api.post('/auth/register', {
                 nombreCompleto: nombreCompleto.trim(),
-                username: email.trim(), // Asegúrate de que el backend espere 'username' para el email
+                username: email.trim(),
                 password: password,
             });
 
-            // Una vez registrado, redirige al login con un mensaje de éxito
-            navigate('/login?validated=true'); // Usa 'validated=true' para mostrar el mensaje de éxito en el login
-            // Opcional: podrías mostrar un mensaje aquí y luego un botón para ir al login.
-            // setSuccessMessage(`✅ ¡Registro casi completo! Un administrador habilitará tu cuenta en breve.`);
-            // setError('');
-            // setNombreCompleto('');
-            // setEmail('');
-            // setPassword('');
-            // setConfirmPassword('');
-
+            // Redirige al login con un mensaje de éxito para que sea visible
+            navigate('/login?validated=true'); // Reutilizamos el parámetro 'validated' para indicar éxito en el registro
+                                             // Puedes cambiarlo por 'registered=true' si prefieres más claridad.
         } catch (err) {
             console.error('Error al registrar:', err);
             let errorMessage = 'Error al registrar la cuenta.';
@@ -87,25 +79,29 @@ function Register() { // onGoToLogin no se usa, lo quité de los props
                     <p className="register-banner-subtitle">Tu próxima reserva te espera.</p>
                 </div>
 
+                {/* MODIFICACIÓN: Contenedor para el mensaje de notificación */}
+                {error && (
+                    <div className="notification-container error">
+                        <p className="notification-message">
+                            {error}
+                        </p>
+                    </div>
+                )}
+                {successMessage && !error && (
+                    <div className="notification-container success">
+                        <p className="notification-message">
+                            {successMessage}
+                        </p>
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="auth-form register-form" autoComplete="off">
                     <p className="auth-title">Crear Cuenta</p>
 
-                    {error && (
-                        <p className="auth-message error" style={{ marginBottom: '1.5em' }}>
-                            {error}
-                        </p>
-                    )}
-                    {successMessage && !error && (
-                        <p className="auth-message success" style={{ marginBottom: '1.5em' }}>
-                            {successMessage}
-                        </p>
-                    )}
-
-                    {/* Mostrar campos solo si no hay mensaje de éxito para que el usuario no intente reenviar */}
                     {!successMessage && (
                         <>
                             <div className="input-group">
-                                <i className="fas fa-user-circle auth-icon"></i> {/* Icono de persona */}
+                                <i className="fas fa-user-circle auth-icon"></i>
                                 <input
                                     className="auth-input"
                                     type="text"
@@ -117,7 +113,7 @@ function Register() { // onGoToLogin no se usa, lo quité de los props
                                 />
                             </div>
                             <div className="input-group">
-                                <i className="fas fa-envelope auth-icon"></i> {/* Icono de email */}
+                                <i className="fas fa-envelope auth-icon"></i>
                                 <input
                                     className="auth-input"
                                     type="email"
@@ -129,7 +125,7 @@ function Register() { // onGoToLogin no se usa, lo quité de los props
                                 />
                             </div>
                             <div className="input-group">
-                                <i className="fas fa-key auth-icon"></i> {/* Icono de llave/contraseña */}
+                                <i className="fas fa-key auth-icon"></i>
                                 <input
                                     className="auth-input"
                                     type="password"
@@ -141,7 +137,7 @@ function Register() { // onGoToLogin no se usa, lo quité de los props
                                 />
                             </div>
                             <div className="input-group">
-                                <i className="fas fa-key auth-icon"></i> {/* Icono de llave/contraseña */}
+                                <i className="fas fa-key auth-icon"></i>
                                 <input
                                     className="auth-input"
                                     type="password"
@@ -162,7 +158,7 @@ function Register() { // onGoToLogin no se usa, lo quité de los props
                         ¿Ya tienes una cuenta? Inicia sesión
                     </Link>
 
-                    {!successMessage && ( // Mostrar la opción de Google solo si no hay un mensaje de éxito (registro completado)
+                    {!successMessage && (
                         <>
                             <div className="auth-divider">
                                 <span>O</span>

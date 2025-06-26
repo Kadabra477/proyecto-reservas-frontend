@@ -1,8 +1,6 @@
 @import url("../../styles/AuthForm.css");
 
-/* Estilos específicos para el fondo de Register */
 .register-background {
-    /* Mantenemos el gradiente azul oscuro, añadimos la misma imagen de fondo */
     background: linear-gradient(to bottom left, #1e3c72, #2a5298);
     background-size: cover;
     background-position: center;
@@ -10,7 +8,7 @@
     overflow: hidden;
 }
 
-/* Usa la misma clase para la imagen de fondo con overlay */
+/* IMAGEN DE FONDO - OPCIÓN DE IMAGEN LOCAL (AHORA CORRECTA) */
 .sport-theme-background::before {
     content: '';
     position: absolute;
@@ -18,7 +16,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('https://i.ibb.co/VMyh26M/fondo-cancha.jpg'); /* URL de una imagen de cancha de fútbol */
+    /* RUTA CORREGIDA: Desde src/features/auth/Register.css, necesitas subir dos niveles para llegar a src/ */
+    background-image: url('../../assets/fondo-cancha.jpg'); /* ¡Ruta Ajustada! */
     background-size: cover;
     background-position: center;
     filter: blur(3px) brightness(0.6);
@@ -26,18 +25,17 @@
     pointer-events: none;
 }
 
-/* Estilos para el banner de imagen dentro del registro */
 .register-image-banner {
-    background: linear-gradient(45deg, var(--secondary), var(--secondary-dark)); /* Gradiente azul secundario */
+    background: linear-gradient(45deg, var(--secondary), var(--secondary-dark));
     color: white;
     padding: 20px 30px;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     text-align: center;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    margin-bottom: 25px;
+    margin-bottom: 0;
     position: relative;
-    z-index: 2;
+    z-index: 3;
 }
 
 .register-banner-title {
@@ -53,37 +51,10 @@
     opacity: 0.9;
 }
 
-/* Ajustes al formulario para espaciarlo del banner */
 .register-form {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    padding-top: 2.5em;
+    padding-top: 1.5em;
     position: relative;
-    z-index: 2;
+    z-index: 3;
 }
-
-/* Reutilizamos los estilos del input-group y auth-icon del Login.css */
-/* No es necesario re-definirlos aquí si AuthForm.css los importa primero,
-   pero si quieres overrides específicos para el registro, puedes hacerlo. */
-.input-group {
-    position: relative;
-    margin-bottom: 1.5em;
-}
-
-.auth-input {
-    padding-left: 3.5em;
-}
-
-.auth-icon {
-    position: absolute;
-    left: 1.2em;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1.1rem;
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* Reutilizamos el auth-divider y google-auth-button de Login.css */
-/* Si necesitas un estilo distinto para el botón de Google en el registro, sobreescríbelo aquí */

@@ -4,11 +4,6 @@ import api from '../../api/axiosConfig';
 import './Login.css';
 import '../../styles/AuthForm.css';
 
-// Importa los iconos que podrías usar (ejemplo: si usas FontAwesome, necesitas instalarlos y configurarlos)
-// Para el ejemplo, usaremos SVGs directamente o clases de una librería de iconos.
-// Si no tienes una librería, los iconos se mostrarán como texto o no se verán.
-// Asegúrate de que los iconos de usuario y candado estén disponibles.
-
 function Login({ onLoginSuccess }) {
     const [emailInput, setEmailInput] = useState('');
     const [password, setPassword] = useState('');
@@ -23,7 +18,7 @@ function Login({ onLoginSuccess }) {
         const validatedParam = searchParams.get('validated');
         const errorParam = searchParams.get('error');
         const resetSuccessParam = searchParams.get('reset');
-        const unauthorizedParam = searchParams.get('unauthorized'); // Nuevo: para manejar redirecciones de seguridad
+        const unauthorizedParam = searchParams.get('unauthorized');
 
         let message = '';
         let type = '';
@@ -40,7 +35,7 @@ function Login({ onLoginSuccess }) {
         } else if (errorParam === 'oauth_failed') {
             message = '❌ Error durante el inicio de sesión con Google. Intenta de nuevo.';
             type = 'error';
-        } else if (unauthorizedParam === 'true') { // Mensaje específico para 401
+        } else if (unauthorizedParam === 'true') {
             message = 'Acceso denegado. Por favor, inicia sesión para continuar.';
             type = 'error';
         }
@@ -93,27 +88,27 @@ function Login({ onLoginSuccess }) {
     };
 
     return (
-        // Se añade una clase para el background de login que podría tener una imagen
         <div className="auth-background login-background sport-theme-background">
             <div className="auth-container">
                 <div className="login-image-banner">
-                    {/* Puedes poner una imagen de una cancha de fútbol, una pelota, etc. */}
-                    {/* Por ahora, un simple título para el banner */}
                     <h2 className="login-banner-title">¡Juega tu partido!</h2>
                     <p className="login-banner-subtitle">Reserva tu cancha favorita al instante.</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="auth-form login-form" autoComplete="off">
-                    <p className="auth-title">Iniciar Sesión</p> {/* Título más directo */}
-
-                    {validationMessage && (
-                        <p className={`auth-message ${validationMessageType}`} style={{ marginBottom: '1.5em' }}>
+                {/* MODIFICACIÓN: Contenedor para el mensaje de notificación */}
+                {validationMessage && (
+                    <div className={`notification-container ${validationMessageType}`}>
+                        <p className="notification-message">
                             {validationMessage}
                         </p>
-                    )}
+                    </div>
+                )}
 
-                    <div className="input-group"> {/* Nuevo: Para agrupar input e icono */}
-                        <i className="fas fa-user auth-icon"></i> {/* Icono de usuario */}
+                <form onSubmit={handleSubmit} className="auth-form login-form" autoComplete="off">
+                    <p className="auth-title">Iniciar Sesión</p>
+
+                    <div className="input-group">
+                        <i className="fas fa-user auth-icon"></i>
                         <input
                             className="auth-input"
                             type="email"
@@ -124,8 +119,8 @@ function Login({ onLoginSuccess }) {
                             disabled={isLoading}
                         />
                     </div>
-                    <div className="input-group"> {/* Nuevo: Para agrupar input e icono */}
-                        <i className="fas fa-lock auth-icon"></i> {/* Icono de candado */}
+                    <div className="input-group">
+                        <i className="fas fa-lock auth-icon"></i>
                         <input
                             className="auth-input"
                             type="password"
@@ -142,7 +137,7 @@ function Login({ onLoginSuccess }) {
 
                     {error && <p className="auth-message error">{error}</p>}
 
-                    <div className="auth-links-group"> {/* Agrupar los links para mejor espaciado */}
+                    <div className="auth-links-group">
                         <Link to="/forgot-password" className="auth-link">
                             ¿Olvidaste tu contraseña?
                         </Link>
@@ -168,7 +163,6 @@ function Login({ onLoginSuccess }) {
                     </a>
                 </form>
 
-                {/* Las gotas decorativas se mantienen */}
                 <div className="auth-drops">
                     <div className="drop drop-1"></div>
                     <div className="drop drop-2"></div>
