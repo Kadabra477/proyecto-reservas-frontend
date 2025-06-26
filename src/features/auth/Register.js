@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
 import api from '../../api/axiosConfig';
 import './Register.css';
 import '../../styles/AuthForm.css';
 
-function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente, puedes quitarlo
+function Register() { // onGoToLogin no se usa, lo quité de los props
     const [nombreCompleto, setNombreCompleto] = useState('');
-    const [email, setEmail] = useState(''); // El email será ahora el username para el backend
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate(); // Hook para la navegación
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,7 +24,7 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
             setError('El nombre completo es obligatorio.');
             return;
         }
-        if (!email || !/\S+@\S+\.\S+/.test(email)) { // Validar formato de email
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
             setError('Por favor, ingresa un correo electrónico válido.');
             return;
         }
@@ -41,16 +42,20 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
         try {
             await api.post('/auth/register', {
                 nombreCompleto: nombreCompleto.trim(),
-                email: email.trim(), // CAMBIO CLAVE: El email se envía al campo 'email' del DTO, y el backend lo usará como username
+                username: email.trim(), // Asegúrate de que el backend espere 'username' para el email
                 password: password,
             });
 
-            setSuccessMessage(`✅ ¡Registro casi completo! Revisa tu correo (${email}) para validar tu cuenta.`);
-            setError('');
-            setNombreCompleto('');
-            setEmail('');
-            setPassword('');
-            setConfirmPassword('');
+            // Una vez registrado, redirige al login con un mensaje de éxito
+            navigate('/login?validated=true'); // Usa 'validated=true' para mostrar el mensaje de éxito en el login
+            // Opcional: podrías mostrar un mensaje aquí y luego un botón para ir al login.
+            // setSuccessMessage(`✅ ¡Registro casi completo! Un administrador habilitará tu cuenta en breve.`);
+            // setError('');
+            // setNombreCompleto('');
+            // setEmail('');
+            // setPassword('');
+            // setConfirmPassword('');
+
         } catch (err) {
             console.error('Error al registrar:', err);
             let errorMessage = 'Error al registrar la cuenta.';
@@ -62,8 +67,8 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
                 } else if (err.response.data.message) {
                     errorMessage = err.response.data.message;
                 }
-            } else if (err.response?.status === 409) { // El 409 es para duplicados (username/email)
-                errorMessage = '❌ El correo electrónico ya está registrado.';
+            } else if (err.response?.status === 400 || err.response?.status === 409) {
+                errorMessage = '❌ El correo electrónico ya está registrado o los datos son inválidos.';
             } else {
                 errorMessage = 'Error de conexión o respuesta inesperada.';
             }
@@ -75,8 +80,13 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
     };
 
     return (
-        <div className="auth-background register-background">
+        <div className="auth-background register-background sport-theme-background">
             <div className="auth-container">
+                <div className="register-image-banner">
+                    <h2 className="register-banner-title">Únete a la Comunidad</h2>
+                    <p className="register-banner-subtitle">Tu próxima reserva te espera.</p>
+                </div>
+
                 <form onSubmit={handleSubmit} className="auth-form register-form" autoComplete="off">
                     <p className="auth-title">Crear Cuenta</p>
 
@@ -91,45 +101,57 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
                         </p>
                     )}
 
+                    {/* Mostrar campos solo si no hay mensaje de éxito para que el usuario no intente reenviar */}
                     {!successMessage && (
                         <>
-                            <input
-                                className="auth-input"
-                                type="text"
-                                placeholder="Nombre completo"
-                                value={nombreCompleto}
-                                onChange={(e) => setNombreCompleto(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                            {/* CAMBIO CLAVE: Este input ahora es solo para el email (que será el username) */}
-                            <input
-                                className="auth-input"
-                                type="email"
-                                placeholder="Correo electrónico"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                            <input
-                                className="auth-input"
-                                type="password"
-                                placeholder="Contraseña (mín. 6 caracteres)"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
-                            <input
-                                className="auth-input"
-                                type="password"
-                                placeholder="Confirmar contraseña"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                required
-                                disabled={isLoading}
-                            />
+                            <div className="input-group">
+                                <i className="fas fa-user-circle auth-icon"></i> {/* Icono de persona */}
+                                <input
+                                    className="auth-input"
+                                    type="text"
+                                    placeholder="Nombre completo"
+                                    value={nombreCompleto}
+                                    onChange={(e) => setNombreCompleto(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <i className="fas fa-envelope auth-icon"></i> {/* Icono de email */}
+                                <input
+                                    className="auth-input"
+                                    type="email"
+                                    placeholder="Correo electrónico"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <i className="fas fa-key auth-icon"></i> {/* Icono de llave/contraseña */}
+                                <input
+                                    className="auth-input"
+                                    type="password"
+                                    placeholder="Contraseña (mín. 6 caracteres)"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div className="input-group">
+                                <i className="fas fa-key auth-icon"></i> {/* Icono de llave/contraseña */}
+                                <input
+                                    className="auth-input"
+                                    type="password"
+                                    placeholder="Confirmar contraseña"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    required
+                                    disabled={isLoading}
+                                />
+                            </div>
                             <button type="submit" className="auth-button" disabled={isLoading}>
                                 {isLoading ? 'Registrando...' : 'Registrarse'}
                             </button>
@@ -140,15 +162,11 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
                         ¿Ya tienes una cuenta? Inicia sesión
                     </Link>
 
-                    {!successMessage && (
-                        <div
-                            style={{
-                                marginTop: '20px',
-                                borderTop: '1px solid rgba(255,255,255,0.2)',
-                                paddingTop: '20px',
-                            }}
-                        >
-                            <p style={{ fontSize: '0.9rem', marginBottom: '10px' }}>O registrate con:</p>
+                    {!successMessage && ( // Mostrar la opción de Google solo si no hay un mensaje de éxito (registro completado)
+                        <>
+                            <div className="auth-divider">
+                                <span>O</span>
+                            </div>
                             <a
                                 href={`${process.env.REACT_APP_API_URL.replace('/api', '')}/oauth2/authorization/google`}
                                 className="google-auth-button"
@@ -158,8 +176,9 @@ function Register({ onGoToLogin }) { // onGoToLogin no se usa en este componente
                                     alt="Google logo"
                                     style={{ width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle' }}
                                 />
+                                Registrarse con Google
                             </a>
-                        </div>
+                        </>
                     )}
                 </form>
 

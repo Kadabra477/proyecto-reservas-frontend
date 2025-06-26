@@ -1,14 +1,142 @@
-/* src/components/Login.css */
-@import url("../../styles/AuthForm.css"); /* Importa los estilos compartidos */
+@import url("../../styles/AuthForm.css");
 
 /* Estilos específicos para el fondo de Login */
 .login-background {
-  background: linear-gradient(to left, #283593, #1976d2); /* Gradiente azul específico */
+    /* Mantenemos el gradiente azul, podemos añadir una imagen de fondo */
+    background: linear-gradient(to bottom right, #283593, #1976d2); /* Ajuste a bottom right para un efecto más dinámico */
+    background-size: cover; /* Asegura que la imagen cubra todo */
+    background-position: center;
+    position: relative; /* Necesario para el overlay */
+    overflow: hidden; /* Oculta cualquier desborde de la imagen */
 }
 
-/* Puedes añadir aquí otros estilos específicos o sobreescrituras para Login */
-/* Ejemplo:
-.login-form {
-  border-top-color: rgba(255, 255, 255, 0.5);
+/* Agregamos una imagen de fondo con un overlay para el tema deportivo */
+.sport-theme-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://i.ibb.co/VMyh26M/fondo-cancha.jpg'); /* URL de una imagen de cancha de fútbol */
+    background-size: cover;
+    background-position: center;
+    filter: blur(3px) brightness(0.6); /* Desenfoque y oscurecimiento para que el formulario resalte */
+    z-index: 1; /* Detrás del contenido, pero encima del gradiente */
+    pointer-events: none; /* Permite clicks a través del overlay */
 }
-*/
+
+/* Estilos para el banner de imagen dentro del login */
+.login-image-banner {
+    background: linear-gradient(45deg, var(--primary), var(--primary-dark)); /* Gradiente verde vibrante */
+    color: white;
+    padding: 20px 30px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 25px; /* Espacio antes del formulario */
+    position: relative; /* Para el z-index si hay drops */
+    z-index: 2; /* Asegura que esté sobre las gotas */
+}
+
+.login-banner-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+.login-banner-subtitle {
+    font-size: 1.1rem;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* Ajustes al formulario para espaciarlo del banner */
+.login-form {
+    border-top-left-radius: 0; /* Desactiva el borde superior si hay banner */
+    border-top-right-radius: 0; /* Desactiva el borde superior si hay banner */
+    padding-top: 2.5em; /* Asegura el padding superior si no hay banner */
+    position: relative; /* Para el z-index */
+    z-index: 2;
+}
+
+/* Opcional: si quieres un borde o sombra específica para el formulario de login */
+.login-form {
+    border-top: 1px solid rgba(255, 255, 255, 0.25); /* Borde superior para separarlo del banner si lo deseas */
+}
+
+/* Estilo para el grupo de inputs con iconos */
+.input-group {
+    position: relative;
+    margin-bottom: 1.5em;
+}
+
+.auth-input {
+    padding-left: 3.5em; /* Espacio para el icono */
+}
+
+.auth-icon {
+    position: absolute;
+    left: 1.2em;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7); /* Color del icono */
+    font-size: 1.1rem;
+    pointer-events: none; /* No bloquea el click */
+    z-index: 1; /* Asegura que el icono esté sobre el input */
+}
+
+/* Agrupar links para mejor control del espaciado */
+.auth-links-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacio entre los links */
+    margin-top: 15px; /* Espacio arriba del grupo de links */
+}
+
+/* Divisor para "O inicia sesión con" */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-divider:not(:empty)::before {
+    margin-right: .5em;
+}
+
+.auth-divider:not(:empty)::after {
+    margin-left: .5em;
+}
+
+/* Ajustes al botón de Google para mayor coherencia */
+.google-auth-button {
+    width: 100%; /* Ocupa todo el ancho */
+    margin-top: 10px; /* Espacio respecto al divisor */
+    justify-content: center; /* Centrar contenido */
+}
+
+/* Media Queries para responsividad del banner */
+@media (max-width: 768px) {
+    .login-image-banner, .register-image-banner {
+        padding: 15px 20px;
+    }
+    .login-banner-title, .register-banner-title {
+        font-size: 1.8rem;
+    }
+    .login-banner-subtitle, .register-banner-subtitle {
+        font-size: 1rem;
+    }
+}

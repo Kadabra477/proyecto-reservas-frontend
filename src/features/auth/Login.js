@@ -4,6 +4,11 @@ import api from '../../api/axiosConfig';
 import './Login.css';
 import '../../styles/AuthForm.css';
 
+// Importa los iconos que podrías usar (ejemplo: si usas FontAwesome, necesitas instalarlos y configurarlos)
+// Para el ejemplo, usaremos SVGs directamente o clases de una librería de iconos.
+// Si no tienes una librería, los iconos se mostrarán como texto o no se verán.
+// Asegúrate de que los iconos de usuario y candado estén disponibles.
+
 function Login({ onLoginSuccess }) {
     const [emailInput, setEmailInput] = useState('');
     const [password, setPassword] = useState('');
@@ -18,6 +23,7 @@ function Login({ onLoginSuccess }) {
         const validatedParam = searchParams.get('validated');
         const errorParam = searchParams.get('error');
         const resetSuccessParam = searchParams.get('reset');
+        const unauthorizedParam = searchParams.get('unauthorized'); // Nuevo: para manejar redirecciones de seguridad
 
         let message = '';
         let type = '';
@@ -33,6 +39,9 @@ function Login({ onLoginSuccess }) {
             type = 'success';
         } else if (errorParam === 'oauth_failed') {
             message = '❌ Error durante el inicio de sesión con Google. Intenta de nuevo.';
+            type = 'error';
+        } else if (unauthorizedParam === 'true') { // Mensaje específico para 401
+            message = 'Acceso denegado. Por favor, inicia sesión para continuar.';
             type = 'error';
         }
 
@@ -53,17 +62,14 @@ function Login({ onLoginSuccess }) {
                 password: password,
             });
 
-            // Asumo que 'role' en response.data es una cadena simple (ej: "ADMIN")
-            // Si tu backend ya envía un array, esto seguirá funcionando.
             const { token, username, nombreCompleto, role, error: loginError } = response.data; 
 
             if (loginError) {
                 setIsLoading(false);
                 setError(loginError);
             } else if (token && username && nombreCompleto) {
-                // **CAMBIO CLAVE AQUÍ:** Siempre pasar un ARRAY de roles a onLoginSuccess
                 const rolesArray = Array.isArray(role) ? role : [role]; 
-                onLoginSuccess(token, username, nombreCompleto, rolesArray); // Pasa un array de roles
+                onLoginSuccess(token, username, nombreCompleto, rolesArray);
                 navigate('/dashboard'); 
             } else {
                 setIsLoading(false);
@@ -75,7 +81,7 @@ function Login({ onLoginSuccess }) {
             if (err.response?.data?.error) {
                 errorMessage = err.response.data.error;
             } else if (err.response?.data) { 
-                 errorMessage = err.response.data;
+                errorMessage = err.response.data;
             } else if (err.response?.status === 401) {
                 errorMessage = 'Credenciales incorrectas o cuenta no activa.';
             } else {
@@ -87,71 +93,82 @@ function Login({ onLoginSuccess }) {
     };
 
     return (
-        <div className="auth-background login-background">
+        // Se añade una clase para el background de login que podría tener una imagen
+        <div className="auth-background login-background sport-theme-background">
             <div className="auth-container">
-
-                {validationMessage && (
-                    <p className={`auth-message ${validationMessageType}`} style={{ marginBottom: '1.5em' }}>
-                        {validationMessage}
-                    </p>
-                )}
+                <div className="login-image-banner">
+                    {/* Puedes poner una imagen de una cancha de fútbol, una pelota, etc. */}
+                    {/* Por ahora, un simple título para el banner */}
+                    <h2 className="login-banner-title">¡Juega tu partido!</h2>
+                    <p className="login-banner-subtitle">Reserva tu cancha favorita al instante.</p>
+                </div>
 
                 <form onSubmit={handleSubmit} className="auth-form login-form" autoComplete="off">
-                    <p className="auth-title">Bienvenido</p>
+                    <p className="auth-title">Iniciar Sesión</p> {/* Título más directo */}
 
-                    <input
-                        className="auth-input"
-                        type="email"
-                        placeholder="Correo electrónico"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        required
-                        disabled={isLoading}
-                    />
-                    <input
-                        className="auth-input"
-                        type="password"
-                        placeholder="Contraseña"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={isLoading}
-                    />
+                    {validationMessage && (
+                        <p className={`auth-message ${validationMessageType}`} style={{ marginBottom: '1.5em' }}>
+                            {validationMessage}
+                        </p>
+                    )}
+
+                    <div className="input-group"> {/* Nuevo: Para agrupar input e icono */}
+                        <i className="fas fa-user auth-icon"></i> {/* Icono de usuario */}
+                        <input
+                            className="auth-input"
+                            type="email"
+                            placeholder="Correo electrónico"
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div className="input-group"> {/* Nuevo: Para agrupar input e icono */}
+                        <i className="fas fa-lock auth-icon"></i> {/* Icono de candado */}
+                        <input
+                            className="auth-input"
+                            type="password"
+                            placeholder="Contraseña"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            disabled={isLoading}
+                        />
+                    </div>
                     <button type="submit" className="auth-button" disabled={isLoading}>
                         {isLoading ? 'Ingresando...' : 'Iniciar Sesión'}
                     </button>
 
                     {error && <p className="auth-message error">{error}</p>}
 
-                    <Link to="/register" className="auth-link" style={{ marginTop: '10px' }}>
-                        ¿No tienes cuenta? Regístrate aquí
-                    </Link>
-
-                    <Link to="/forgot-password" className="auth-link" style={{ marginTop: '10px' }}>
-                        ¿Olvidaste tu contraseña?
-                    </Link>
-
-                    <div
-                        style={{
-                            marginTop: '20px',
-                            borderTop: '1px solid rgba(255,255,255,0.2)',
-                            paddingTop: '20px',
-                        }}
-                    >
-                        <p style={{ fontSize: '0.9rem', marginBottom: '10px' }}>O inicia sesión con:</p>
-                        <a
-                            href={`${process.env.REACT_APP_API_URL.replace('/api', '')}/oauth2/authorization/google`}
-                            className="google-auth-button"
-                        >
-                            <img
-                                src="https://developers.google.com/identity/images/g-logo.png"
-                                alt="Google logo"
-                                style={{ width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle' }}
-                            />
-                        </a>
+                    <div className="auth-links-group"> {/* Agrupar los links para mejor espaciado */}
+                        <Link to="/forgot-password" className="auth-link">
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                        <Link to="/register" className="auth-link">
+                            ¿No tienes cuenta? Regístrate aquí
+                        </Link>
                     </div>
+
+                    <div className="auth-divider">
+                        <span>O</span>
+                    </div>
+
+                    <a
+                        href={`${process.env.REACT_APP_API_URL.replace('/api', '')}/oauth2/authorization/google`}
+                        className="google-auth-button"
+                    >
+                        <img
+                            src="https://developers.google.com/identity/images/g-logo.png"
+                            alt="Google logo"
+                            style={{ width: '20px', height: '20px', marginRight: '10px', verticalAlign: 'middle' }}
+                        />
+                        Iniciar Sesión con Google
+                    </a>
                 </form>
 
+                {/* Las gotas decorativas se mantienen */}
                 <div className="auth-drops">
                     <div className="drop drop-1"></div>
                     <div className="drop drop-2"></div>

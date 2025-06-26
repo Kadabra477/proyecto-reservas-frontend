@@ -1,135 +1,154 @@
-/* src/styles/AuthForm.css (Modificado) */
-/* ELIMINADO: Importación de fuente Montserrat, ahora está en App.css */
-/* @import url("..."); */
+/* src/styles/AuthForm.css */
+/* ELIMINADO: Importación de fuente Montserrat de aquí, ahora en App.css */
 
-/* ... (resto de estilos .auth-background, .auth-container, .auth-form, etc. sin cambios) ... */
 /* Contenedor de fondo que ocupa toda la pantalla */
 .auth-background {
-  position: fixed; /* Fijo para cubrir todo */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 10; /* Asegura que esté visible */
-  display: flex; /* Centra el contenido */
-  align-items: center;
-  justify-content: center;
-  padding: 20px; /* Padding por si el formulario es muy grande */
-  box-sizing: border-box;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    /* Los fondos específicos (login-background, register-background) se definen en sus propios CSS */
 }
 
-/* Contenedor del formulario y las gotas decorativas */
+/* Contenedor principal del formulario y las gotas decorativas */
 .auth-container {
-  position: relative; /* Necesario para posicionar las gotas */
-  max-width: 400px; /* Ancho máximo del formulario */
-  width: 100%; /* Ocupa el ancho disponible hasta el máximo */
+    position: relative;
+    max-width: 450px; /* Ancho máximo del formulario ligeramente aumentado */
+    width: 100%;
+    z-index: 2; /* Asegura que el contenedor esté sobre la imagen de fondo */
+    display: flex; /* Para que el banner y el formulario se apilen */
+    flex-direction: column;
+    border-radius: 20px; /* Redondeo general para el contenedor */
+    overflow: hidden; /* Importante para el banner */
 }
 
 /* Estilo base del formulario */
 .auth-form {
-  background: rgba(255, 255, 255, 0.2); /* Fondo semitransparente */
-  padding: 2.5em 3em; /* Padding interno */
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.25); /* Borde sutil */
-  backdrop-filter: blur(15px); /* Efecto vidrio esmerilado */
-  -webkit-backdrop-filter: blur(15px); /* Soporte para Safari */
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25); /* Sombra más pronunciada */
-  text-align: center;
-  transition: transform 0.3s ease;
-  color: white; /* Texto blanco por defecto */
-  font-family: 'Montserrat', sans-serif; /* Fuente específica */
+    background: rgba(255, 255, 255, 0.15); /* Fondo semitransparente más sutil */
+    padding: 2.5em 3em;
+    border-radius: 20px; /* Redondeo solo si no hay banner */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Borde sutil */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Sombra más definida */
+    text-align: center;
+    transition: transform 0.3s ease;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    position: relative; /* Para que los drops no lo cubran si z-index es bajo */
+    z-index: 2;
 }
-
 
 /* Título del formulario (Login/Register) */
 .auth-form .auth-title {
-  font-size: 1.8rem; /* Tamaño del título */
-  font-weight: 600; /* Más grueso */
-  margin-bottom: 30px; /* Más espacio debajo */
-  text-shadow: 1px 1px 5px rgba(0,0,0,0.35);
+    font-size: 2rem; /* Tamaño del título ligeramente aumentado */
+    font-weight: 700; /* Más grueso */
+    margin-bottom: 25px; /* Espacio debajo */
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.4);
+    color: white; /* Asegura que el título sea blanco */
 }
 
 /* Enlace para cambiar entre Login/Register */
 .auth-form .auth-link {
-  color: #e0e0e0; /* Color grisáceo claro */
-  font-size: 0.85rem; /* Tamaño de fuente del enlace */
-  margin-top: 20px; /* Espacio arriba del enlace */
-  display: block; /* Ocupa toda la línea */
-  text-decoration: none;
-  transition: color 0.3s ease, text-shadow 0.3s ease;
+    color: #e0e0e0;
+    font-size: 0.9rem; /* Tamaño de fuente ligeramente aumentado */
+    margin-top: 15px; /* Espacio arriba del enlace */
+    display: block;
+    text-decoration: none;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 .auth-form .auth-link:hover {
-  color: #ffffff; /* Blanco al pasar el mouse */
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); /* Efecto de brillo */
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
-
 
 .auth-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 1em 1.5em;
-  margin-bottom: 1.5em;
-  border: none;
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.15);
-  outline: none;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1em 1.5em; /* Mantener padding original */
+    margin-bottom: 1.5em; /* Mantener margen inferior original */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Borde más visible */
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.1); /* Fondo más transparente */
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500; /* Ligeramente más grueso */
+    font-size: 1rem;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); /* Sombra interna más suave */
+    outline: none;
+    transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-/* NUEVO: Estilo para .auth-button (usado en Register.js) */
+.auth-input::placeholder {
+    color: rgba(255, 255, 255, 0.6); /* Color del placeholder */
+}
+
+.auth-input:focus {
+    background: rgba(255, 255, 255, 0.2); /* Más opaco al enfocar */
+    border-color: rgba(255, 255, 255, 0.6); /* Borde más brillante al enfocar */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2), 0 0 0 3px rgba(255, 255, 255, 0.3); /* Resplandor al enfocar */
+}
+
 .auth-button {
-    display: block; /* Ocupa todo el ancho */
+    display: block;
     width: 100%;
-    padding: 1em 1.5em; /* Padding similar al input */
-    margin-top: 1em; /* Espacio arriba */
+    padding: 1em 1.5em;
+    margin-top: 1.5em; /* Más espacio arriba */
     border: none;
-    border-radius: 30px; /* Mismo redondeo */
+    border-radius: 30px;
     background-color: var(--primary); /* Usar variable global primaria */
     color: white;
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 1.15rem; /* Botón ligeramente más grande */
+    font-weight: 700; /* Más audaz */
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25); /* Sombra más fuerte */
+    letter-spacing: 0.5px; /* Pequeño espaciado entre letras */
 }
 
 .auth-button:hover:not(:disabled) {
-    background-color: var(--primary-dark); /* Oscurecer al pasar el mouse */
-    transform: translateY(-2px);
+    background-color: var(--primary-dark);
+    transform: translateY(-3px); /* Efecto hover más pronunciado */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .auth-button:disabled {
-    background-color: var(--gray); /* Color gris si deshabilitado */
+    background-color: var(--gray);
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 0.6; /* Menos opaco para que se note la deshabilitación */
+    box-shadow: none;
 }
 
-/* Estilos para mensajes de error/éxito dentro del form */
 .auth-message {
     margin-top: 1.5em;
     padding: 0.8em 1em;
     border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.95rem; /* Ligeramente más grande */
+    font-weight: 600; /* Más audaz */
     text-align: center;
+    line-height: 1.4;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 }
 .auth-message.error {
-    background-color: rgba(231, 76, 60, 0.8); /* Fondo rojo más opaco */
+    background-color: var(--danger); /* Usa la variable --danger */
     color: white;
+    border: 1px solid var(--danger-dark);
 }
 .auth-message.success {
-    background-color: rgba(46, 204, 113, 0.8); /* Fondo verde más opaco */
+    background-color: var(--success); /* Usa la variable --success */
     color: white;
+    border: 1px solid var(--success-dark);
 }
 
-/* Estilos para las gotas decorativas (si existen en el HTML) */
 .auth-drops {
     position: absolute;
     top: 0;
@@ -137,68 +156,90 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    z-index: -1; /* Detrás del formulario */
+    z-index: 1; /* Detrás del formulario principal y el banner */
+    pointer-events: none; /* Crucial para que no bloquee interacciones */
 }
-
-/* ... (otros estilos) ... */
 
 /* Estilo para el botón de Google */
 .google-auth-button {
-  display: inline-flex; /* Alinear icono y texto */
-  align-items: center;
-  justify-content: center;
-  padding: 0.8em 1.5em;
-  border-radius: 30px;
-  background-color: #ffffff; /* Fondo blanco */
-  color: #444; /* Texto oscuro */
-  font-family: 'Montserrat', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  border: 1px solid var(--gray); /* Borde sutil */
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.9em 1.5em; /* Un poco más de padding */
+    border-radius: 30px;
+    background-color: #ffffff;
+    color: #444;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem; /* Ligeramente más grande */
+    font-weight: 600; /* Más audaz */
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid var(--gray);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .google-auth-button:hover {
-  background-color: var(--gray-lightest);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    background-color: var(--gray-lightest);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
 }
 
+/* Animación de gotas */
 .drop {
     position: absolute;
-    bottom: -150px; /* Empiezan desde abajo */
-    width: 100px;
-    height: 100px;
+    bottom: -150px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
-    animation: rise 10s infinite ease-in;
+    animation: rise 10s infinite ease-in-out; /* Cambiado a ease-in-out para un ciclo más suave */
     opacity: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Borde sutil a las gotas */
+    box-shadow: 0 0 15px rgba(0,0,0,0.1); /* Sombra para dar volumen */
 }
-/* ... (mantener @keyframes rise y .drop-N si los tenías) ... */
 .drop.drop-1 { left: 10%; width: 80px; height: 80px; animation-delay: 1s; animation-duration: 12s; }
-.drop.drop-2 { left: 25%; width: 120px; height: 120px; animation-delay: 3s; }
+.drop.drop-2 { left: 25%; width: 120px; height: 120px; animation-delay: 3s; animation-duration: 10s; }
 .drop.drop-3 { left: 50%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 8s; }
-.drop.drop-4 { left: 70%; width: 100px; height: 100px; animation-delay: 5s; }
+.drop.drop-4 { left: 70%; width: 100px; height: 100px; animation-delay: 5s; animation-duration: 14s; }
 .drop.drop-5 { left: 85%; width: 70px; height: 70px; animation-delay: 2s; animation-duration: 11s; }
 
 @keyframes rise {
     0% {
         bottom: -150px;
         opacity: 0;
+        transform: scale(0.5); /* Empieza pequeño */
     }
     50% {
-        opacity: 0.4;
+        opacity: 0.3; /* Opacidad máxima */
     }
     100% {
-        bottom: 110%; /* Sube más allá del contenedor */
+        bottom: 110%;
         opacity: 0;
+        transform: scale(1.2); /* Termina un poco más grande */
     }
 }
-.oauth2-success-message {
-  text-align: center;
-  margin-top: 100px;
-  font-family: 'Montserrat', sans-serif;
-  color: var(--primary-dark);
+
+/* Contenedor para agrupar links como "olvidaste contraseña" */
+.auth-links-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacio entre los links */
+    margin-top: 15px; /* Espacio arriba */
+}
+
+/* Divisor horizontal para "O" */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    color: rgba(255, 255, 255, 0.7); /* Color más claro para la línea */
+    font-size: 0.9em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25); /* Línea más visible */
+    margin: 0 0.5em;
 }
