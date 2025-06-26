@@ -16,8 +16,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* RUTA CORREGIDA: Desde src/features/auth/Login.css, necesitas subir dos niveles para llegar a src/ */
-    background-image: url('../../assets/fondo-cancha.jpg'); /* ¡Ruta Ajustada! */
+    /* RUTA CORRECTA: Desde src/features/auth/Login.css, sube dos niveles para llegar a src/ y luego entra a assets */
+    background-image: url('../../assets/fondo-cancha.jpg'); 
     background-size: cover;
     background-position: center;
     filter: blur(3px) brightness(0.6);
@@ -28,7 +28,7 @@
 .login-image-banner {
     background: linear-gradient(45deg, var(--primary), var(--primary-dark));
     color: white;
-    padding: 20px 30px;
+    padding: 15px 25px; /* Ajustado */
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     text-align: center;
@@ -39,14 +39,14 @@
 }
 
 .login-banner-title {
-    font-size: 2.2rem;
+    font-size: 2rem; /* Ajustado */
     font-weight: 700;
     margin-bottom: 5px;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
 .login-banner-subtitle {
-    font-size: 1.1rem;
+    font-size: 1rem; /* Ajustado */
     font-weight: 400;
     opacity: 0.9;
 }
@@ -54,80 +54,11 @@
 .login-form {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    padding-top: 1.5em;
+    padding-top: 1.2em; /* Ajustado */
     position: relative;
     z-index: 3;
 }
 
 .login-form {
     border-top: 1px solid rgba(255, 255, 255, 0.25);
-}
-
-.input-group {
-    position: relative;
-    margin-bottom: 1.5em;
-}
-
-.auth-input {
-    padding-left: 3.5em;
-}
-
-.auth-icon {
-    position: absolute;
-    left: 1.2em;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 1.1rem;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.auth-links-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-}
-
-.auth-divider {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 25px 0;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.9em;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.auth-divider:not(:empty)::before {
-    margin-right: .5em;
-}
-
-.auth-divider:not(:empty)::after {
-    margin-left: .5em;
-}
-
-.google-auth-button {
-    width: 100%;
-    margin-top: 10px;
-    justify-content: center;
-}
-
-@media (max-width: 768px) {
-    .login-image-banner, .register-image-banner {
-        padding: 15px 20px;
-    }
-    .login-banner-title, .register-banner-title {
-        font-size: 1.8rem;
-    }
-    .login-banner-subtitle, .register-banner-subtitle {
-        font-size: 1rem;
-    }
 }

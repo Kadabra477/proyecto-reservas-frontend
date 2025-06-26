@@ -1,5 +1,6 @@
 /* frontend/src/features/home/Home.css */
 
+/* Tus variables :root si las tienes aquí, o asegúrate de que App.css las defina */
 :root {
     --primary: #007bff; /* Azul vibrante */
     --primary-dark: #0056b3;
@@ -14,6 +15,7 @@
     --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
     --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.1);
     --border-light: #dee2e6;
+    /* Asegúrate que estas variables estén consistentes con App.css */
 }
 
 /* IMPORTANTE: Asegura que el HTML y BODY ocupen todo el alto disponible */
@@ -24,23 +26,20 @@ html, body, #root {
 }
 
 body {
-    font-family: 'Poppins', sans-serif; /* Fuente más moderna y limpia */
+    font-family: 'Poppins', sans-serif;
     background-color: var(--background);
     color: var(--text);
     line-height: 1.6;
 }
 
-/* Asegura que el contenedor principal de la app o el main ocupe el espacio restante */
-/* Si tu App.jsx no tiene un div envolvente con clase "App", este selector podría ser diferente */
 .App, main {
-    min-height: 100vh; /* Asegura que ocupe al menos el alto de la ventana */
+    min-height: 100vh;
     display: flex;
-    flex-direction: column; /* Permite que el footer se empuje hacia abajo */
+    flex-direction: column;
 }
 
-
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Montserrat', sans-serif; /* Fuente para encabezados */
+    font-family: 'Montserrat', sans-serif;
     color: var(--text);
     margin-top: 0;
     margin-bottom: 0.5em;
@@ -71,8 +70,8 @@ a:hover {
 .hero {
     position: relative;
     height: 600px;
-    /* RUTA CORREGIDA: Desde src/features/home/Home.css, necesitas subir dos niveles para llegar a src/ */
-    background-image: url('../../assets/fondo-cancha-hero.jpg'); /* ¡Ruta Ajustada! (asumiendo que tienes una imagen específica para el hero) */
+    /* RUTA CORRECTA: Desde src/features/home/Home.css, sube dos niveles para llegar a src/ y luego entra a assets */
+    background-image: url('../../assets/fondo-cancha-hero.jpg'); 
     background-size: cover;
     background-position: center;
     display: flex;
@@ -403,14 +402,13 @@ a:hover {
     width: 55px;
     height: 55px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: center; /* Centrado vertical */
+    justify-content: center; /* Centrado horizontal */
     font-size: 2em; /* Esto escala el icono */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     transition: transform 0.3s ease, background-color 0.3s ease;
     z-index: 1000;
-    /* Asegura que el icono esté centrado si hay un problema */
-    text-decoration: none; /* Asegura que no haya subrayado */
+    text-decoration: none;
     line-height: 1; /* Ajusta la altura de línea para centrar verticalmente mejor el icono */
 }
 
@@ -422,12 +420,12 @@ a:hover {
 
 /* Footer mejorado */
 .footer {
-    background-color: var(--gray-dark); /* Fondo oscuro principal para el footer */
+    background-color: var(--gray-dark);
     color: white;
     padding: 40px 0 20px;
     text-align: center;
-    margin-top: auto; /* Empuja el footer al final de la página si el contenido es corto */
-    width: 100%; /* Asegura que ocupe todo el ancho */
+    margin-top: auto;
+    width: 100%;
 }
 
 .footer-content {
@@ -443,13 +441,13 @@ a:hover {
     text-decoration: none;
     display: flex;
     align-items: center;
-    font-family: 'Montserrat', sans-serif; /* Misma fuente que los títulos */
+    font-family: 'Montserrat', sans-serif;
     font-weight: 700;
     letter-spacing: -1px;
 }
 
 .footer-logo-link h3 {
-    font-size: 1.8em; /* Tamaño similar al Navbar */
+    font-size: 1.8em;
     color: white;
     margin: 0;
 }
@@ -464,7 +462,7 @@ a:hover {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 25px; /* Más espacio entre enlaces para mejor legibilidad */
+    gap: 25px;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -472,18 +470,18 @@ a:hover {
 
 .footer-link {
     color: white;
-    font-size: 1.05em; /* Un poco más grande que antes */
+    font-size: 1.05em;
     text-decoration: none;
     transition: color 0.3s ease, text-shadow 0.3s ease;
-    font-family: 'Poppins', sans-serif; /* Mismo font que el body/Navbar links */
-    font-weight: 600; /* Coincide con Navbar links */
-    text-transform: uppercase; /* Coincide con Navbar links */
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
     white-space: nowrap;
 }
 
 .footer-link:hover {
     color: var(--primary-light);
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4); /* Efecto de sombra al pasar el mouse */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 
@@ -549,7 +547,7 @@ a:hover {
     }
     .footer-links-group {
         text-align: center;
-        gap: 15px; /* Menos espacio en pantallas más pequeñas */
+        gap: 15px;
     }
     .footer-bottom {
         flex-direction: column;
@@ -588,8 +586,8 @@ a:hover {
         right: 20px;
     }
     .footer-link {
-        font-size: 0.95em; /* Ajuste para móviles */
-        padding: 5px 10px; /* Para que parezcan más "botones" */
+        font-size: 0.95em;
+        padding: 5px 10px;
     }
 }
 
@@ -615,11 +613,11 @@ a:hover {
     }
     .footer-links-group {
         width: 100%;
-        flex-direction: column; /* Apila los enlaces en móviles muy pequeños */
+        flex-direction: column;
         gap: 10px;
     }
     .footer-link {
-        width: fit-content; /* Asegura que el enlace no ocupe todo el ancho si se apila */
-        margin: 0 auto; /* Centra los enlaces apilados */
+        width: fit-content;
+        margin: 0 auto;
     }
 }

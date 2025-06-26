@@ -16,8 +16,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    /* RUTA CORREGIDA: Desde src/features/auth/Register.css, necesitas subir dos niveles para llegar a src/ */
-    background-image: url('../../assets/fondo-cancha.jpg'); /* ¡Ruta Ajustada! */
+    /* RUTA CORRECTA: Desde src/features/auth/Register.css, sube dos niveles para llegar a src/ y luego entra a assets */
+    background-image: url('../../assets/fondo-cancha.jpg'); 
     background-size: cover;
     background-position: center;
     filter: blur(3px) brightness(0.6);
@@ -28,7 +28,7 @@
 .register-image-banner {
     background: linear-gradient(45deg, var(--secondary), var(--secondary-dark));
     color: white;
-    padding: 20px 30px;
+    padding: 15px 25px; /* Ajustado */
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;
     text-align: center;
@@ -39,14 +39,14 @@
 }
 
 .register-banner-title {
-    font-size: 2.2rem;
+    font-size: 2rem; /* Ajustado */
     font-weight: 700;
     margin-bottom: 5px;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
 
 .register-banner-subtitle {
-    font-size: 1.1rem;
+    font-size: 1rem; /* Ajustado */
     font-weight: 400;
     opacity: 0.9;
 }
@@ -54,7 +54,7 @@
 .register-form {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    padding-top: 1.5em;
+    padding-top: 1.2em; /* Ajustado */
     position: relative;
     z-index: 3;
 }
