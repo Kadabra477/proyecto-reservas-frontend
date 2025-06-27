@@ -373,45 +373,25 @@ a:hover {
 
 /* WhatsApp Button */
 .whatsapp-button {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    background-color: #25d366;
-    color: white; /* Esto afecta al color del path del SVG si el SVG lo hereda */
-    border-radius: 50%;
-    width: 55px;
-    height: 55px;
-    display: flex;
-    align-items: center; 
-    justify-content: center; 
-    font-size: 2em;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); 
-    transition: transform 0.3s ease, background-color 0.3s ease;
-    z-index: 1000;
-    text-decoration: none;
-    line-height: 1; 
-    border: none; 
-    outline: none;
-    padding: 0; 
-    overflow: hidden; /* Esto es importante, si el SVG es más grande, se recorta */
+    /* ... tus estilos actuales para el botón verde ... */
+    display: flex; /* Importante para centrar */
+    align-items: center; /* Centra verticalmente */
+    justify-content: center; /* Centra horizontalmente */
+    overflow: hidden; /* Recorta si el contenido es más grande */
 }
 
-/* Estilos para el SVG dentro del botón de WhatsApp */
 .whatsapp-button svg {
     display: block; 
     margin: 0; 
     padding: 0; 
-    /* Cambiamos el tamaño a un porcentaje del contenedor */
-    width: 60%;   /* Ajusta este porcentaje. Un 60-70% suele verse bien */
-    height: 60%;  /* Mismo porcentaje para mantener la proporción */
+    width: 60%; /* O el porcentaje que mejor se vea (ej: 70%) */
+    height: 60%; /* Mismo porcentaje */
     box-sizing: content-box; 
-    /* Aseguramos que el SVG se adapte sin recortarse si su viewBox es más grande */
-    flex-shrink: 0; /* Evita que el SVG se encoja si el espacio es limitado */
+    flex-shrink: 0; 
 }
 
-/* El path dentro del SVG hereda el color, pero lo podemos asegurar */
 .whatsapp-button svg path {
-    fill: currentColor; /* Asegura que el path use el color del padre (white del .whatsapp-button) */
+    fill: white; /* Asegura que el icono sea blanco */
 }
 
 
