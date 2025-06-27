@@ -9,13 +9,13 @@
     --gray-medium: #ced4da; /* Para bordes de inputs */
     --gray-dark: #343a40; /* Para texto oscuro y footer */
     
-    /* Colores Principales (Verdes y Azules para Temática Deportiva) */
-    --primary: #4CAF50;      /* Verde vibrante */
-    --primary-dark: #388E3C; /* Verde más oscuro para hover */
-    --primary-light: #81C784; /* Verde más claro */
+    /* Colores Principales (¡AZUL de vuelta!) */
+    --primary: #007bff;      /* AZUL ORIGINAL */
+    --primary-dark: #0056b3; /* AZUL OSCURO */
+    --primary-light: #66b5ff; /* AZUL CLARO */
     
-    --secondary: #2196F3;    /* Azul deportivo */
-    --secondary-dark: #1976D2; /* Azul más oscuro */
+    --secondary: #6c757d;    /* Gris secundario (como lo tenías) */
+    --secondary-dark: #5a6268; /* Gris oscuro secundario */
     
     /* Fondos y Textos */
     --background: #f0f2f5;   /* Fondo general claro */
@@ -38,7 +38,7 @@
     --info-dark: #138496;
     --warning: #FFC107;        /* Naranja para advertencias/pendiente */
     --warning-dark: #E0A800;
-    --success: #28A745;        /* Verde para éxito/confirmado */
+    --success: #28A745;        /* Verde para éxito/confirmado (mantengo el verde de éxito) */
     --success-dark: #218838;
 
     /* Otros valores */
@@ -72,7 +72,7 @@ body {
 }
 
 .App {
-    min-height: 100vh; 
+    min-height: 100vh; /* Asegura que la app ocupe al menos la altura de la ventana */
     display: flex;
     flex-direction: column;
 }
@@ -92,7 +92,7 @@ p {
 
 a {
     text-decoration: none;
-    color: var(--primary);
+    color: var(--primary); /* Los enlaces generales usarán el nuevo primary (azul) */
     transition: color var(--transition-fast);
 }
 

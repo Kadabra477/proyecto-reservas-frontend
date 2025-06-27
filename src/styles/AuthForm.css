@@ -34,7 +34,7 @@
 /* Contenedor principal del formulario y las gotas decorativas */
 .auth-container {
     position: relative;
-    max-width: 280px; /* REDUCIDO AÚN MÁS el ancho máximo para más espacio vertical */
+    max-width: 280px; /* MANTENIDO, ya era lo suficientemente pequeño */
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -294,17 +294,17 @@
 .auth-links-group {
     display: flex;
     flex-direction: column;
-    gap: 4px; /* Más pequeño */
-    margin-top: 6px; /* Más pequeño */
+    gap: 4px; 
+    margin-top: 8px; 
 }
 
 .auth-divider {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 10px 0; /* Más pequeño */
+    margin: 12px 0; 
     color: rgba(255, 255, 255, 0.7);
-    font-size: 0.75em; /* Más pequeño */
+    font-size: 0.75em; 
 }
 
 .auth-divider::before,
@@ -323,34 +323,34 @@
         max-width: 100%; 
     }
     .auth-form {
-        padding: 0.8em 0.8em; /* Más pequeño aún el padding interno en móviles */
+        padding: 0.8em 0.8em; 
         border-radius: 0; 
         box-shadow: none; 
     }
     .login-image-banner, .register-image-banner {
-        padding: 5px 8px; /* Más pequeño aún el padding del banner en móviles */
+        padding: 5px 8px; 
         border-radius: 0; 
     }
     .login-banner-title, .register-banner-title {
-        font-size: 1.2rem; /* Más pequeño en móviles muy pequeños */
+        font-size: 1.2rem; 
     }
     .login-banner-subtitle, .register-banner-subtitle {
         font-size: 0.75rem;
     }
     .input-group {
-        margin-bottom: 0.5em; /* Más compacto */
+        margin-bottom: 0.6em; 
     }
     .auth-input {
-        padding: 0.5em 0.7em 0.5em 2.2em; /* Ajuste para el icono en móviles */
-        height: 32px; /* Más pequeña la altura del input */
-        font-size: 0.75rem;
+        padding: 0.6em 0.8em 0.6em 2.5em; 
+        height: 35px; 
+        font-size: 0.8rem;
     }
     .auth-icon {
-        left: 0.5em;
-        font-size: 0.75rem;
+        left: 0.6em;
+        font-size: 0.8rem;
     }
     .auth-button {
-        padding: 0.5em 0.8em;
+        padding: 0.6em 0.9em;
         font-size: 0.85rem;
         margin-top: 0.8em;
     }
@@ -359,10 +359,10 @@
         font-size: 0.75rem;
     }
     .notification-container {
-        padding: 5px 8px;
+        padding: 6px 10px;
         font-size: 0.7rem;
         margin: 5px auto 5px auto;
-        width: calc(100% - 16px); /* Ajustar el ancho del mensaje para móviles (8px padding a cada lado) */
+        width: calc(100% - 16px); 
         max-width: none; 
         border-radius: 0; 
     }
