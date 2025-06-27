@@ -381,11 +381,11 @@ a:hover {
     border-radius: 50%;
     width: 55px;
     height: 55px;
-    display: flex;
-    align-items: center; 
-    justify-content: center; 
-    font-size: 2em;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); /* CAMBIO CLAVE: Sombra sin desplazamiento */
+    display: flex; /* Mantenemos flexbox para centrar el contenido */
+    align-items: center; /* Centra verticalmente el contenido dentro del botón */
+    justify-content: center; /* Centra horizontalmente el contenido dentro del botón */
+    font-size: 2em; /* Esto es para si hubiera texto, pero para el SVG no afecta directamente */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); 
     transition: transform 0.3s ease, background-color 0.3s ease;
     z-index: 1000;
     text-decoration: none;
@@ -396,14 +396,17 @@ a:hover {
     overflow: hidden; 
 }
 
-/* Asegurarse que el icono dentro del botón no tenga márgenes o paddings extra */
-.whatsapp-button i {
-    margin: 0;
-    padding: 0;
-    display: block; 
-    line-height: 1; 
-    transform: none !important; /* CAMBIO CLAVE: Reinicia cualquier transformación aplicada por User Agent o librerías */
+/* Estilos para el SVG dentro del botón de WhatsApp */
+.whatsapp-button svg {
+    /* Aquí solo necesitamos controlar el tamaño y asegurar que no haya márgenes/paddings externos */
+    display: block; /* Mantenemos block para un comportamiento predecible */
+    margin: 0; 
+    padding: 0; 
+    width: 28px; /* Ajusta este tamaño según lo que se vea mejor */
+    height: 28px; 
+    box-sizing: content-box; 
 }
+
 
 .whatsapp-button:hover {
     background-color: #128c7e;
