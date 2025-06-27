@@ -373,30 +373,51 @@ a:hover {
 
 /* WhatsApp Button */
 .whatsapp-button {
-    /* ... tus estilos actuales para el botón verde ... */
-    display: flex; /* Importante para centrar */
-    align-items: center; /* Centra verticalmente */
-    justify-content: center; /* Centra horizontalmente */
-    overflow: hidden; /* Recorta si el contenido es más grande */
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background-color: #25d366; /* ESTE ES EL COLOR VERDE DE LA BURBUJA */
+    color: white; /* Esto hace que el 'fill="currentColor"' del SVG (si no se especifica) sea blanco */
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center; /* Centra verticalmente el contenido dentro del botón */
+    justify-content: center; /* Centra horizontalmente el contenido dentro del botón */
+    /* font-size: 2em;  Esto es irrelevante para el SVG */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); 
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    z-index: 1000;
+    text-decoration: none;
+    line-height: 1; 
+    border: none; 
+    outline: none;
+    padding: 0; 
+    overflow: hidden; /* Esto asegura que el SVG no se salga del círculo si es demasiado grande */
 }
 
+/* Estilos para el SVG dentro del botón de WhatsApp */
 .whatsapp-button svg {
-    display: block; 
+    display: block; /* Mantenemos block para un comportamiento predecible */
     margin: 0; 
     padding: 0; 
-    width: 60%; /* O el porcentaje que mejor se vea (ej: 70%) */
-    height: 60%; /* Mismo porcentaje */
+    /* Dimensiones en porcentaje para que el icono del teléfono se ajuste al círculo verde */
+    width: 60%;   /* Puedes ajustar este porcentaje (ej. 65% o 70%) para que se vea más grande o más pequeño */
+    height: 60%;  /* Mismo porcentaje para mantener la proporción del icono */
     box-sizing: content-box; 
     flex-shrink: 0; 
+    /* Aquí no necesitas 'fill: white;' si ya lo pones directamente en el SVG. */
+    /* Pero si lo pones, asegúrate de que sea 'fill: white;' y no 'fill: currentColor;' */
 }
 
+/* Opcional: Asegura que el path del icono sea blanco, aunque el 'fill="white"' en el SVG ya lo hace */
 .whatsapp-button svg path {
-    fill: white; /* Asegura que el icono sea blanco */
+    fill: white; 
 }
 
 
 .whatsapp-button:hover {
-    background-color: #128c7e;
+    background-color: #128c7e; /* Verde WhatsApp más oscuro al pasar el ratón */
     transform: scale(1.1);
 }
 
