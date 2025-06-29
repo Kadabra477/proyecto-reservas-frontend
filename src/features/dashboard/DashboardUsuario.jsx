@@ -21,7 +21,8 @@ function DashboardUsuario() {
         setLoading(true);
         setError(null);
         try {
-            const reservasRes = await api.get('/reservas/usuario');
+            // CAMBIO: La ruta correcta para obtener reservas del usuario es /api/reservas/usuario
+            const reservasRes = await api.get('/reservas/usuario'); 
             setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
         } catch (err) {
             console.error("Error al recargar reservas:", err);
@@ -52,6 +53,7 @@ function DashboardUsuario() {
                     setBio(userData.bio || '');
                 }
 
+                // CAMBIO: La ruta correcta para obtener reservas del usuario es /api/reservas/usuario
                 const reservasRes = await api.get('/reservas/usuario');
                 if (isMounted) {
                     setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
@@ -60,7 +62,7 @@ function DashboardUsuario() {
             } catch (err) {
                 console.error("Error al cargar datos del dashboard:", err);
                 if (isMounted) {
-                    if (!(err.response && err.response.status === 401)) {
+                    if (!(err.response && err.response.status === 401)) { // Evita mostrar error si es un 401 (ya manejado por interceptor)
                         setError("No se pudieron cargar los datos del perfil o las reservas. Intenta recargar la página.");
                     }
                     setMisReservas([]);
@@ -124,9 +126,9 @@ function DashboardUsuario() {
     const formatLocalDateTime = (dateTimeString) => {
         if (!dateTimeString) return 'Fecha no disponible';
         try {
+            // Asegurarse de formatear a la zona horaria correcta de Argentina
             const date = new Date(dateTimeString);
-            // Formato para mostrar la fecha y hora sin segundos
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' };
             return date.toLocaleString('es-AR', options);
         } catch (e) {
             console.error("Error formateando fecha:", dateTimeString, e);
@@ -240,13 +242,15 @@ function DashboardUsuario() {
     }
 
     // Identificar la próxima reserva si existe
-    const proximasReservas = misReservas.filter(reserva => new Date(reserva.fechaHora) > new Date())
+    // Asegurarse de comparar fechas en la misma zona horaria para consistencia
+    const nowArgentinaClient = new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Argentina/Buenos_Aires'}));
+    const proximasReservas = misReservas.filter(reserva => new Date(reserva.fechaHora) > nowArgentinaClient)
                                       .sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
     const proximaReserva = proximasReservas.length > 0 ? proximasReservas[0] : null;
 
     // Reservas pasadas
-    const reservasPasadas = misReservas.filter(reserva => new Date(reserva.fechaHora) <= new Date())
-                                      .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora)); // Ordenar de más reciente a más antigua
+    const reservasPasadas = misReservas.filter(reserva => new Date(reserva.fechaHora) <= nowArgentinaClient)
+                                      .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora)); 
 
 
     return (
@@ -366,7 +370,7 @@ function DashboardUsuario() {
                                 <p className="reserva-card-detail"><strong>Precio:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
                                 {reserva.metodoPago && (
                                     <p className="reserva-card-detail payment-info">
-                                        <strong>Pago:</strong> {reserva.pagada ? `Pagada (${capitalizeFirstLetter(reserva.metodoPago)})` : 'Pendiente'}
+                                        <strong>Pago:</strong> {reserva.pagada ? `Pagada (${capitalizeFirstLetter(reserva.metodoPago || '?')})` : 'Pendiente'}
                                         {reserva.metodoPago.toLowerCase() === 'mercadopago' && <img src={`${process.env.PUBLIC_URL}/imagenes/mercadopago-small.png`} alt="MP" className="payment-icon-small" />}
                                         {reserva.metodoPago.toLowerCase() === 'efectivo' && <img src={`${process.env.PUBLIC_URL}/imagenes/efectivo-small.png`} alt="Efectivo" className="payment-icon-small" />}
                                     </p>

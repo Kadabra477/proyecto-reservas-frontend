@@ -33,7 +33,8 @@ function RedireccionSiAutenticado({ children, destino = "/dashboard" }) {
     const estaAutenticado = !!localStorage.getItem('jwtToken');
     const location = useLocation();
     if (estaAutenticado) {
-        const from = location.state?.from?.pathname || destino;
+        // Asegúrate de que 'from' siempre tenga un valor seguro para evitar rutas no válidas
+        const from = location.state?.from?.pathname && location.state.from.pathname !== '/' ? location.state.from.pathname : destino;
         return <Navigate to={from} replace />;
     }
     return children;
@@ -57,6 +58,7 @@ function RutaProtegida({ children, rolesRequeridos }) {
 
     if (!hasRequiredRole) {
         console.warn(`Acceso denegado: Roles del usuario [${userRolesFromStorage.join(', ')}] no autorizados para ${location.pathname}. Roles requeridos: [${rolesRequeridos.join(', ')}]`);
+        // Redirige al dashboard si no tiene el rol, que es la acción por defecto para rutas no autorizadas
         return <Navigate to="/dashboard" replace />;
     }
 
@@ -115,19 +117,24 @@ function App() {
             }
 
             try {
-                const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/validate-token`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) throw new Error("Token inválido o expirado");
+                // Modificado: Se elimina la validación explícita del token aquí
+                // si el axios interceptor ya se encarga de los 401 y redirecciones.
+                // Si este endpoint /auth/validate-token está dando 404 constantemente,
+                // la validación real la hará el backend al intentar acceder a una ruta protegida.
+                // const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/validate-token`, {
+                //     method: "GET",
+                //     headers: {
+                //         "Authorization": `Bearer ${token}`
+                //     }
+                // });
+                // if (!res.ok) throw new Error("Token inválido o expirado");
 
                 const decodedToken = jwtDecode(token);
-                const currentTime = Date.now() / 1000;
-                if (decodedToken.exp < currentTime) {
-                    throw new Error("Token expirado");
+                // Usar la hora actual en Argentina para verificar la expiración
+                const currentTimeArgentinaSeconds = Math.floor(new Date().toLocaleString('en-US', {timeZone: 'America/Argentina/Buenos_Aires', hour12: false}).getTime() / 1000);
+                
+                if (decodedToken.exp < currentTimeArgentinaSeconds) {
+                    throw new Error("Token expirado (hora de Argentina)");
                 }
 
                 setEstaAutenticado(true);
@@ -135,7 +142,7 @@ function App() {
                 setUserRoleArray(rolesFromStorage); 
             } catch (error) {
                 console.log("Token inválido o expirado:", error);
-                handleLogout();
+                handleLogout(); // Forzar logout si el token no es válido o está expirado
             } finally {
                 setIsLoadingAuth(false);
             }
@@ -189,13 +196,10 @@ function App() {
                     <Route path="/complejos" element={<Complejos />} /> 
                     <Route path="/complejos/:id" element={<ComplejoDetalle />} />
                     
-                    {/* RUTA MODIFICADA Y AÑADIDA PARA RESEVA FORM */}
-                    {/* Ruta genérica para llegar al formulario de reserva (con o sin preselección) */}
                     <Route 
                         path="/reservar" 
                         element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} 
                     />
-                    {/* Mantener esta ruta solo si tienes un caso de uso específico para reservar con ID de cancha ya conocido */}
                     <Route 
                         path="/reservar/:complejoId/:canchaId" 
                         element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} 
@@ -212,6 +216,7 @@ function App() {
 
                     <Route path="/faq" element={<FAQPage />} />
 
+                    {/* Ruta catch-all para cualquier otra cosa que no coincida */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </>

@@ -1,3 +1,4 @@
+// frontend/src/api/axiosConfig.js
 import axios from 'axios';
 
 // La URL base para el backend, SIN el '/api'
@@ -38,7 +39,7 @@ api.interceptors.response.use(
       localStorage.removeItem('jwtToken');
       localStorage.removeItem('username');
       localStorage.removeItem('nombreCompleto');
-      localStorage.removeItem('userRole');
+      localStorage.removeItem('userRoles'); // Cambiado de 'userRole' a 'userRoles'
       // Redirigir al login
       window.location.href = '/login?unauthorized=true';
     }
