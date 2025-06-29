@@ -305,21 +305,18 @@ function AdminPanel() {
             if (editingComplejo?.id) { 
                 response = await api.put(`/complejos/${id}`, formData, {
                     headers: {
-                        // Axios suele inferir 'Content-Type': 'multipart/form-data' al enviar FormData,
-                        // pero explicitarlo no está de más. NO DEBES PONER EL BOUNDARY.
-                        // 'Content-Type': 'multipart/form-data' 
+                        'Content-Type': undefined, // ¡CAMBIO AQUÍ! Deja que el navegador lo defina
                     },
                 });
                 setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
             } else { 
                 response = await api.post('/complejos', formData, {
                     headers: {
-                        // 'Content-Type': 'multipart/form-data'
+                        'Content-Type': undefined, // ¡CAMBIO AQUÍ! Deja que el navegador lo defina
                     },
                 });
                 setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
             }
-            
             // Si la operación fue exitosa, limpiar estados y recargar datos
             setEditingComplejo(null);
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
