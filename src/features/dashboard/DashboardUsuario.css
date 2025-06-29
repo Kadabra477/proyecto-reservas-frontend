@@ -1,247 +1,379 @@
-/* DashboardUsuario.css */
+/* frontend/src/features/dashboard/DashboardUsuario.css */
+
+/* Variables de color y tamaño (asegúrate de que estén definidas en algún archivo global o aquí) */
+:root {
+    --primary: #007bff; /* Azul primario */
+    --primary-dark: #0056b3; /* Azul oscuro */
+    --secondary: #6c757d; /* Gris secundario */
+    --secondary-light: #e2e6ea; /* Gris claro */
+    --secondary-dark: #343a40; /* Gris muy oscuro */
+    --white: #ffffff;
+    --background-light: #f9f9f9;
+    --gray-lightest: #f8f9fa;
+    --gray: #ced4da;
+    --gray-dark: #6c757d;
+    --text: #333;
+    --text-light: #555;
+    --text-dark: #212529;
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #dc3545;
+
+    --max-width: 1200px;
+    --radius: 8px;
+    --radius-lg: 15px;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Contenedor principal del Dashboard */
 .dashboard-container {
     max-width: var(--max-width);
-    margin: 40px auto;
+    margin: 50px auto;
     padding: 30px 25px;
-    background: linear-gradient(to bottom, #ffffff, #f2f6fa);
+    background: var(--background-light); /* Fondo claro para todo el dashboard */
     border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra principal más pronunciada */
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* Espacio entre secciones principales */
 }
 
-.dashboard-title {
-    color: var(--primary-dark);
-    font-size: 2.2rem;
-    font-weight: 700;
+/* Mensajes de carga y error */
+.loading-message, .error-message {
     text-align: center;
-    margin-bottom: 10px;
-}
-
-.dashboard-subtitle {
+    font-size: 1.2rem;
     color: var(--text-light);
-    font-size: 1.1rem;
-    text-align: center;
-    margin-bottom: 40px;
+    padding: 20px;
+    background-color: var(--gray-lightest);
+    border-radius: var(--radius);
+    border: 1px dashed var(--gray);
+}
+.error-message {
+    color: var(--danger);
+    background-color: rgba(var(--danger), 0.05);
+    border-color: var(--danger);
 }
 
-.dashboard-card {
+
+/* Tarjeta de Bienvenida */
+.welcome-card {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)); /* Gradiente atractivo */
+    color: var(--white);
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-hover);
+    margin-bottom: 20px; /* Espacio extra debajo de la tarjeta de bienvenida */
+}
+
+.welcome-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-subtitle {
+    font-size: 1.2rem;
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+/* Diseño de columnas para pantallas grandes */
+.dashboard-content-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Por defecto una columna */
+    gap: 30px;
+}
+
+@media (min-width: 992px) { /* A partir de pantallas de escritorio */
+    .dashboard-content-grid {
+        grid-template-columns: 1fr 2fr; /* Columna izquierda para perfil, derecha para resumen de reservas */
+    }
+}
+
+/* Sección general de dashboard (tarjetas de perfil y resumen) */
+.dashboard-section {
     background-color: var(--white);
     border-radius: var(--radius-lg);
     padding: 25px 30px;
     box-shadow: var(--shadow);
-    margin-bottom: 30px;
-    border-left: 5px solid var(--primary);
+    border-left: 5px solid var(--primary); /* Borde acentuado */
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Para que las columnas tengan la misma altura */
 }
 
-.dashboard-card h2 {
-    color: var(--primary);
-    font-size: 1.5rem;
+.dashboard-section h2 {
+    color: var(--primary-dark);
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--gray);
+    padding-bottom: 10px;
+}
+
+/* PERFIL - Detalles Personales */
+.perfil-detail-card {
+    border-color: var(--secondary); /* Color diferente para el borde de perfil */
+}
+
+.perfil-form-edit label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 5px;
+    margin-top: 15px;
+    font-size: 0.95rem;
+}
+
+.perfil-input, .perfil-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--gray);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    margin-bottom: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perfil-input:focus, .perfil-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary), 0.25);
+    outline: none;
+}
+
+.perfil-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.perfil-email-display {
+    font-size: 1rem;
+    color: var(--text-light);
     margin-bottom: 20px;
 }
 
-.proximas-reservas p {
-    margin: 10px 0;
-    color: var(--text);
-    font-size: 1.05rem;
-}
-
-.proximas-reservas p strong {
-    color: var(--text-dark);
-    min-width: 80px;
-    display: inline-block;
-}
-
-.dashboard-info {
-    background-color: var(--gray-lightest);
-    padding: 15px 20px;
-    border-radius: var(--radius);
-    text-align: center;
-    color: var(--text-light);
-    margin-bottom: 30px;
-    border: 1px dashed var(--gray);
-}
-
-.dashboard-acciones h2 {
-    text-align: center;
-    color: var(--secondary);
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin-bottom: 30px;
-}
-
-.acciones-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-}
-
-.accion-card {
-    text-decoration: none;
-    color: inherit;
-    background-color: var(--white);
-    border-radius: var(--radius-lg);
-    padding: 30px 25px;
-    box-shadow: var(--shadow);
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.perfil-actions-edit {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-left: none;
-    border-bottom: 5px solid var(--secondary-light);
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
 }
 
-.accion-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-hover);
-    border-bottom-color: var(--secondary);
+.btn-guardar {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+}
+.btn-guardar:hover {
+    background-color: var(--primary-dark);
+}
+.btn-cancelar {
+    background-color: var(--gray-dark);
+    color: white;
+    border: none;
+}
+.btn-cancelar:hover {
+    background-color: var(--secondary-dark);
 }
 
-.accion-icon {
-    font-size: 3rem;
+.perfil-data-view {
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.perfil-data-item {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted var(--gray);
+}
+.perfil-data-item:last-child {
+    border-bottom: none;
+}
+.perfil-data-item strong {
+    color: var(--text-dark);
+    display: inline-block;
+    min-width: 100px;
+}
+.perfil-bio {
+    line-height: 1.5;
+}
+.btn-editar {
+    margin-top: 20px;
+    align-self: flex-start; /* Alinea el botón a la izquierda */
+}
+
+
+/* RESUMEN DE RESERVAS */
+.reservations-summary-card {
+    border-color: var(--info); /* Borde de color diferente */
+}
+
+.next-reservation-highlight {
+    background-color: rgba(var(--info), 0.08); /* Fondo suave con color de acento */
+    border: 1px solid rgba(var(--info), 0.2);
+    border-radius: var(--radius);
+    padding: 15px 20px;
+    margin-bottom: 25px;
+}
+
+.next-reservation-highlight h3 {
+    font-size: 1.2rem;
+    color: var(--info);
+    margin-top: 0;
     margin-bottom: 15px;
+    text-align: center;
+    border-bottom: 1px dashed var(--info);
+    padding-bottom: 8px;
+}
+
+.reserva-highlight-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 10px;
+    border-radius: var(--radius);
+}
+.reserva-highlight-item:hover {
+    background-color: rgba(var(--info), 0.15);
+}
+
+.reserva-highlight-icon {
+    font-size: 2.5rem; /* Icono grande */
     line-height: 1;
 }
 
-.accion-card h3 {
-    color: var(--secondary-dark);
-    font-size: 1.3rem;
-    margin-bottom: 10px;
-}
-
-.accion-card p {
-    color: var(--text-light);
-    font-size: 0.95rem;
-    line-height: 1.5;
-    margin: 0;
-    flex-grow: 1;
-}
-
-.btn-main {
-    background-color: var(--primary);
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: var(--radius);
-    font-weight: 600;
-    text-decoration: none;
-    transition: background-color 0.3s ease;
-}
-
-.btn-main:hover {
-    background-color: var(--primary-dark);
-}
-
-@media (max-width: 768px) {
-    .dashboard-title { font-size: 1.8rem; }
-    .dashboard-subtitle { font-size: 1rem; }
-    .dashboard-acciones h2 { font-size: 1.5rem; }
-    .accion-card h3 { font-size: 1.1rem; }
-}
-.perfil-usuario p {
-    margin: 10px 0;
-    color: var(--text);
+.reserva-highlight-details p {
+    margin: 3px 0;
     font-size: 1rem;
+    color: var(--text-dark);
 }
-.perfil-usuario p strong {
+.reserva-highlight-details strong {
     color: var(--primary-dark);
-    display: inline-block;
-    width: 160px;
-}
-/* --- PERFIL estilo red social --- */
-.perfil-container {
-    background-color: var(--white);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    margin-bottom: 40px;
 }
 
-.perfil-portada {
-    height: 160px;
-    background-color: var(--gray-light);
-    overflow: hidden;
-}
-
-.portada-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Asegura que la imagen de portada cubra el área sin estirarse */
-}
-
-.perfil-info-box {
-    text-align: center;
-    padding: 20px 25px;
-    position: relative;
-    top: -50px;
-}
-
-.perfil-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 100%;
-    border: 4px solid var(--white);
-    object-fit: cover;
-    background-color: var(--gray);
-    margin-bottom: 10px;
-}
-
-.perfil-nombre {
-    font-size: 1.6rem;
-    color: var(--primary-dark);
-    margin: 5px 0 10px 0;
-}
-
-.perfil-dato {
-    margin: 4px 0;
-    color: var(--text-light);
-    font-size: 0.95rem;
-}
-/* Inputs de perfil */
-.perfil-input {
-    display: block;
-    margin: 8px auto;
-    padding: 8px 12px;
-    font-size: 0.95rem;
-    border: 1px solid var(--gray);
-    border-radius: var(--radius);
-    max-width: 300px;
-    width: 100%;
-}
-
-/* Estilo editable de avatar al pasar el mouse */
-.perfil-avatar.editable {
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-.perfil-avatar.editable:hover {
-    transform: scale(1.05);
-}
-
-/* Lista de reservas */
-.lista-reservas {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
+.action-buttons-group {
+    display: flex;
+    flex-direction: column;
     gap: 15px;
+    margin-top: auto; /* Empuja los botones al final de la tarjeta */
 }
 
-.reserva-item {
-    background-color: var(--gray-lightest);
+.btn-full-width {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none; /* Para los Links */
     border-radius: var(--radius);
-    padding: 15px 20px;
-    box-shadow: var(--shadow);
-    border-left: 4px solid var(--secondary);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: none;
+    cursor: pointer;
 }
 
-.reserva-item p {
+.btn-primary { background-color: var(--primary); color: white; }
+.btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
+
+.btn-secondary { background-color: var(--secondary); color: white; }
+.btn-secondary:hover { background-color: var(--secondary-dark); transform: translateY(-2px); }
+
+/* SECCIÓN DE TODAS LAS RESERVAS */
+.all-reservations-card {
+    border-color: var(--success); /* Borde verde para esta sección */
+}
+
+.reservas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.reserva-item-card {
+    background-color: var(--white);
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-left: 4px solid var(--secondary); /* Borde sutil, se cambiará con el estado */
+}
+.reserva-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.reserva-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.reserva-card-title {
+    font-size: 1.3rem;
+    color: var(--primary-dark);
+    margin: 0;
+    font-weight: 600;
+}
+
+.reserva-card-detail {
     margin: 5px 0;
     font-size: 0.95rem;
     color: var(--text);
 }
-.reserva-item p strong {
+.reserva-card-detail strong {
     color: var(--text-dark);
 }
-/* --- Modal --- */
+
+.payment-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.payment-icon-small {
+    height: 18px;
+    vertical-align: middle;
+}
+
+
+/* BADGES DE ESTADO DE RESERVA */
+.reserva-status-badge {
+    padding: 5px 10px;
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-pendiente {
+    background-color: var(--warning);
+    color: #856404;
+}
+.status-confirmada {
+    background-color: var(--success);
+    color: white;
+}
+.status-cancelada, .status-rechazada {
+    background-color: var(--danger);
+    color: white;
+}
+.status-desconocido {
+    background-color: var(--gray);
+    color: var(--text-dark);
+}
+
+/* Modal de Detalle de Reserva (reutiliza estilos existentes) */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -260,7 +392,7 @@
     padding: 30px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-hover);
-    max-width: 400px;
+    max-width: 450px; /* Un poco más grande para el detalle */
     width: 90%;
     position: relative;
 }
@@ -268,21 +400,11 @@
 .modal-content h3 {
     margin-top: 0;
     color: var(--primary-dark);
-    font-size: 1.4rem;
+    font-size: 1.6rem; /* Un poco más grande */
     margin-bottom: 15px;
+    text-align: center;
 }
 
-.modal-content p {
-    font-size: 1rem;
-    margin: 10px 0;
-    color: var(--text);
-}
-
-.modal-actions {
-    text-align: right;
-    margin-top: 20px;
-}
-/* Estilos adicionales para el modal y botones */
 .modal-content hr {
     border: 0;
     height: 1px;
@@ -290,138 +412,81 @@
     margin: 15px 0;
 }
 
-.modal-content .text-danger {
-    color: var(--danger);
-    font-weight: bold;
-    margin-top: 10px;
-    text-align: center;
-}
-
-.modal-content .btn-mostrar-boleto,
-.modal-content .btn-pagar-mp {
-    width: 100%;
-    padding: 10px 15px;
-    border-radius: var(--radius);
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 15px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.modal-content .btn-mostrar-boleto {
-    background-color: var(--info); /* Un color azul para info */
-    color: var(--white);
-    border: none;
-}
-.modal-content .btn-mostrar-boleto:hover {
-    background-color: #008cba; /* Un azul más oscuro al pasar el mouse */
-    transform: translateY(-2px);
-}
-
-.modal-content .btn-pagar-mp {
-    background-color: var(--success); /* Un color verde para éxito */
-    color: var(--white);
-    border: none;
-}
-.modal-content .btn-pagar-mp:hover {
-    background-color: #4CAF50; /* Un verde más oscuro al pasar el mouse */
-    transform: translateY(-2px);
-}
-
-.modal-actions button {
-    margin-left: 10px; /* Espacio entre el botón Cerrar y los otros */
-}
-
-/* Nuevos estilos para los radio buttons de pago en ReservaForm */
-.reserva-formulario .payment-method-selection {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
-    padding: 15px;
-    border: 1px solid var(--gray-light);
-    border-radius: var(--radius);
-    background-color: var(--gray-lightest);
-}
-
-.reserva-formulario .payment-method-selection p {
-    font-weight: bold;
-    color: var(--text-dark);
-    margin-bottom: 5px;
-}
-
-.reserva-formulario .payment-method-selection label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 0.95rem;
+.modal-content p {
+    font-size: 1rem;
+    margin: 8px 0;
     color: var(--text);
+}
+.modal-content p strong {
+    color: var(--text-dark);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    margin-top: 25px;
     gap: 10px;
 }
 
-.reserva-formulario .payment-method-selection label input[type="radio"] {
-    margin-right: 5px;
-    transform: scale(1.2); /* Agrandar un poco el radio button */
-}
-
-.reserva-formulario .payment-method-selection .payment-icon {
-    height: 24px; /* Tamaño de los iconos de pago */
-    margin-left: 5px;
-    vertical-align: middle;
-}
-
-.reserva-submit-button {
-    background-color: var(--primary);
-    color: white;
-    padding: 12px 20px;
-    border: none;
+.btn { /* Estilos base para todos los botones que usan 'btn' */
+    padding: 10px 20px;
     border-radius: var(--radius);
-    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    width: 100%; /* Ocupa todo el ancho */
-    margin-top: 10px;
+    border: 1px solid transparent;
 }
 
-.reserva-submit-button:hover:not(:disabled) {
-    background-color: var(--primary-dark);
+/* Estilos específicos para botones del modal */
+.btn-info {
+    background-color: var(--info);
+    color: var(--white);
+}
+.btn-info:hover {
+    background-color: #008cba;
+    transform: translateY(-2px);
+}
+.btn-success {
+    background-color: var(--success);
+    color: var(--white);
+}
+.btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+.btn-outline-primary {
+    background-color: transparent;
+    color: var(--primary);
+    border-color: var(--primary);
+}
+.btn-outline-primary:hover {
+    background-color: var(--primary);
+    color: var(--white);
     transform: translateY(-2px);
 }
 
-.reserva-submit-button:disabled {
-    background-color: var(--gray);
-    cursor: not-allowed;
-}
-
-.reserva-mensaje {
-    padding: 10px 15px;
-    border-radius: var(--radius);
-    margin-top: 20px;
-    font-weight: bold;
-    text-align: center;
-}
-
-.reserva-mensaje.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.reserva-mensaje.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-.reserva-mensaje.info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
-}
-
-.reserva-mensaje.warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .dashboard-container {
+        margin: 20px auto;
+        padding: 20px 15px;
+    }
+    .welcome-title { font-size: 2rem; }
+    .welcome-subtitle { font-size: 1rem; }
+    .dashboard-section h2 { font-size: 1.5rem; }
+    .reservas-grid {
+        grid-template-columns: 1fr; /* Una columna en móviles */
+    }
+    .perfil-form-edit input, .perfil-form-edit textarea {
+        max-width: 100%; /* Asegura que los inputs no desborden */
+    }
+    .perfil-actions-edit {
+        flex-direction: column;
+    }
+    .btn-full-width, .perfil-actions-edit button {
+        width: 100%;
+    }
+    .modal-content {
+        padding: 20px;
+    }
 }

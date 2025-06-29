@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../../api/axiosConfig'; // Asegúrate de que esta ruta sea correcta
-import './DashboardUsuario.css'; // Asegúrate de que esta ruta sea correcta
+import api from '../../api/axiosConfig'; 
+import './DashboardUsuario.css'; 
 
 function DashboardUsuario() {
     const [nombreCompleto, setNombreCompleto] = useState('');
@@ -11,15 +11,12 @@ function DashboardUsuario() {
     const [edad, setEdad] = useState('');
     const [ubicacion, setUbicacion] = useState('');
     const [bio, setBio] = useState('');
-    const [profilePictureUrl, setProfilePictureUrl] = useState('');
-    const [profileImageFile, setProfileImageFile] = useState(null);
     const [misReservas, setMisReservas] = useState([]);
     const [isEditing, setIsEditing] = useState(false);
     const [modalReserva, setModalReserva] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Función para recargar las reservas, útil después de una acción de pago o confirmación
     const recargarReservas = async () => {
         setLoading(true);
         setError(null);
@@ -53,7 +50,6 @@ function DashboardUsuario() {
                     setEdad(userData.edad || '');
                     setUbicacion(userData.ubicacion || '');
                     setBio(userData.bio || '');
-                    setProfilePictureUrl(userData.profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
 
                 const reservasRes = await api.get('/reservas/usuario');
@@ -73,9 +69,6 @@ function DashboardUsuario() {
                     setEdad('');
                     setUbicacion('');
                     setBio('');
-                    // <-- ELIMINAR: Resetear también el teléfono en caso de error -->
-                    // setTelefono('');
-                    setProfilePictureUrl(`${process.env.PUBLIC_URL}/imagenes/avatar-default.png`);
                 }
             } finally {
                 if (isMounted) {
@@ -92,17 +85,6 @@ function DashboardUsuario() {
 
     }, []);
 
-    const handleAvatarChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setProfileImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfilePictureUrl(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
 
     const handleSaveChanges = async () => {
         setLoading(true);
@@ -124,20 +106,6 @@ function DashboardUsuario() {
             const updateProfileRes = await api.put('/users/me', profileData);
             console.log('Perfil actualizado:', updateProfileRes.data);
 
-            if (profileImageFile) {
-                const formData = new FormData();
-                formData.append('file', profileImageFile);
-
-                const uploadImageRes = await api.post('/users/me/profile-picture', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-                console.log('Imagen de perfil actualizada:', uploadImageRes.data);
-                setProfilePictureUrl(uploadImageRes.data.profilePictureUrl);
-                setProfileImageFile(null);
-            }
-
             setIsEditing(false);
             alert('¡Perfil actualizado exitosamente!');
         } catch (err) {
@@ -157,7 +125,8 @@ function DashboardUsuario() {
         if (!dateTimeString) return 'Fecha no disponible';
         try {
             const date = new Date(dateTimeString);
-            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+            // Formato para mostrar la fecha y hora sin segundos
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
             return date.toLocaleString('es-AR', options);
         } catch (e) {
             console.error("Error formateando fecha:", dateTimeString, e);
@@ -168,7 +137,6 @@ function DashboardUsuario() {
     const handleOpenModal = (reserva) => { setModalReserva(reserva); };
     const handleCloseModal = () => { setModalReserva(null); };
 
-    // Manejador para descargar el PDF
     const handleDescargarPdf = async (reservaId) => {
         try {
             const response = await api.get(`/reservas/${reservaId}/pdf-comprobante`, {
@@ -235,6 +203,20 @@ function DashboardUsuario() {
         }
     };
 
+    const getStatusClass = (estado) => {
+        estado = estado.toLowerCase();
+        switch (estado) {
+            case 'pagada': return 'status-pagada';
+            case 'confirmada':
+            case 'confirmada_efectivo': return 'status-confirmada';
+            case 'pendiente':
+            case 'pendiente_pago_mp': return 'status-pendiente';
+            case 'rechazada_pago_mp':
+            case 'cancelada': return 'status-cancelada';
+            default: return 'status-desconocido';
+        }
+    };
+
     const capitalizeFirstLetter = (string) => {
         if (!string) return '';
         return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -244,7 +226,7 @@ function DashboardUsuario() {
     if (loading) {
         return (
             <div className="dashboard-container">
-                <p>Cargando datos del perfil y reservas...</p>
+                <p className="loading-message">Cargando datos del perfil y reservas...</p>
             </div>
         );
     }
@@ -257,119 +239,147 @@ function DashboardUsuario() {
         );
     }
 
+    // Identificar la próxima reserva si existe
+    const proximasReservas = misReservas.filter(reserva => new Date(reserva.fechaHora) > new Date())
+                                      .sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
+    const proximaReserva = proximasReservas.length > 0 ? proximasReservas[0] : null;
+
+    // Reservas pasadas
+    const reservasPasadas = misReservas.filter(reserva => new Date(reserva.fechaHora) <= new Date())
+                                      .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora)); // Ordenar de más reciente a más antigua
+
+
     return (
         <div className="dashboard-container">
-            <div className="perfil-container">
-                <div className="perfil-portada">
-                    <img src={`${process.env.PUBLIC_URL}/imagenes/portada-default.jpg`} alt="Portada" className="portada-img" />
-                </div>
-                <div className="perfil-info-box">
-                    <label htmlFor="avatar-upload" className="avatar-label">
-                        <img src={profilePictureUrl || `${process.env.PUBLIC_URL}/imagenes/avatar-default.png`} alt="Avatar" className="perfil-avatar editable" title="Cambiar avatar" />
-                        {isEditing && (
-                            <span className="change-avatar-icon">
-                                <i className="fas fa-camera"></i>
-                            </span>
-                        )}
-                    </label>
-                    {isEditing && (
-                        <input
-                            type="file"
-                            id="avatar-upload"
-                            style={{ display: 'none' }}
-                            accept="image/*"
-                            onChange={handleAvatarChange}
-                        />
-                    )}
+            {/* Sección de Bienvenida y Perfil */}
+            <div className="welcome-card">
+                <h1 className="welcome-title">¡Hola, {nombreCompleto || 'Usuario'}!</h1>
+                <p className="welcome-subtitle">Bienvenido a tu panel personal. Aquí puedes gestionar tu perfil y tus reservas.</p>
+            </div>
 
+            <div className="dashboard-content-grid">
+                {/* Columna Izquierda: Detalles del Perfil */}
+                <div className="dashboard-section perfil-detail-card">
+                    <h2>Tus Datos Personales</h2>
                     {isEditing ? (
-                        <div className="perfil-edicion">
+                        <div className="perfil-form-edit">
+                            <label htmlFor="nombreCompleto">Nombre Completo:</label>
                             <input
+                                id="nombreCompleto"
                                 value={nombreCompleto}
                                 onChange={(e) => setNombreCompleto(e.target.value)}
                                 className="perfil-input"
                                 placeholder="Nombre Completo"
                                 required
                             />
+                            <label htmlFor="edad">Edad:</label>
                             <input
+                                id="edad"
                                 value={edad}
                                 onChange={(e) => setEdad(e.target.value)}
                                 className="perfil-input"
                                 placeholder="Edad"
                                 type="number"
+                                min="10" max="99"
                             />
+                            <label htmlFor="ubicacion">Ubicación:</label>
                             <input
+                                id="ubicacion"
                                 value={ubicacion}
                                 onChange={(e) => setUbicacion(e.target.value)}
                                 className="perfil-input"
                                 placeholder="Ubicación"
                             />
+                            <label htmlFor="bio">Biografía:</label>
                             <textarea
+                                id="bio"
                                 value={bio}
                                 onChange={(e) => setBio(e.target.value)}
                                 className="perfil-textarea"
                                 placeholder="Cuéntanos algo sobre ti..."
                                 rows="3"
                             ></textarea>
-                            <p className="perfil-dato-editable"><strong>Email:</strong> {email}</p>
+                            <p className="perfil-email-display"><strong>Email:</strong> {email}</p>
 
-                            <div className="perfil-acciones">
+                            <div className="perfil-actions-edit">
                                 <button onClick={handleSaveChanges} className="btn btn-primary btn-guardar">Guardar Cambios</button>
-                                <button onClick={() => {
-                                    setIsEditing(false);
-                                }} className="btn btn-secondary btn-cancelar">Cancelar</button>
+                                <button onClick={() => setIsEditing(false)} className="btn btn-secondary btn-cancelar">Cancelar</button>
                             </div>
                         </div>
                     ) : (
-                        <div className="perfil-vista">
-                            <h2 className="perfil-nombre">{nombreCompleto || '¡Completa tu Perfil!'}</h2>
-                            <p className="perfil-dato"><strong>Edad:</strong> {edad ? `${edad} años` : 'No especificado'}</p>
-                            <p className="perfil-dato"><strong>Ubicación:</strong> {ubicacion || 'No especificada'}</p>
-                            <p className="perfil-dato"><strong>Email:</strong> {email || 'N/A'}</p>
-                            <p><strong>Bio:</strong> {bio || 'No especificado'}</p>
+                        <div className="perfil-data-view">
+                            <p className="perfil-data-item"><strong>Nombre:</strong> {nombreCompleto || 'No especificado'}</p>
+                            <p className="perfil-data-item"><strong>Email:</strong> {email || 'N/A'}</p>
+                            <p className="perfil-data-item"><strong>Edad:</strong> {edad ? `${edad} años` : 'No especificado'}</p>
+                            <p className="perfil-data-item"><strong>Ubicación:</strong> {ubicacion || 'No especificada'}</p>
+                            <p className="perfil-data-item perfil-bio"><strong>Bio:</strong> {bio || 'No especificado'}</p>
                             <button onClick={() => setIsEditing(true)} className="btn btn-outline-primary btn-editar">Editar Perfil</button>
                         </div>
                     )}
                 </div>
+
+                {/* Columna Derecha: Resumen de Reservas */}
+                <div className="dashboard-section reservations-summary-card">
+                    <h2>Resumen de Reservas</h2>
+                    
+                    {proximaReserva ? (
+                        <div className="next-reservation-highlight">
+                            <h3>Tu Próxima Reserva:</h3>
+                            <div className="reserva-highlight-item" onClick={() => handleOpenModal(proximaReserva)}>
+                                <div className="reserva-highlight-icon">📅</div>
+                                <div className="reserva-highlight-details">
+                                    <p><strong>{proximaReserva.complejoNombre}</strong></p>
+                                    <p>{proximaReserva.tipoCanchaReservada} - {formatLocalDateTime(proximaReserva.fechaHora)}</p>
+                                    <span className={`reserva-status-badge ${getStatusClass(proximaReserva.estado)}`}>
+                                        {formatReservaEstado(proximaReserva.estado)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="dashboard-info">No tienes próximas reservas.</p>
+                    )}
+
+                    <div className="action-buttons-group">
+                        <Link to="/complejos" className="btn btn-primary btn-full-width">Hacer una Nueva Reserva</Link>
+                        <button onClick={() => document.getElementById('past-reservations-section').scrollIntoView({ behavior: 'smooth' })} className="btn btn-secondary btn-full-width">Ver todas las reservas</button>
+                    </div>
+                </div>
             </div>
 
-            <div className="dashboard-card mis-reservas-card">
-                <h2>Mis Reservas</h2>
+            {/* Sección de Todas las Reservas (próximas y pasadas) */}
+            <div id="past-reservations-section" className="dashboard-section all-reservations-card">
+                <h2>Todas tus Reservas ({misReservas.length})</h2>
                 {misReservas.length > 0 ? (
-                    <ul className="lista-reservas">
-                        {misReservas.map((reserva) => (
-                            <li key={reserva.id} className="reserva-item" onClick={() => handleOpenModal(reserva)} title="Ver detalle">
-                                <p><strong>Complejo:</strong> {reserva.complejoNombre || 'N/A'}</p>
-                                <p><strong>Tipo de Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
-                                <p><strong>Cancha Asignada:</strong> {reserva.nombreCanchaAsignada || 'N/A'}</p>
-                                <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
-                                <p><strong>Estado:</strong> {formatReservaEstado(reserva.estado)}</p>
-                                <p><strong>Pago:</strong> {reserva.pagada ? 'Pagada' : 'Pendiente'}</p>
+                    <div className="reservas-grid">
+                        {/* Mapear todas las reservas, ya ordenadas si quieres mostrar próximas primero */}
+                        {proximasReservas.concat(reservasPasadas).map((reserva) => (
+                            <div key={reserva.id} className="reserva-item-card" onClick={() => handleOpenModal(reserva)}>
+                                <div className="reserva-card-header">
+                                    <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
+                                    <span className={`reserva-status-badge ${getStatusClass(reserva.estado)}`}>
+                                        {formatReservaEstado(reserva.estado)}
+                                    </span>
+                                </div>
+                                <p className="reserva-card-detail"><strong>Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
+                                <p className="reserva-card-detail"><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
+                                <p className="reserva-card-detail"><strong>Precio:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
                                 {reserva.metodoPago && (
-                                    <p>
-                                        <strong>Método de Pago:</strong> {capitalizeFirstLetter(reserva.metodoPago)}
-                                        {reserva.metodoPago.toLowerCase() === 'mercadopago' && <img src={`${process.env.PUBLIC_URL}/imagenes/mercadopago-small.png`} alt="Mercado Pago" className="payment-icon-small" />}
+                                    <p className="reserva-card-detail payment-info">
+                                        <strong>Pago:</strong> {reserva.pagada ? `Pagada (${capitalizeFirstLetter(reserva.metodoPago)})` : 'Pendiente'}
+                                        {reserva.metodoPago.toLowerCase() === 'mercadopago' && <img src={`${process.env.PUBLIC_URL}/imagenes/mercadopago-small.png`} alt="MP" className="payment-icon-small" />}
                                         {reserva.metodoPago.toLowerCase() === 'efectivo' && <img src={`${process.env.PUBLIC_URL}/imagenes/efectivo-small.png`} alt="Efectivo" className="payment-icon-small" />}
                                     </p>
                                 )}
-                                {reserva.jugadores && reserva.jugadores.length > 0 && (
-                                    <p><strong>Jugadores:</strong> {reserva.jugadores.join(', ')}</p>
-                                )}
-                                {reserva.equipo1 && reserva.equipo1.length > 0 && (
-                                    <p><strong>Equipo 1:</strong> {Array.from(reserva.equipo1).join(', ')}</p>
-                                )}
-                                {reserva.equipo2 && reserva.equipo2.length > 0 && (
-                                    <p><strong>Equipo 2:</strong> {Array.from(reserva.equipo2).join(', ')}</p>
-                                )}
-                            </li>
+                            </div>
                         ))}
-                    </ul>
+                    </div>
                 ) : (
-                    <p className="dashboard-info">Aún no tenés reservas.</p>
+                    <p className="dashboard-info">Aún no tenés reservas. ¡Es hora de hacer la primera!</p>
                 )}
-                <Link to="/complejos" className="btn btn-primary btn-nueva-reserva">Hacer una Nueva Reserva</Link>
             </div>
 
+            {/* Modal de Detalle de Reserva (sin cambios importantes en la lógica) */}
             {modalReserva && (
                 <div className="modal-overlay" onClick={handleCloseModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
