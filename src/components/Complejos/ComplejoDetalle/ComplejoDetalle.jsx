@@ -1,7 +1,7 @@
 // frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../../../api/axiosConfig'; // RUTA AJUSTADA para axiosConfig
+import api from '../../../api/axiosConfig';
 import './ComplejoDetalle.css'; 
 
 const placeholderImage = '/imagenes/default-complejo.png';
