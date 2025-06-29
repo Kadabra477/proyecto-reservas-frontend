@@ -19,10 +19,12 @@
 
 .complejo-card-img {
     width: 100%;
-    height: 220px; /* Altura fija para imágenes un poco más grandes */
+    /* ¡CAMBIO CLAVE AQUÍ! Usamos aspect-ratio en lugar de height fija */
+    aspect-ratio: 3 / 2; /* Establece la relación de aspecto a 3:2 (ancho:alto) */
     object-fit: cover;
     object-position: center;
     border-bottom: 1px solid var(--gray-light, #eee);
+    /* Ya no necesitamos height aquí, ni en media queries, porque aspect-ratio la manejará */
 }
 
 .complejo-card-content {
@@ -199,7 +201,6 @@ h4 {
         padding: 15px;
     }
     .complejo-card-img {
-        height: 180px;
     }
     .complejo-card-buttons-container {
         flex-direction: column; /* Apila los botones en pantallas muy pequeñas */
