@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig'; 
-import ComplejoCard from './ComplejoCard/ComplejoCard'; // RUTA AJUSTADA
+import ComplejoCard from '../ComplejoCard/ComplejoCard';
 import './Complejos.css'; 
 
 // Nuevo componente para el esqueleto de carga
