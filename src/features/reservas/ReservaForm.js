@@ -95,48 +95,46 @@ function ReservaForm() {
                     setMensaje({ type: 'warning', text: 'El complejo seleccionado no tiene tipos de cancha configurados.' });
                 }
                 
-                // --- INICIO DE LA LÓGICA CORREGIDA PARA GENERAR HORAS ---
                 if (fetchedComplejo.horarioApertura && fetchedComplejo.horarioCierre) {
                     const [aperturaHoras, aperturaMinutos] = fetchedComplejo.horarioApertura.split(':').map(Number);
                     const [cierreHoras, cierreMinutos] = fetchedComplejo.horarioCierre.split(':').map(Number);
                     
                     const generatedHours = [];
-                    // Convertir todo a minutos para manejar mejor los rangos y el cruce de medianoche
                     const aperturaTotalMinutos = aperturaHoras * 60 + aperturaMinutos;
                     let cierreTotalMinutos = cierreHoras * 60 + cierreMinutos;
 
-                    // Si el horario de cierre es menor que el de apertura, significa que cierra al día siguiente
                     if (cierreTotalMinutos <= aperturaTotalMinutos) {
-                        cierreTotalMinutos += (24 * 60); // Sumar 24 horas en minutos
+                        cierreTotalMinutos += (24 * 60); 
                     }
 
                     let currentTimeInMinutes = aperturaTotalMinutos;
+
+                    const now = new Date(); // Hora local del cliente
+                    const currentClientHour = now.getHours();
+                    const currentClientMinute = now.getMinutes();
+                    const isToday = formulario.fecha === getMinDate(); // Comparar con la fecha mínima (hoy)
 
                     while (currentTimeInMinutes < cierreTotalMinutos) {
                         const hour = Math.floor(currentTimeInMinutes / 60) % 24; 
                         const minute = currentTimeInMinutes % 60;
                         const formattedHour = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                         
-                        // Solo añadir la hora si es igual o posterior a la hora actual (si es hoy)
-                        const now = new Date();
-                        const isToday = new Date(formulario.fecha).toDateString() === now.toDateString();
-                        const currentRealHour = now.getHours();
-                        const currentRealMinute = now.getMinutes();
-                        
-                        if (!isToday || hour > currentRealHour || (hour === currentRealHour && minute >= currentRealMinute)) {
+                        // FILTRADO DE HORAS PASADAS EN EL FRONTEND (AJUSTADO)
+                        if (!isToday || // Si no es hoy, se incluyen todas las horas
+                            hour > currentClientHour || // Si la hora es mayor a la actual, se incluye
+                            (hour === currentClientHour && minute >= currentClientMinute)) { // Si es la misma hora, solo si los minutos son iguales o mayores
                              generatedHours.push(formattedHour);
                         }
                        
-                        currentTimeInMinutes += 60; // Incrementa en 60 minutos (1 hora). Ajusta si tus slots son diferentes.
+                        currentTimeInMinutes += 60; 
                     }
 
                     setHoursOptions(generatedHours);
-                    console.log("Horas generadas:", generatedHours); 
+                    console.log("Horas generadas (frontend):", generatedHours); 
                 } else {
                     setHoursOptions([]);
                     setMensaje({ type: 'error', text: 'Horarios de apertura y cierre no configurados para el complejo.' });
                 }
-                // --- FIN DE LA LÓGICA CORREGIDA PARA GENERAR HORAS ---
 
             } catch (err) {
                 console.error("Error al cargar el complejo preseleccionado:", err);
@@ -146,7 +144,7 @@ function ReservaForm() {
             }
         };
         loadPreselectedComplejo();
-    }, [location.state, formulario.fecha]); // Se añadió formulario.fecha como dependencia
+    }, [location.state, formulario.fecha]); 
 
     const checkAvailability = useCallback(async () => {
         const { fecha, hora } = formulario;
@@ -156,20 +154,16 @@ function ReservaForm() {
             return;
         }
 
-        const selectedDate = new Date(fecha);
-        const now = new Date();
-        const currentDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
-        const selectedDateTime = new Date(`${fecha}T${hora}:00`);
-
-        // Esta validación de tiempo pasado ya la hace la generación de hoursOptions,
-        // pero la mantenemos aquí como un respaldo extra para el envío de datos al backend.
-        if (selectedDate.toDateString() === now.toDateString()) { 
-            if (selectedDateTime < currentDateTime) { 
-                setAvailableCanchasCount(0);
-                setAvailabilityMessage('No puedes reservar una hora que ya ha pasado hoy.');
-                setMensaje({ type: 'error', text: 'Hora en el pasado no disponible.' });
-                return;
-            }
+        // Esta validación del lado del cliente (frontend) es un respaldo visual,
+        // la validación estricta de "pasado" ocurre en el backend con la zona horaria correcta.
+        const selectedDateTimeFront = new Date(`${fecha}T${hora}:00`);
+        const nowFront = new Date();
+        const currentClientDateTime = new Date(nowFront.getFullYear(), nowFront.getMonth(), nowFront.getDate(), nowFront.getHours(), nowFront.getMinutes());
+        if (selectedDateTimeFront < currentClientDateTime) {
+            setAvailableCanchasCount(0);
+            setAvailabilityMessage('No puedes reservar una hora que ya ha pasado hoy (según tu reloj).');
+            setMensaje({ type: 'error', text: 'Hora en el pasado no disponible.' });
+            return;
         }
 
         setIsLoadingAvailability(true);
@@ -218,11 +212,11 @@ function ReservaForm() {
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
         }
-        if (name === 'fecha') { // Si la fecha cambia, regenerar las opciones de hora
+        if (name === 'fecha') { 
+            // Si la fecha cambia, también limpiar la hora seleccionada
+            setFormulario(prevForm => ({ ...prevForm, hora: '' })); 
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
-            // Disparar la regeneración de hoursOptions cuando la fecha cambie
-            // La dependencia de formulario.fecha en el useEffect de loadPreselectedComplejo lo hará.
         }
         if (name === 'hora') {
             setAvailableCanchasCount(null);
@@ -246,14 +240,15 @@ function ReservaForm() {
         if (!/^\d+$/.test(telefono.trim())) { setMensaje({ type: 'error', text: 'El teléfono debe contener solo números.' }); return; }
         if (!/^\d{7,8}$/.test(dni)) { setMensaje({ type: 'error', text: 'El DNI debe contener 7 u 8 dígitos numéricos.' }); return; }
 
-        const selectedDateTime = new Date(`${fecha}T${hora}:00`);
-        const now = new Date();
-        const currentHourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()); // Usar minutos para comparación más precisa
-
-        if (selectedDateTime < currentHourStart) {
+        // Validacion de tiempo pasado final (redundante con backend, pero buena práctica)
+        const selectedDateTimeFinal = new Date(`${fecha}T${hora}:00`);
+        const nowFinal = new Date();
+        const currentClientDateTimeFinal = new Date(nowFinal.getFullYear(), nowFinal.getMonth(), nowFinal.getDate(), nowFinal.getHours(), nowFinal.getMinutes());
+        if (selectedDateTimeFinal < currentClientDateTimeFinal) {
             setMensaje({ type: 'error', text: 'No se puede reservar en el pasado. Selecciona una fecha y hora futura.' });
             return;
         }
+
 
         if (availableCanchasCount === null || availableCanchasCount <= 0) {
             setMensaje({ type: 'error', text: 'No hay canchas disponibles para este horario. Por favor, elige otro o espera la verificación.' });
