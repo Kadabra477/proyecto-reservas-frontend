@@ -702,18 +702,6 @@ function AdminPanel() {
                             <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Para crear nuevos complejos, contacta a un Administrador.</p>
                         )
                     )}
-
-                    {/* El botón "Agregar Nuevo Complejo" visible solo para ADMIN y si no hay un complejo en edición */}
-                    {isAdmin && !editingComplejo?.id && (
-                         <button className="admin-btn-add-new-complejo" onClick={() => {
-                             // Esto ahora activará el formulario en modo "crear"
-                             setEditingComplejo(estadoInicialComplejoAdmin); // Usa el estado inicial para "indicar" que se va a crear
-                             setNuevoComplejoAdmin(estadoInicialComplejoAdmin); // Asegura que el formulario esté limpio
-                         }}>
-                             + Agregar Nuevo Complejo
-                         </button>
-                    )}
-
                     <div className="admin-list-container">
                         <h3>{isAdmin ? 'Todos los Complejos' : 'Mis Complejos'}</h3>
                         {isLoadingData ? <p>Cargando complejos...</p> : (
