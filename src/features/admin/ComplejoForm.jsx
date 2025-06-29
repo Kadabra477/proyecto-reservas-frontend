@@ -1,8 +1,8 @@
 // frontend/src/features/admin/ComplejoForm.jsx
-import React, { useState, useEffect } from 'react'; // Importar useState y useEffect
+import React, { useState, useEffect } from 'react'; // Asegúrate de importar useState y useEffect
 import './ComplejoForm.css';
 
-const placeholderImage = '/imagenes/default-complejo.png';
+const placeholderImage = '/imagenes/default-complejo.png'; // Imagen por defecto si no hay foto
 
 const ComplejoForm = ({
     nuevoComplejoAdmin,
@@ -10,76 +10,81 @@ const ComplejoForm = ({
     handleCanchaChange,
     handleAddCancha,
     handleRemoveCancha,
-    handleSaveComplejo, // Esta función se encargará de guardar
+    handleSaveComplejo, // Esta función se ejecutará en AdminPanel
     editingComplejo,
     cancelEditingComplejo,
     isAdmin,
-    mensaje,
     // ¡NUEVAS PROPS! Para manejar el archivo de la foto
-    selectedPhotoFile, 
-    setSelectedPhotoFile,
-    setMensaje // Pasamos setMensaje desde AdminPanel para mostrar errores específicos de la foto
+    selectedPhotoFile, // El archivo de foto seleccionado (desde AdminPanel)
+    setSelectedPhotoFile, // Función para actualizar el archivo de foto (desde AdminPanel)
+    setMensaje // Función para mostrar mensajes (errores de validación de foto)
 }) => {
-    // Estado interno para la URL de previsualización (solo para el cliente)
+    // Estado interno para la URL de previsualización de la foto
+    // Puede ser la URL existente del complejo o una URL creada localmente para un archivo nuevo
     const [previewPhotoUrl, setPreviewPhotoUrl] = useState(null);
 
-    // useEffect para manejar la previsualización al cargar un complejo para edición
+    // useEffect para inicializar la previsualización y el archivo seleccionado
+    // Esto se ejecuta cuando `editingComplejo` cambia (ej. al seleccionar un complejo para editar)
     useEffect(() => {
         if (editingComplejo && editingComplejo.fotoUrl) {
             setPreviewPhotoUrl(editingComplejo.fotoUrl);
-            // Si el complejo existente tiene una foto, NO seleccionamos un archivo nuevo aquí.
-            // La lógica es que si el usuario no selecciona un archivo nuevo, se mantiene la foto existente.
-            setSelectedPhotoFile(null); 
+            setSelectedPhotoFile(null); // No hay un archivo nuevo seleccionado al cargar un complejo existente
         } else {
-            setPreviewPhotoUrl(null); // No hay preview si es nuevo o no tiene foto
-            setSelectedPhotoFile(null); // Asegurarse de que no hay archivo seleccionado al iniciar
+            setPreviewPhotoUrl(null); // No hay previsualización si es un complejo nuevo
+            setSelectedPhotoFile(null); // Asegurarse de que no haya archivo seleccionado al iniciar/resetear
         }
     }, [editingComplejo, setSelectedPhotoFile]);
 
-    // Manejar la selección del archivo de foto
+    // Manejar la selección del archivo de foto por el usuario
     const handlePhotoFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validar tamaño máximo (ej. 5MB)
-            const MAX_FILE_SIZE_MB = 5;
-            if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-                setMensaje({ text: `La imagen no puede exceder los ${MAX_FILE_SIZE_MB}MB.`, type: 'error' });
-                e.target.value = null; // Limpiar el input file
-                setPreviewPhotoUrl(null);
-                setSelectedPhotoFile(null);
-                return;
-            }
-            // Validar tipo de archivo
-            if (!file.type.startsWith('image/')) {
-                setMensaje({ text: 'Por favor, selecciona un archivo de imagen válido (JPG, PNG, GIF, etc.).', type: 'error' });
-                e.target.value = null;
+            // --- VALIDACIONES DE IMAGEN EN EL FRONTEND ---
+            const MAX_FILE_SIZE_MB = 5; // Límite de 5MB
+            const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']; // Tipos permitidos
+
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                setMensaje({ text: 'Tipo de archivo no permitido. Sube JPG, PNG, GIF o WebP.', type: 'error' });
+                e.target.value = null; // Limpiar el input para que pueda volver a seleccionar
                 setPreviewPhotoUrl(null);
                 setSelectedPhotoFile(null);
                 return;
             }
 
-            setSelectedPhotoFile(file);
-            setPreviewPhotoUrl(URL.createObjectURL(file)); // Crear URL para previsualización
-            setMensaje({ text: '', type: '' }); // Limpiar mensaje de error si había
+            if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+                setMensaje({ text: `La imagen no puede exceder los ${MAX_FILE_SIZE_MB}MB.`, type: 'error' });
+                e.target.value = null; // Limpiar el input
+                setPreviewPhotoUrl(null);
+                setSelectedPhotoFile(null);
+                return;
+            }
+            // --- FIN VALIDACIONES ---
+
+            setSelectedPhotoFile(file); // Guarda el objeto File en el estado del padre
+            setPreviewPhotoUrl(URL.createObjectURL(file)); // Crea una URL temporal para la previsualización
+            setMensaje({ text: '', type: '' }); // Limpiar cualquier mensaje de error previo
         } else {
             setSelectedPhotoFile(null);
-            setPreviewPhotoUrl(editingComplejo?.fotoUrl || null); // Volver a la foto existente si se deselecciona
+            // Si el usuario deselecciona el archivo, volver a mostrar la foto existente si la había
+            setPreviewPhotoUrl(editingComplejo?.fotoUrl || null); 
+            setMensaje({ text: '', type: '' });
         }
     };
 
-    // Manejar la eliminación de la foto (tanto la nueva seleccionada como la existente)
+    // Manejar la eliminación de la foto
     const handleRemovePhoto = () => {
         setMensaje({ text: '', type: '' });
-        setSelectedPhotoFile(null); // Quitar archivo seleccionado
-        setPreviewPhotoUrl(null); // Quitar previsualización
+        setSelectedPhotoFile(null); // Borra cualquier archivo nuevo seleccionado
+        setPreviewPhotoUrl(null); // Borra la previsualización
 
-        // Si estamos editando, también vaciamos la fotoUrl del objeto principal
-        // Esto indica al `handleSaveComplejo` que la fotoUrl debe eliminarse en el backend
+        // Importante: Si estamos editando y había una foto existente,
+        // vaciamos `fotoUrl` en `nuevoComplejoAdmin` para indicarle al backend que debe eliminarla.
         if (editingComplejo) {
             handleComplejoFormChange({ target: { name: 'fotoUrl', value: '' } });
         }
+        // También limpia el input de tipo 'file' para permitir seleccionar el mismo archivo de nuevo si se desea
+        document.getElementById('photoFile').value = '';
     };
-
 
     return (
         <form className="admin-complejo-form" onSubmit={(e) => handleSaveComplejo(e, selectedPhotoFile)}>
@@ -110,21 +115,22 @@ const ComplejoForm = ({
                 <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
             </div>
             
-            {/* ¡CAMBIO CLAVE AQUÍ: Input de tipo 'file' para la foto! */}
+            {/* ¡CAMBIO CLAVE: Input de tipo 'file' para la foto! */}
             <div className="admin-form-group">
                 <label htmlFor="photoFile">Foto Principal del Complejo:</label>
                 <input 
                     type="file" 
                     id="photoFile" 
-                    name="photoFile" // Nota: el nombre del input debe coincidir con el @RequestPart del backend ('photo')
-                    accept="image/*" // Solo acepta archivos de imagen
+                    name="photo" // El 'name' debe coincidir con el @RequestPart del backend (ej. "photo")
+                    accept="image/*" // Solo acepta archivos de imagen (cualquier formato de imagen)
                     onChange={handlePhotoFileChange} 
                 />
-                <p className="small-info">Tamaño máximo de archivo: 5MB. Formatos recomendados: JPG, PNG.</p>
+                <p className="small-info">Tamaño máximo de archivo: 5MB. Formatos permitidos: JPG, PNG, GIF, WebP.</p>
 
-                {(previewPhotoUrl || editingComplejo?.fotoUrl) && (
+                {/* Mostrar la previsualización de la foto */}
+                {(previewPhotoUrl || editingComplejo?.fotoUrl) ? (
                     <div className="image-preview-container">
-                        <p>Previsualización:</p>
+                        <p>Previsualización de la foto actual:</p>
                         <img 
                             src={previewPhotoUrl || editingComplejo.fotoUrl} 
                             alt="Previsualización de Complejo" 
@@ -134,6 +140,12 @@ const ComplejoForm = ({
                         <button type="button" className="admin-btn-delete remove-photo-btn" onClick={handleRemovePhoto}>
                             Eliminar Foto
                         </button>
+                    </div>
+                ) : (
+                    // Mensaje si no hay foto seleccionada ni existente
+                    <div className="image-preview-container">
+                        <p className="no-photo-message">No hay foto seleccionada.</p>
+                        {editingComplejo?.id && <p className="small-info">Para mantener la foto existente, no selecciones una nueva ni la elimines.</p>}
                     </div>
                 )}
             </div>

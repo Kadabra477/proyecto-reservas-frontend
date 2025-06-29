@@ -84,6 +84,8 @@ function AdminPanel() {
         return canchasArray;
     }, []);
 
+    // Este useEffect ahora solo configura el estado nuevoComplejoAdmin
+    // El estado selectedPhotoFile es gestionado por ComplejoForm y sus handlers
     useEffect(() => {
         if (editingComplejo && editingComplejo.id) {
             setNuevoComplejoAdmin({
@@ -92,18 +94,19 @@ function AdminPanel() {
                 descripcion: editingComplejo.descripcion || '',
                 ubicacion: editingComplejo.ubicacion || '',
                 telefono: editingComplejo.telefono || '',
-                fotoUrl: editingComplejo.fotoUrl || '', // Mantener la fotoUrl existente
+                fotoUrl: editingComplejo.fotoUrl || '', // Mantener la fotoUrl existente para visualización
                 horarioApertura: editingComplejo.horarioApertura || '10:00',
                 horarioCierre: editingComplejo.horarioCierre || '23:00',
                 emailPropietario: editingComplejo.propietario?.username || '', 
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
-            setSelectedPhotoFile(null); // Asegurarse de que no hay archivo nuevo seleccionado al iniciar edición
+            // NOTA: selectedPhotoFile se resetea a null en ComplejoForm a través de su useEffect
         } else {
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            setSelectedPhotoFile(null); // Limpiar el archivo seleccionado al crear
+            // NOTA: selectedPhotoFile se resetea a null en ComplejoForm a través de su useEffect
         }
     }, [editingComplejo, mapComplejoToFormCanchas]);
+
 
     useEffect(() => {
         let timer;
@@ -221,31 +224,19 @@ function AdminPanel() {
         setNuevoComplejoAdmin(prev => ({ ...prev, canchas: newCanchas }));
     };
 
-    // ¡NUEVA FUNCIÓN! handleSaveComplejo ahora acepta el archivo de la foto
+    // ¡handleSaveComplejo ahora recibe el archivo de la foto desde el formulario!
     const handleSaveComplejo = async (e, photoFile) => {
         e.preventDefault();
         setMensaje({ text: '', type: '' });
 
         const { id, nombre, emailPropietario, canchas, descripcion, ubicacion, telefono, horarioApertura, horarioCierre } = nuevoComplejoAdmin;
-        let { fotoUrl } = nuevoComplejoAdmin; // Obtener fotoUrl para manejar la eliminación explícita
+        let { fotoUrl } = nuevoComplejoAdmin; // Obtenemos fotoUrl del estado para determinar si se eliminó
 
-        if (!nombre?.trim()) {
-            setMensaje({ text: 'El nombre del complejo es obligatorio.', type: 'error' });
-            return;
-        }
-        if (!ubicacion?.trim()) {
-            setMensaje({ text: 'La ubicación del complejo es obligatoria.', type: 'error' });
-            return;
-        }
-        if (!horarioApertura || !horarioCierre) {
-            setMensaje({ text: 'Los horarios de apertura y cierre son obligatorios.', type: 'error' });
-            return;
-        }
-
-        if (!id && isAdmin && !emailPropietario?.trim()) { 
-            setMensaje({ text: 'El email del propietario es obligatorio para nuevos complejos (Administrador).', type: 'error' });
-            return;
-        }
+        // Validaciones básicas que aún se hacen aquí
+        if (!nombre?.trim()) { setMensaje({ text: 'El nombre del complejo es obligatorio.', type: 'error' }); return; }
+        if (!ubicacion?.trim()) { setMensaje({ text: 'La ubicación del complejo es obligatoria.', type: 'error' }); return; }
+        if (!horarioApertura || !horarioCierre) { setMensaje({ text: 'Los horarios de apertura y cierre son obligatorios.', type: 'error' }); return; }
+        if (!id && isAdmin && !emailPropietario?.trim()) { setMensaje({ text: 'El email del propietario es obligatorio para nuevos complejos (Administrador).', type: 'error' }); return; }
 
         const formattedCanchas = canchas.filter(c => c.tipoCancha.trim() !== '');
         if (formattedCanchas.length === 0 || formattedCanchas.some(c => !c.tipoCancha?.trim() || isNaN(parseFloat(c.precioHora)) || parseFloat(c.precioHora) <= 0 || isNaN(parseInt(c.cantidad, 10)) || parseInt(c.cantidad, 10) <= 0 || !c.superficie?.trim())) {
@@ -267,28 +258,28 @@ function AdminPanel() {
             canchaTecho[cancha.tipoCancha] = cancha.techo;
         });
 
-        // ¡CREAR FormData para enviar archivos y JSON!
+        // ¡PREPARAR FormData para enviar archivos y JSON!
         const formData = new FormData();
 
-        // Si hay un archivo de foto seleccionado, lo añadimos
+        // 1. Añadir el archivo de foto si fue seleccionado
         if (photoFile) {
-            formData.append('photo', photoFile); // 'photo' debe coincidir con el @RequestPart del backend
+            formData.append('photo', photoFile); // 'photo' debe coincidir con el @RequestPart("photo") del backend
         } else if (editingComplejo?.id && fotoUrl === '') {
-            // Si no se seleccionó un nuevo archivo Y estamos editando Y la fotoUrl se vació (significa que la quieren quitar)
-            // No añadimos 'photo', pero indicamos al backend que limpie la foto.
-            // Para el backend, si 'photo' no está y fotoUrl en el JSON es null/vacío, eliminará la existente.
-            formData.append('photo', new Blob(), ''); // Enviar un archivo vacío para indicar que se quiere eliminar
+            // 2. Si estamos editando Y no hay archivo nuevo Y la fotoUrl del estado se vació (indicando que se quiere eliminar la existente)
+            // Se envía un Blob vacío con el nombre 'photo' para indicar al backend que se debe eliminar la foto.
+            // Si el backend espera 'photo' como required=false, un Blob vacío es la forma de indicar "quitar foto".
+            // Nota: En el backend se manejará si fotoUrl es null/vacío y photoFile es nulo/vacío para mantener la foto existente.
+            formData.append('photo', new Blob(), 'empty-photo'); // 'empty-photo' es el nombre del archivo vacío
         }
 
 
-        // Construir el objeto JSON para el complejo (sin fotoUrl aquí)
+        // 3. Construir el objeto JSON con los datos del complejo (sin fotoUrl aquí)
         const complejoData = {
             id,
             nombre,
             descripcion: descripcion || null,
             ubicacion,
             telefono: telefono || null,
-            // fotoUrl YA NO SE ENVÍA AQUÍ, se maneja como archivo separado
             horarioApertura,
             horarioCierre,
             canchaCounts,
@@ -296,52 +287,55 @@ function AdminPanel() {
             canchaSurfaces,
             canchaIluminacion,
             canchaTecho,
-            // Si estamos editando y la fotoUrl del estado es '' (eliminada por el usuario), la enviamos para que el backend la elimine
+            // Si estamos editando y la fotoUrl del estado es '' (porque se hizo clic en "Eliminar Foto"),
+            // enviamos fotoUrl: '' para que el backend sepa que debe eliminarla.
             ...(editingComplejo?.id && fotoUrl === '' && { fotoUrl: '' }) 
         };
 
-        // Si es un nuevo complejo y es ADMIN, añadir el emailPropietario
+        // Si es un nuevo complejo y es ADMIN, añadir el emailPropietario al objeto JSON
         if (!id && isAdmin && emailPropietario) {
             complejoData.propietarioUsername = emailPropietario;
         }
 
-        // Añadir el JSON del complejo como un Blob a FormData
-        formData.append('complejo', new Blob([JSON.stringify(complejoData)], { type: 'application/json' }));
+        // 4. Añadir el JSON del complejo como un Blob a FormData
+        formData.append('complejo', new Blob([JSON.stringify(complejoData)], { type: 'application/json' })); // 'complejo' debe coincidir con el @RequestPart("complejo") del backend
 
         try {
             let response;
             if (editingComplejo?.id) { 
                 response = await api.put(`/complejos/${id}`, formData, {
                     headers: {
-                        'Content-Type': 'multipart/form-data', // Axios lo suele inferir, pero mejor explicitar
+                        // Axios suele inferir 'Content-Type': 'multipart/form-data' al enviar FormData,
+                        // pero explicitarlo no está de más. NO DEBES PONER EL BOUNDARY.
+                        // 'Content-Type': 'multipart/form-data' 
                     },
                 });
                 setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
             } else { 
                 response = await api.post('/complejos', formData, {
                     headers: {
-                        'Content-Type': 'multipart/form-data',
+                        // 'Content-Type': 'multipart/form-data'
                     },
                 });
                 setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
             }
             
-            // Si la operación fue exitosa, limpiar y recargar
+            // Si la operación fue exitosa, limpiar estados y recargar datos
             setEditingComplejo(null);
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            setSelectedPhotoFile(null); // Limpiar archivo seleccionado
-            fetchComplejos();
+            setSelectedPhotoFile(null); // Limpiar el archivo seleccionado del input
+            fetchComplejos(); // Recargar la lista de complejos
 
         } catch (err) {
             console.error('Error al guardar complejo (Frontend):', err);
-            const errorMsg = err.response?.data?.message || 'Ocurrió un error al guardar el complejo.';
+            const errorMsg = err.response?.data?.message || err.message || 'Ocurrió un error al guardar el complejo.';
             setMensaje({ text: errorMsg, type: 'error' });
         }
     };
     
     const startEditingComplejo = (complejoParaEditar) => {
         setEditingComplejo(complejoParaEditar);
-        // El useEffect se encarga de setNuevoComplejoAdmin y setSelectedPhotoFile
+        // La inicialización de nuevoComplejoAdmin y selectedPhotoFile se maneja en useEffect
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -349,8 +343,8 @@ function AdminPanel() {
         setEditingComplejo(null);
         setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
         setSelectedPhotoFile(null); // Asegurarse de limpiar el archivo seleccionado
+        document.getElementById('photoFile').value = ''; // Limpiar el input file visualmente
     };
-
 
     const handleConfirmReserva = (id) => {
         setModalConfig({
@@ -546,6 +540,7 @@ function AdminPanel() {
                     fetchComplejos();
                     setEditingComplejo(null);
                     setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
+                    setSelectedPhotoFile(null); // Asegurarse de limpiar el archivo seleccionado
                 } catch (err) {
                     console.error('Error al eliminar el complejo:', err);
                     const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el complejo.';
@@ -624,14 +619,14 @@ function AdminPanel() {
                             handleCanchaChange={handleCanchaChange}
                             handleAddCancha={handleAddCancha}
                             handleRemoveCancha={handleRemoveCancha}
-                            handleSaveComplejo={handleSaveComplejo} // Pasamos la función de guardar
+                            handleSaveComplejo={handleSaveComplejo} 
                             editingComplejo={editingComplejo}
                             cancelEditingComplejo={cancelEditingComplejo}
                             isAdmin={isAdmin}
-                            mensaje={mensaje}
-                            selectedPhotoFile={selectedPhotoFile} // Pasamos el archivo seleccionado
-                            setSelectedPhotoFile={setSelectedPhotoFile} // Pasamos el setter para el archivo
-                            setMensaje={setMensaje} // Pasamos setMensaje al formulario
+                            // Pasamos el estado de la foto y su setter
+                            selectedPhotoFile={selectedPhotoFile} 
+                            setSelectedPhotoFile={setSelectedPhotoFile} 
+                            setMensaje={setMensaje} // Pasamos setMensaje para errores específicos de foto
                         />
                     )}
                     
