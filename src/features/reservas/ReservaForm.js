@@ -101,9 +101,6 @@ function ReservaForm() {
                     const [cierreHoras, cierreMinutos] = fetchedComplejo.horarioCierre.split(':').map(Number);
                     
                     const generatedHours = [];
-                    let currentHour = aperturaHoras;
-                    let currentMinute = aperturaMinutos;
-
                     // Convertir todo a minutos para manejar mejor los rangos y el cruce de medianoche
                     const aperturaTotalMinutos = aperturaHoras * 60 + aperturaMinutos;
                     let cierreTotalMinutos = cierreHoras * 60 + cierreMinutos;
@@ -116,10 +113,20 @@ function ReservaForm() {
                     let currentTimeInMinutes = aperturaTotalMinutos;
 
                     while (currentTimeInMinutes < cierreTotalMinutos) {
-                        const hour = Math.floor(currentTimeInMinutes / 60) % 24; // %24 para manejar el cruce de medianoche
+                        const hour = Math.floor(currentTimeInMinutes / 60) % 24; 
                         const minute = currentTimeInMinutes % 60;
-                        generatedHours.push(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
+                        const formattedHour = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                         
+                        // Solo añadir la hora si es igual o posterior a la hora actual (si es hoy)
+                        const now = new Date();
+                        const isToday = new Date(formulario.fecha).toDateString() === now.toDateString();
+                        const currentRealHour = now.getHours();
+                        const currentRealMinute = now.getMinutes();
+                        
+                        if (!isToday || hour > currentRealHour || (hour === currentRealHour && minute >= currentRealMinute)) {
+                             generatedHours.push(formattedHour);
+                        }
+                       
                         currentTimeInMinutes += 60; // Incrementa en 60 minutos (1 hora). Ajusta si tus slots son diferentes.
                     }
 
@@ -139,8 +146,7 @@ function ReservaForm() {
             }
         };
         loadPreselectedComplejo();
-    }, [location.state]);
-
+    }, [location.state, formulario.fecha]); // Se añadió formulario.fecha como dependencia
 
     const checkAvailability = useCallback(async () => {
         const { fecha, hora } = formulario;
@@ -155,6 +161,8 @@ function ReservaForm() {
         const currentDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
         const selectedDateTime = new Date(`${fecha}T${hora}:00`);
 
+        // Esta validación de tiempo pasado ya la hace la generación de hoursOptions,
+        // pero la mantenemos aquí como un respaldo extra para el envío de datos al backend.
         if (selectedDate.toDateString() === now.toDateString()) { 
             if (selectedDateTime < currentDateTime) { 
                 setAvailableCanchasCount(0);
@@ -210,7 +218,13 @@ function ReservaForm() {
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
         }
-        if (name === 'fecha' || name === 'hora') {
+        if (name === 'fecha') { // Si la fecha cambia, regenerar las opciones de hora
+            setAvailableCanchasCount(null);
+            setAvailabilityMessage('');
+            // Disparar la regeneración de hoursOptions cuando la fecha cambie
+            // La dependencia de formulario.fecha en el useEffect de loadPreselectedComplejo lo hará.
+        }
+        if (name === 'hora') {
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
         }
@@ -234,7 +248,7 @@ function ReservaForm() {
 
         const selectedDateTime = new Date(`${fecha}T${hora}:00`);
         const now = new Date();
-        const currentHourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0);
+        const currentHourStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes()); // Usar minutos para comparación más precisa
 
         if (selectedDateTime < currentHourStart) {
             setMensaje({ type: 'error', text: 'No se puede reservar en el pasado. Selecciona una fecha y hora futura.' });
@@ -420,10 +434,7 @@ function ReservaForm() {
                     >
                         <option value="">Selecciona una hora</option>
                         {hoursOptions.map(hour => (
-                            <option key={hour} value={hour} disabled={
-                                (new Date(formulario.fecha).toDateString() === new Date().toDateString() && 
-                                 parseInt(hour.substring(0, 2), 10) < new Date().getHours())
-                            }>
+                            <option key={hour} value={hour}>
                                 {hour.substring(0, 5)}
                             </option>
                         ))}
