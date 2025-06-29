@@ -1,5 +1,38 @@
 /* frontend/src/features/home/Home.css */
 
+/* Variables globales (asegúrate de que estas son consistentes o movidas a un archivo global como App.css) */
+:root {
+    --primary: #007bff; /* Azul primario */
+    --primary-light: #66b2ff; /* Azul más claro para acentos */
+    --primary-dark: #004d99; /* Azul más oscuro */
+    --secondary: #6c757d; /* Gris secundario */
+    --secondary-light: #e2e6ea; /* Gris claro */
+    --secondary-dark: #343a40; /* Gris muy oscuro */
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #dc3545;
+
+    --white: #ffffff;
+    --background: #f8f9fa; /* Color de fondo general */
+    --background-light: #f0f3f6; /* Ligeramente más oscuro para secciones */
+    --text: #343a40; /* Color de texto principal */
+    --text-light: #6c757d; /* Color de texto secundario */
+    --text-dark: #212529; /* Color de texto muy oscuro */
+    --gray: #ced4da; /* Borde y separadores */
+    --gray-light: #e9ecef; /* Más claro para fondos sutiles */
+    --max-width: 1200px; /* Ancho máximo del contenido */
+    --radius: 8px; /* Radio de borde pequeño */
+    --radius-lg: 12px; /* Radio de borde grande */
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra estándar */
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15); /* Sombra al pasar el ratón */
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra más sutil */
+    --transition: all 0.3s ease-in-out; /* Transición general */
+    --transition-fast: all 0.2s ease-out; /* Transición más rápida */
+    --transition-medium: all 0.3s ease; /* Transición media */
+}
+
+/* Base HTML y Fuentes */
 html, body, #root {
     height: 100%;
     margin: 0;
@@ -21,7 +54,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Montserrat', sans-serif;
-    color: var(--text);
+    color: var(--text-dark); /* Color más oscuro para los títulos */
     margin-top: 0;
     margin-bottom: 0.5em;
     font-weight: 700;
@@ -33,7 +66,7 @@ p {
 
 a {
     text-decoration: none;
-    color: var(--primary); /* Esto es para enlaces generales, Navbar.css lo sobrescribe para el logo */
+    color: var(--primary);
     transition: color var(--transition-fast);
 }
 
@@ -50,7 +83,7 @@ a:hover {
 /* Hero Section */
 .hero {
     position: relative;
-    height: 600px;
+    height: 650px; /* Altura un poco mayor */
     background-image: url('../../assets/fondo-cancha-hero.jpg'); 
     background-size: cover;
     background-position: center;
@@ -60,10 +93,11 @@ a:hover {
     color: white;
     text-align: center;
     overflow: hidden;
+    box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.2); /* Sombra interna sutil */
 }
 
 .hero-overlay {
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.75); /* Opacidad un poco mayor */
     position: absolute;
     top: 0;
     left: 0;
@@ -79,12 +113,12 @@ a:hover {
 }
 
 .hero-content h1 {
-    font-size: 4.5em;
-    margin-bottom: 15px;
+    font-size: 5em; /* Título más grande */
+    margin-bottom: 20px;
     color: white;
     font-weight: 800;
-    letter-spacing: -1px;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    letter-spacing: -2px; /* Espaciado de letras más ajustado */
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5); /* Sombra de texto más definida */
 }
 
 .hero-content h1 span {
@@ -92,26 +126,30 @@ a:hover {
 }
 
 .hero-content p {
-    font-size: 1.5em;
-    margin-bottom: 30px;
+    font-size: 1.6em;
+    margin-bottom: 40px;
     font-weight: 300;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .hero-buttons {
     display: flex;
-    gap: 20px;
+    gap: 25px; /* Mayor espacio entre botones */
     justify-content: center;
 }
 
-.btn-main, .btn-secondary, .btn-secondary-outline {
+/* Estilos de botones generales para Home */
+.btn-main, .btn-secondary, .btn-secondary-home {
     display: inline-block;
-    padding: 15px 30px;
-    border-radius: 8px;
+    padding: 15px 35px; /* Más padding para que sean más grandes */
+    border-radius: var(--radius); /* Usa la variable de radio de borde */
     font-weight: 600;
     text-transform: uppercase;
     transition: var(--transition-medium);
-    font-size: 1.1em;
+    font-size: 1.15em; /* Tamaño de fuente ligeramente mayor */
     white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra de texto sutil */
+    box-shadow: var(--shadow); /* Sombra por defecto */
 }
 
 .btn-main {
@@ -123,7 +161,8 @@ a:hover {
 .btn-main:hover {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
-    transform: translateY(-2px);
+    transform: translateY(-3px); /* Efecto de "levantar" */
+    box-shadow: var(--shadow-hover); /* Sombra más pronunciada en hover */
 }
 
 .btn-secondary {
@@ -133,67 +172,111 @@ a:hover {
 }
 
 .btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: white;
-    transform: translateY(-2px);
+    background-color: rgba(255, 255, 255, 0.1); /* Fondo más sutil en hover */
+    border-color: var(--primary-light); /* Borde de color primario en hover */
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
 }
+
+/* Nuevo estilo para el botón "Crear cuenta" en platform-preview */
+.btn-secondary-home {
+    background-color: var(--secondary); /* Fondo gris para este botón */
+    color: white;
+    border: 2px solid var(--secondary);
+    transition: var(--transition-medium);
+    box-shadow: var(--shadow);
+}
+.btn-secondary-home:hover {
+    background-color: var(--secondary-dark);
+    border-color: var(--secondary-dark);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
 
 /* How It Works Section */
 .how {
-    padding: 80px 0;
+    padding: 100px 0; /* Más padding vertical */
     background-color: var(--white);
     text-align: center;
+    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.05); /* Sombra interna superior */
 }
 
 .how h2 {
-    font-size: 2.8em;
+    font-size: 3.2em; /* Título más grande */
     color: var(--primary-dark);
-    margin-bottom: 60px;
+    margin-bottom: 70px;
+    position: relative;
+}
+.how h2::after { /* Línea decorativa debajo del título */
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background-color: var(--primary);
+    margin: 15px auto 0;
+    border-radius: 2px;
 }
 
 .how .steps {
     display: flex;
-    justify-content: space-around;
-    gap: 30px;
+    justify-content: center; /* Centrar los pasos */
+    gap: 40px; /* Mayor espacio entre pasos */
     flex-wrap: wrap;
 }
 
 .how .step {
-    flex-basis: 30%;
+    flex-basis: 28%; /* Ajuste para que quepan mejor en 3 columnas */
     min-width: 280px;
-    padding: 30px;
+    padding: 35px; /* Más padding interno */
     background-color: var(--background-light);
-    border-radius: 12px;
-    box-shadow: var(--shadow-light);
-    transition: transform 0.3s ease;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow); /* Sombra estándar */
+    transition: var(--transition-medium);
     display: flex;
     flex-direction: column;
     align-items: center;
+    border-top: 5px solid transparent; /* Borde superior dinámico */
 }
 
 .how .step:hover {
-    transform: translateY(-10px);
+    transform: translateY(-12px); /* Efecto de "levantar" más pronunciado */
+    box-shadow: var(--shadow-hover);
+    border-top-color: var(--primary); /* Color en hover */
 }
 
 .step-icon {
-    width: 80px;
-    height: 80px;
+    width: 90px; /* Icono más grande */
+    height: 90px;
     background-color: var(--primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 25px;
-    font-size: 2.5em;
+    margin-bottom: 30px;
+    font-size: 3em; /* Tamaño del número */
     color: white;
     font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4); /* Sombra más definida */
+    position: relative;
 }
+.step-icon::before { /* Anillo exterior decorativo */
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border: 2px dashed rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
 .step-icon .step-number {
     border: 3px solid white;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: 60px; /* Número más grande */
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -201,71 +284,73 @@ a:hover {
 
 
 .step-content h4 {
-    font-size: 1.6em;
-    color: var(--primary);
-    margin-bottom: 10px;
+    font-size: 1.8em; /* Título de paso más grande */
+    color: var(--primary-dark);
+    margin-bottom: 12px;
 }
 
 .step-content p {
-    font-size: 1em;
+    font-size: 1.05em;
     color: var(--text-light);
 }
 
 /* Platform Preview Section */
 .platform-preview {
-    padding: 80px 0;
+    padding: 100px 0;
     background-color: var(--background);
+    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.03); /* Sombra interna inferior */
 }
 
 .platform-preview .section-container {
     display: flex;
     align-items: center;
-    gap: 50px;
+    gap: 70px; /* Mayor espacio entre columnas */
     flex-wrap: wrap;
 }
 
 .platform-content {
     flex: 1;
-    min-width: 300px;
+    min-width: 350px; /* Asegura un ancho mínimo razonable */
 }
 
 .platform-content h2 {
-    font-size: 2.5em;
+    font-size: 2.8em;
     color: var(--primary-dark);
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .platform-content p {
-    font-size: 1.1em;
+    font-size: 1.15em;
     color: var(--text-light);
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
 .feature-list {
     list-style: none;
     padding: 0;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
 .feature-list li {
     font-size: 1.1em;
     color: var(--text);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     position: relative;
-    padding-left: 25px;
+    padding-left: 30px; /* Más espacio para el checkmark */
 }
 
 .feature-list li::before {
     content: '✓';
     position: absolute;
     left: 0;
-    color: var(--success, #28a745);
+    color: var(--success);
     font-weight: bold;
+    font-size: 1.3em; /* Checkmark más grande */
 }
 
 .platform-image-container {
     flex: 1;
-    min-width: 300px;
+    min-width: 350px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -274,154 +359,168 @@ a:hover {
 .platform-image-actual {
     max-width: 100%;
     height: auto;
-    border-radius: 12px;
-    box-shadow: var(--shadow-medium);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-hover); /* Sombra más definida */
+    border: 5px solid var(--white); /* Borde blanco para resaltar */
 }
 
 
 /* Benefits Section */
 .benefits {
-    padding: 80px 0;
+    padding: 100px 0;
     background-color: var(--white);
     text-align: center;
+    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.05); /* Sombra interna inferior */
 }
 
 .benefits h2 {
-    font-size: 2.8em;
+    font-size: 3.2em;
     color: var(--primary-dark);
-    margin-bottom: 60px;
+    margin-bottom: 70px;
+    position: relative;
+}
+.benefits h2::after { /* Línea decorativa debajo del título */
+    content: '';
+    display: block;
+    width: 80px;
+    height: 4px;
+    background-color: var(--primary);
+    margin: 15px auto 0;
+    border-radius: 2px;
 }
 
 .benefit-list {
     display: flex;
-    justify-content: space-around;
-    gap: 30px;
+    justify-content: center;
+    gap: 40px;
     flex-wrap: wrap;
 }
 
 .benefit {
     flex-basis: 22%;
-    min-width: 220px;
-    padding: 30px;
+    min-width: 250px; /* Un poco más grande */
+    padding: 35px;
     background-color: var(--background-light);
-    border-radius: 12px;
-    box-shadow: var(--shadow-light);
-    transition: transform 0.3s ease;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    transition: var(--transition-medium);
     display: flex;
     flex-direction: column;
     align-items: center;
+    border-bottom: 5px solid transparent; /* Borde inferior dinámico */
 }
 
 .benefit:hover {
-    transform: translateY(-10px);
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-hover);
+    border-bottom-color: var(--primary);
 }
 
 .benefit-icon {
-    font-size: 3em;
-    margin-bottom: 20px;
+    font-size: 3.5em; /* Icono más grande */
+    margin-bottom: 25px;
     color: var(--primary);
 }
 
 .benefit-content h4 {
-    font-size: 1.6em;
-    color: var(--primary);
-    margin-bottom: 10px;
+    font-size: 1.8em;
+    color: var(--primary-dark);
+    margin-bottom: 12px;
 }
 
 .benefit-content p {
-    font-size: 1em;
+    font-size: 1.05em;
     color: var(--text-light);
 }
 
 /* Call to Action Section */
 .cta {
     position: relative;
-    padding: 100px 0;
-    background-color: var(--primary-dark);
+    padding: 120px 0; /* Mayor padding vertical */
+    background-image: url('../../assets/fondo-cta.jpg'); /* Una imagen de fondo para el CTA */
+    background-size: cover;
+    background-position: center;
     color: white;
     text-align: center;
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.2); /* Sombra superior */
 }
 
 .cta-overlay {
+    background-color: rgba(0, 0, 0, 0.8); /* Fondo más oscuro para mayor contraste */
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
     z-index: 1;
 }
 
 .cta-content {
     position: relative;
     z-index: 2;
-    max-width: 800px;
+    max-width: 900px; /* Ancho máximo mayor */
     margin: 0 auto;
     padding: 20px;
 }
 
 .cta-content h2 {
-    font-size: 3em;
-    margin-bottom: 15px;
+    font-size: 3.5em; /* Título más grande */
+    margin-bottom: 20px;
     color: white;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .cta-content p {
-    font-size: 1.3em;
-    margin-bottom: 40px;
+    font-size: 1.4em;
+    margin-bottom: 50px;
 }
 
 /* WhatsApp Button */
 .whatsapp-button {
     position: fixed;
-    bottom: 25px;
-    right: 25px;
-    background-color: #25d366; /* ESTE ES EL COLOR VERDE DE LA BURBUJA EXTERIOR */
-    color: white; /* Esto hará que el icono de Font Awesome sea blanco */
+    bottom: 30px; /* Un poco más arriba */
+    right: 30px; /* Un poco más a la derecha */
+    background-color: #25d366; 
+    color: white; 
     border-radius: 50%;
-    width: 55px;
-    height: 55px;
+    width: 60px; /* Botón más grande */
+    height: 60px;
     display: flex;
     align-items: center; 
     justify-content: center; 
-    font-size: 2em; /* Controla el tamaño del icono de Font Awesome */
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.4); 
-    transition: transform 0.3s ease, background-color 0.3s ease;
+    font-size: 2.2em; /* Icono más grande */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
+    transition: var(--transition-medium);
     z-index: 1000;
     text-decoration: none;
     line-height: 1; 
     border: none; 
     outline: none;
     padding: 0; 
-    overflow: hidden; /* Esto asegura que si el icono es un poco grande, no se salga del círculo */
+    overflow: hidden; 
 }
 
-/* ESTA SECCIÓN REEMPLAZA LOS ESTILOS DE SVG */
 .whatsapp-button .fab,
-.whatsapp-button .fas { /* Estilos para el icono de Font Awesome */
-    display: block; /* Para un mejor control del centrado */
+.whatsapp-button .fas { 
+    display: block; 
     margin: 0;
     padding: 0;
-    line-height: 1; /* Ayuda a la alineación vertical */
-    /* El font-size del padre (.whatsapp-button) ya controla el tamaño del icono.
-       Si necesitas un ajuste más fino, podrías añadir:
-       font-size: 1.2em; o un valor fijo como 28px;
-    */
-    color: inherit; /* Asegura que herede el color blanco del .whatsapp-button */
+    line-height: 1; 
+    color: inherit; 
 }
-
 
 .whatsapp-button:hover {
     background-color: #128c7e; 
-    transform: scale(1.1);
+    transform: scale(1.15); /* Efecto de crecimiento más pronunciado */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 
 /* Footer mejorado */
 .footer {
-    background-color: var(--gray-dark);
+    background-color: var(--secondary-dark); /* Color más oscuro para el footer */
     color: white;
-    padding: 40px 0 20px;
+    padding: 50px 0 30px; /* Más padding vertical */
     text-align: center;
     margin-top: auto;
     width: 100%;
@@ -432,8 +531,8 @@ a:hover {
     justify-content: space-around;
     align-items: center;
     flex-wrap: wrap;
-    gap: 30px;
-    margin-bottom: 30px;
+    gap: 40px; /* Mayor espacio entre elementos */
+    margin-bottom: 40px;
 }
 
 .footer-logo-link {
@@ -446,7 +545,7 @@ a:hover {
 }
 
 .footer-logo-link h3 {
-    font-size: 1.8em;
+    font-size: 2em; /* Logo más grande */
     color: white;
     margin: 0;
 }
@@ -461,7 +560,7 @@ a:hover {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 25px;
+    gap: 30px; /* Mayor espacio entre enlaces */
     list-style: none;
     padding: 0;
     margin: 0;
@@ -469,9 +568,9 @@ a:hover {
 
 .footer-link {
     color: white;
-    font-size: 1.05em;
+    font-size: 1.1em; /* Enlaces más grandes */
     text-decoration: none;
-    transition: color 0.3s ease, text-shadow 0.3s ease;
+    transition: var(--transition-medium);
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
     text-transform: uppercase;
@@ -480,13 +579,14 @@ a:hover {
 
 .footer-link:hover {
     color: var(--primary-light);
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); /* Sombra más pronunciada en hover */
+    transform: scale(1.05); /* Efecto de escala sutil */
 }
 
 
 .footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15); /* Borde superior más visible */
+    padding-top: 25px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -495,8 +595,8 @@ a:hover {
 }
 
 .footer-bottom .copyright {
-    font-size: 0.9em;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95em;
+    color: rgba(255, 255, 255, 0.8);
     margin: 0;
     flex: none;
     text-align: center;
@@ -505,118 +605,46 @@ a:hover {
 
 /* Media Queries */
 @media (max-width: 1024px) {
-    .hero-content h1 {
-        font-size: 3.8em;
-    }
-    .hero-content p {
-        font-size: 1.3em;
-    }
-    .btn-main, .btn-secondary {
-        padding: 12px 25px;
-        font-size: 1em;
-    }
-    .how .step, .benefit {
-        flex-basis: 45%;
-    }
-    .platform-preview .section-container {
-        flex-direction: column;
-        text-align: center;
-    }
-    .platform-content, .platform-image-container {
-        width: 100%;
-    }
-    .platform-content {
-        order: 2;
-    }
-    .platform-image-container {
-        order: 1;
-    }
-    .platform-content .btn-main {
-        margin: 0 auto;
-        display: block;
-        width: fit-content;
-    }
-    .footer-content {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    .footer-logo-link {
-        margin-bottom: 20px;
-    }
-    .footer-links-group {
-        text-align: center;
-        gap: 15px;
-    }
-    .footer-bottom {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-    .footer-bottom .copyright {
-        text-align: center;
-    }
+    .hero-content h1 { font-size: 4em; }
+    .hero-content p { font-size: 1.4em; }
+    .btn-main, .btn-secondary, .btn-secondary-home { padding: 12px 28px; font-size: 1.05em; }
+    .how .step, .benefit { flex-basis: 45%; }
+    .platform-preview .section-container { flex-direction: column; text-align: center; }
+    .platform-content, .platform-image-container { width: 100%; }
+    .platform-content { order: 2; }
+    .platform-image-container { order: 1; }
+    .platform-content .btn-secondary-home { margin: 0 auto; display: block; width: fit-content; } /* Centrar el botón */
+    .cta-content h2 { font-size: 3em; }
+    .cta-content p { font-size: 1.2em; }
+    .footer-content { flex-direction: column; align-items: center; text-align: center; }
+    .footer-logo-link { margin-bottom: 20px; }
+    .footer-links-group { text-align: center; gap: 20px; }
+    .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
+    .footer-bottom .copyright { text-align: center; }
 }
 
 @media (max-width: 768px) {
-    .hero {
-        height: 500px;
-    }
-    .hero-content h1 {
-        font-size: 3em;
-    }
-    .hero-content p {
-        font-size: 1.1em;
-    }
-    .how, .platform-preview, .benefits, .cta {
-        padding: 60px 0;
-    }
-    .how h2, .benefits h2, .cta-content h2 {
-        font-size: 2.2em;
-    }
-    .how .step, .benefit {
-        flex-basis: 100%;
-    }
-    .whatsapp-button {
-        width: 50px;
-        height: 50px;
-        font-size: 1.8em;
-        bottom: 20px;
-        right: 20px;
-    }
-    .footer-link {
-        font-size: 0.95em; 
-        padding: 5px 10px; 
-    }
+    .hero { height: 550px; }
+    .hero-content h1 { font-size: 3.5em; letter-spacing: -1px; }
+    .hero-content p { font-size: 1.2em; }
+    .how, .platform-preview, .benefits, .cta { padding: 80px 0; }
+    .how h2, .benefits h2, .cta-content h2 { font-size: 2.5em; }
+    .step-icon { width: 70px; height: 70px; font-size: 2.5em; margin-bottom: 20px; }
+    .benefit-icon { font-size: 3em; margin-bottom: 15px; }
+    .how .step, .benefit { flex-basis: 100%; padding: 30px; } /* Una columna en móviles */
+    .whatsapp-button { width: 55px; height: 55px; font-size: 2em; bottom: 25px; right: 25px; }
+    .footer-link { font-size: 1em; padding: 5px 10px; }
 }
 
 @media (max-width: 480px) {
-    .hero-content h1 {
-        font-size: 2.5em;
-    }
-    .hero-content p {
-        font-size: 1em;
-    }
-    .hero-buttons {
-        flex-direction: column;
-        gap: 15px;
-    }
-    .btn-main, .btn-secondary {
-        width: 100%;
-    }
-    .how h2, .platform-content h2, .benefits h2, .cta-content h2 {
-        font-size: 1.8em;
-    }
-    .step-content h4, .benefit-content h4 {
-        font-size: 1.4em;
-    }
-    .footer-links-group {
-        width: 100%;
-        flex-direction: column; 
-        gap: 10px;
-    }
-    .footer-link {
-        width: fit-content;
-        margin: 0 auto; 
-    }
+    .hero-content h1 { font-size: 2.8em; }
+    .hero-content p { font-size: 1em; }
+    .hero-buttons { flex-direction: column; gap: 15px; }
+    .btn-main, .btn-secondary, .btn-secondary-home { width: 100%; padding: 12px 20px; }
+    .how h2, .platform-content h2, .benefits h2, .cta-content h2 { font-size: 2em; }
+    .step-content h4, .benefit-content h4 { font-size: 1.5em; }
+    .footer-links-group { flex-direction: column; gap: 10px; }
+    .footer-link { width: fit-content; margin: 0 auto; }
+    .platform-content h2, .platform-content p, .feature-list { text-align: center; }
+    .feature-list li { text-align: left; margin: 0 auto 10px; }
 }

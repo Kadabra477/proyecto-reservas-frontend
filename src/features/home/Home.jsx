@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
-import ReservasSimplesImg from '../../assets/reservas-simples.jpg';
+import ReservasSimplesImg from '../../assets/reservas-simples.jpg'; // Asegúrate de que la ruta a tu imagen sea correcta
 
-function Home({ estaAutenticado }) { // Recibe estaAutenticado como prop
+function Home({ estaAutenticado }) {
     const [nombreUsuario, setNombreUsuario] = useState('');
 
     useEffect(() => {
@@ -20,11 +20,9 @@ function Home({ estaAutenticado }) { // Recibe estaAutenticado como prop
             <section className="hero">
                 <div className="hero-overlay" />
                 <div className="hero-content">
-                    {/* CORRECCIÓN: Quitada la doble tilde */}
                     <h1>¿DÓNDE <span>JUEGO?</span></h1>
                     <p>La mejor forma de <strong>reservar</strong> tu cancha</p>
                     <div className="hero-buttons">
-                        {/* Redirige a /complejos si está autenticado, sino a /login */}
                         <Link to={estaAutenticado ? "/complejos" : "/login"} className="btn-main">Reservar ahora</Link>
                         <a href="#como-funciona" className="btn-secondary">Conocer más</a>
                     </div>
@@ -71,7 +69,7 @@ function Home({ estaAutenticado }) { // Recibe estaAutenticado como prop
                             <li> Confirma y paga de forma segura.</li>
                         </ul>
                         {!estaAutenticado && (
-                            <Link to="/register" className="btn-main">Crear cuenta</Link>
+                            <Link to="/register" className="btn-secondary-home">Crear cuenta</Link> 
                         )}
                     </div>
                     <div className="platform-image-container">
@@ -121,42 +119,28 @@ function Home({ estaAutenticado }) { // Recibe estaAutenticado como prop
                 <div className="cta-content">
                     <h2>¿Listo para comenzar?</h2>
                     <p>Únete a miles de usuarios que ya disfrutan de nuestro servicio</p>
-                    {/* Redirige a /complejos si está autenticado, sino a /login */}
                     <Link to={estaAutenticado ? "/complejos" : "/login"} className="btn-main">Reservar ahora</Link>
                 </div>
             </section>
 
-            {/* ELIMINADO: Sección de FAQ en el Home */}
-            {/* <section id="faq-preview" className="faq-preview">
-                <div className="section-container">
-                    <h2>Preguntas Frecuentes</h2>
-                    <p>Encuentra respuestas a tus dudas más comunes sobre el uso de nuestra plataforma.</p>
-                    <Link to="/faq" className="btn-secondary-outline">Ver todas las preguntas</Link>
-                </div>
-            </section> */}
-
             <a href="https://wa.me/5492634200763" className="whatsapp-button" target="_blank" rel="noopener noreferrer" title="Contactar por WhatsApp">
-                {/* USA ESTO EN LUGAR DEL SVG INLINE */}
                 <i className="fab fa-whatsapp"></i> 
-                {/* Si solo quieres el teléfono, puedes probar con: */}
-                {/* <i className="fas fa-phone-alt"></i>  o <i className="fas fa-phone"></i> */}
             </a>
 
             <footer className="footer">
                 <div className="footer-content">
-                    <Link to="/" className="footer-logo-link"> {/* Enlace con estilo de logo */}
+                    <Link to="/" className="footer-logo-link"> 
                         <h3>¿DÓNDE <span className="footer-logo-span">JUEGO?</span></h3>
                     </Link>
                     <div className="footer-links-group">
                         <Link to="/" className="footer-link">Inicio</Link>
                         <a href="#como-funciona" className="footer-link">Cómo funciona</a>
                         <a href="#beneficios" className="footer-link">Por qué elegirnos</a>
-                        <Link to="/faq" className="footer-link">Preguntas Frecuentes</Link> {/* Enlace a la página de FAQ */}
+                        <Link to="/faq" className="footer-link">Preguntas Frecuentes</Link>
                     </div>
                 </div>
                 <div className="footer-bottom">
                     <p className="copyright">© {new Date().getFullYear()} Sistema de Reservas de Canchas | Hecho en San Martín, Mendoza ⚽</p>
-                    {/* ELIMINADO: footer-nav con Términos y Privacidad */}
                 </div>
             </footer>
         </main>

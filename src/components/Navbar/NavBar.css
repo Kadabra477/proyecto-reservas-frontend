@@ -1,102 +1,197 @@
 /* src/components/Navbar/NavBar.css */
 
+/* Variables globales (asegúrate de que estas son consistentes o movidas a un archivo global como App.css) */
+:root {
+    --primary: #007bff; /* Azul primario */
+    --primary-light: #66b2ff; /* Azul más claro para acentos */
+    --primary-dark: #004d99; /* Azul más oscuro */
+    --secondary: #6c757d; /* Gris secundario */
+    --secondary-light: #e2e6ea; /* Gris claro */
+    --secondary-dark: #343a40; /* Gris muy oscuro */
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #dc3545;
+
+    --white: #ffffff;
+    --background: #f8f9fa; /* Color de fondo general */
+    --background-light: #f0f3f6; /* Ligeramente más oscuro para secciones */
+    --text: #343a40; /* Color de texto principal */
+    --text-light: #6c757d; /* Color de texto secundario */
+    --text-dark: #212529; /* Color de texto muy oscuro */
+    --gray: #ced4da; /* Borde y separadores */
+    --gray-light: #e9ecef; /* Más claro para fondos sutiles */
+    --max-width: 1200px; /* Ancho máximo del contenido */
+    --radius: 8px; /* Radio de borde pequeño */
+    --radius-lg: 12px; /* Radio de borde grande */
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra estándar */
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15); /* Sombra al pasar el ratón */
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra más sutil */
+    --transition: all 0.3s ease-in-out; /* Transición general */
+    --transition-fast: all 0.2s ease-out; /* Transición más rápida */
+    --transition-medium: all 0.3s ease; /* Transición media */
+}
+
 .navbar {
-   background-color: var(--white);
-   border-bottom: 1px solid var(--gray-light);
-   padding: 15px 30px;
-   box-shadow: var(--shadow);
-   position: sticky;
-   top: 0;
-   z-index: 1000;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--gray-light);
+    padding: 15px 30px;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
  
 .navbar-container {
-   max-width: var(--max-width);
-   margin: 0 auto;
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
  
 .navbar-logo {
-   font-size: 1.8rem; 
-   font-weight: 800; 
-   color: var(--text); /* CAMBIO CLAVE: El color base del logo "Donde" será el de texto oscuro */
-   text-decoration: none;
-   letter-spacing: 0.5px; 
-   /* Asegurarse de que no haya otros estilos de color que sobrescriban este */
+    font-size: 1.8rem; 
+    font-weight: 800; 
+    color: var(--text-dark); /* Color base del logo "Donde" será el de texto oscuro */
+    text-decoration: none;
+    letter-spacing: 0.5px; 
 }
 
-/* Estilo específico para el span dentro del logo (JUEGO?) */
 .navbar-logo-span {
-   color: var(--primary); /* Esto usa el verde de tus variables globales */
+    color: var(--primary); /* El color del span "JUEGO?" */
 }
  
 .navbar-menu {
-   display: flex;
-   align-items: center;
-   gap: 25px;
-   flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Espacio ajustado entre elementos del menú */
+    flex-wrap: wrap;
 }
  
 .navbar-link {
-   color: var(--text);
-   text-decoration: none;
-   font-weight: 500;
-   font-size: 1rem;
-   transition: var(--transition);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 8px 12px; /* Añadido padding para que el hover se vea mejor */
+    border-radius: var(--radius);
+    transition: var(--transition-fast);
 }
  
 .navbar-link:hover,
 .navbar-link.active {
-   color: var(--primary-dark);
+    color: var(--primary-dark);
+    background-color: var(--gray-light); /* Fondo sutil al pasar el ratón o si está activo */
 }
  
-/* Usuario + Botón logout */
+/* Estilos para los botones de la Navbar (Login, Register, Logout) */
+.btn-navbar-primary,
+.btn-navbar-secondary,
+.btn-navbar-logout {
+    display: inline-block;
+    padding: 10px 18px; /* Padding ajustado para botones de navbar */
+    border-radius: var(--radius);
+    font-weight: 600;
+    text-decoration: none; /* Asegura que los NavLink se vean como botones */
+    transition: var(--transition-medium);
+    font-size: 0.95rem; /* Tamaño de fuente para botones de navbar */
+    white-space: nowrap;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent; /* Borde por defecto para consistencia */
+}
+
+/* Botón Iniciar Sesión */
+.btn-navbar-primary {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-navbar-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-1px); /* Efecto de "levantar" sutil */
+}
+
+/* Botón Registrarse */
+.btn-navbar-secondary {
+    background-color: var(--secondary); /* Fondo gris */
+    color: white;
+    border-color: var(--secondary);
+}
+
+.btn-navbar-secondary:hover {
+    background-color: var(--secondary-dark); /* Gris más oscuro */
+    border-color: var(--secondary-dark);
+    transform: translateY(-1px);
+}
+
+/* Botón Cerrar Sesión */
+.btn-navbar-logout {
+    background-color: transparent;
+    color: var(--danger); /* Color rojo para logout */
+    border-color: var(--danger);
+}
+
+.btn-navbar-logout:hover {
+    background-color: var(--danger);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Sección de usuario logueado */
 .navbar-user-section {
-   display: flex;
-   align-items: center;
-   gap: 15px;
-   margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: 20px; /* Separación de los links de navegación */
 }
  
 .navbar-greeting {
-   font-weight: 600;
-   color: var(--text-light);
-   white-space: nowrap;
+    font-weight: 600;
+    color: var(--text-dark); /* Color más oscuro para el saludo */
+    white-space: nowrap;
 }
  
 /* Responsive Navbar */
-@media (max-width: 768px) {
-   .navbar-menu {
-     flex-direction: column;
-     align-items: flex-start;
-     gap: 10px;
-     margin-top: 10px;
-   }
- 
-   .navbar-user-section {
-     flex-direction: column;
-     align-items: flex-start;
-     width: 100%;
-   }
- 
-   .navbar-logout {
-     width: 100%;
-     text-align: center;
-   }
+@media (max-width: 992px) { /* Ajustes para tabletas y móviles */
+    .navbar-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .navbar-logo {
+        margin-bottom: 15px;
+    }
+    .navbar-menu {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        width: 100%; /* Ocupa todo el ancho disponible */
+    }
+    .navbar-link, .btn-navbar-primary, .btn-navbar-secondary, .btn-navbar-logout {
+        width: calc(100% - 20px); /* Ajuste de ancho */
+        text-align: left;
+        padding: 10px; /* Ajuste de padding */
+        font-size: 1rem;
+    }
+    .navbar-user-section {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--gray-light);
+    }
 }
  
 @media (max-width: 480px) {
-   .navbar-logo {
-     font-size: 1.5rem; 
-   }
- 
-   .navbar-link {
-     font-size: 0.95rem;
-   }
- 
-   .navbar-greeting {
-     font-size: 0.9rem;
-   }
+    .navbar {
+        padding: 10px 15px;
+    }
+    .navbar-logo {
+        font-size: 1.5rem; 
+    }
 }

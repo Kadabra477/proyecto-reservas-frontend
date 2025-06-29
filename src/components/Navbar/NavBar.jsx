@@ -1,8 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import './NavBar.css';
+import './NavBar.css'; // Asegúrate de que esta ruta sea correcta
 
-// `userRole` en este componente ahora se espera que sea un ARRAY de strings (ej: ['ADMIN', 'USER'])
 function Navbar({ isLoggedIn, nombreUsuario, onLogout, userRole }) { 
     const navigate = useNavigate();
 
@@ -16,10 +15,7 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout, userRole }) {
         return fullName.split(' ')[0];
     };
 
-    // **CAMBIO CLAVE AQUÍ:** Las comprobaciones de rol ahora usan `includes()` en el array `userRole`
-    const hasAdminRole = userRole && userRole.includes && userRole.includes('ADMIN');
-    const hasComplexOwnerRole = userRole && userRole.includes && userRole.includes('COMPLEX_OWNER');
-
+    const hasAdminOrComplexOwnerRole = userRole && userRole.includes && (userRole.includes('ADMIN') || userRole.includes('COMPLEX_OWNER'));
 
     return (
         <header className="navbar">
@@ -47,7 +43,7 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout, userRole }) {
                                 Dashboard
                             </NavLink>
                             {/* Mostrar Admin link si tiene rol ADMIN o COMPLEX_OWNER */}
-                            {(hasAdminRole || hasComplexOwnerRole) && (
+                            {hasAdminOrComplexOwnerRole && (
                                 <NavLink
                                     to="/admin"
                                     className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
@@ -57,7 +53,7 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout, userRole }) {
                             )}
                             <div className="navbar-user-section">
                                 <span className="navbar-greeting">Hola, {getFirstName(nombreUsuario)}!</span>
-                                <button onClick={handleLogoutClick} className="btn btn-outline-primary">
+                                <button onClick={handleLogoutClick} className="btn-navbar-logout"> {/* Clase cambiada */}
                                     Cerrar Sesión
                                 </button>
                             </div>
@@ -66,13 +62,13 @@ function Navbar({ isLoggedIn, nombreUsuario, onLogout, userRole }) {
                         <>
                             <NavLink
                                 to="/login"
-                                className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+                                className="btn-navbar-primary" // CLASE CAMBIADA a botón primario
                             >
                                 Iniciar Sesión
                             </NavLink>
                             <NavLink
                                 to="/register"
-                                className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"}
+                                className="btn-navbar-secondary" // CLASE CAMBIADA a botón secundario
                             >
                                 Registrarse
                             </NavLink>
