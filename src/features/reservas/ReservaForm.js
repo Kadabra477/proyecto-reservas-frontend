@@ -10,15 +10,8 @@ import efectivoIcon from '../../assets/efectivo.png';
 function ReservaForm() {
     const navigate = useNavigate();
     const location = useLocation();
-    // No usamos useParams aquí ya que el ID del complejo viene por location.state
 
     const [complejo, setComplejo] = useState(null); 
-    // Eliminamos 'complejosDisponibles' ya que no se necesitará una lista para seleccionar
-    // const [complejosDisponibles, setComplejosDisponibles] = useState([]); 
-
-    // selectedComplejoId no es necesario como estado separado si siempre se usa complejo.id
-    // const [selectedComplejoId, setSelectedComplejoId] = useState(''); 
-
     const [tiposCanchaDisponiblesDelComplejo, setTiposCanchaDisponiblesDelComplejo] = useState([]); 
     const [selectedTipoCancha, setSelectedTipoCancha] = useState(''); 
 
@@ -43,7 +36,6 @@ function ReservaForm() {
     const [availabilityMessage, setAvailabilityMessage] = useState('');
     const [hoursOptions, setHoursOptions] = useState([]); 
 
-    // Función para obtener la fecha mínima para el input de fecha (hoy)
     const getMinDate = () => {
         const today = new Date();
         const year = today.getFullYear();
@@ -52,7 +44,6 @@ function ReservaForm() {
         return `${year}-${month}-${day}`;
     };
 
-    // Cargar datos del usuario autenticado si existen (Nombre, Apellido, Email, Teléfono)
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -71,13 +62,11 @@ function ReservaForm() {
                 }
             } catch (error) {
                 console.error("Error al cargar perfil de usuario:", error);
-                // No es crítico, el usuario puede ingresar manualmente sus datos
             }
         };
         fetchUserProfile();
     }, []);
 
-    // Cargar el complejo específico preseleccionado y sus tipos de cancha
     useEffect(() => {
         const loadPreselectedComplejo = async () => {
             setIsLoadingInitialData(true);
@@ -98,7 +87,7 @@ function ReservaForm() {
                     const types = Object.keys(fetchedComplejo.canchaCounts);
                     setTiposCanchaDisponiblesDelComplejo(types);
                     if (types.length > 0) {
-                        setSelectedTipoCancha(types[0]); // Selecciona el primer tipo de cancha por defecto
+                        setSelectedTipoCancha(types[0]); 
                     }
                 } else {
                     setTiposCanchaDisponiblesDelComplejo([]);
@@ -106,19 +95,41 @@ function ReservaForm() {
                     setMensaje({ type: 'warning', text: 'El complejo seleccionado no tiene tipos de cancha configurados.' });
                 }
                 
-                // Generar opciones de hora basadas en el horario del complejo
+                // --- INICIO DE LA LÓGICA CORREGIDA PARA GENERAR HORAS ---
                 if (fetchedComplejo.horarioApertura && fetchedComplejo.horarioCierre) {
-                    const startHour = parseInt(fetchedComplejo.horarioApertura.substring(0, 2), 10);
-                    const endHour = parseInt(fetchedComplejo.horarioCierre.substring(0, 2), 10);
+                    const [aperturaHoras, aperturaMinutos] = fetchedComplejo.horarioApertura.split(':').map(Number);
+                    const [cierreHoras, cierreMinutos] = fetchedComplejo.horarioCierre.split(':').map(Number);
+                    
                     const generatedHours = [];
-                    for (let i = startHour; i < endHour; i++) {
-                        generatedHours.push(`${String(i).padStart(2, '0')}:00`);
+                    let currentHour = aperturaHoras;
+                    let currentMinute = aperturaMinutos;
+
+                    // Convertir todo a minutos para manejar mejor los rangos y el cruce de medianoche
+                    const aperturaTotalMinutos = aperturaHoras * 60 + aperturaMinutos;
+                    let cierreTotalMinutos = cierreHoras * 60 + cierreMinutos;
+
+                    // Si el horario de cierre es menor que el de apertura, significa que cierra al día siguiente
+                    if (cierreTotalMinutos <= aperturaTotalMinutos) {
+                        cierreTotalMinutos += (24 * 60); // Sumar 24 horas en minutos
                     }
+
+                    let currentTimeInMinutes = aperturaTotalMinutos;
+
+                    while (currentTimeInMinutes < cierreTotalMinutos) {
+                        const hour = Math.floor(currentTimeInMinutes / 60) % 24; // %24 para manejar el cruce de medianoche
+                        const minute = currentTimeInMinutes % 60;
+                        generatedHours.push(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
+                        
+                        currentTimeInMinutes += 60; // Incrementa en 60 minutos (1 hora). Ajusta si tus slots son diferentes.
+                    }
+
                     setHoursOptions(generatedHours);
+                    console.log("Horas generadas:", generatedHours); 
                 } else {
                     setHoursOptions([]);
                     setMensaje({ type: 'error', text: 'Horarios de apertura y cierre no configurados para el complejo.' });
                 }
+                // --- FIN DE LA LÓGICA CORREGIDA PARA GENERAR HORAS ---
 
             } catch (err) {
                 console.error("Error al cargar el complejo preseleccionado:", err);
@@ -128,10 +139,9 @@ function ReservaForm() {
             }
         };
         loadPreselectedComplejo();
-    }, [location.state]); // Dependencia clave para que se ejecute cuando se pasa el estado
+    }, [location.state]);
 
 
-    // Función para consultar la disponibilidad por complejo, tipo de cancha, fecha y hora
     const checkAvailability = useCallback(async () => {
         const { fecha, hora } = formulario;
         if (!complejo || !selectedTipoCancha || !fecha || !hora) {
@@ -145,9 +155,8 @@ function ReservaForm() {
         const currentDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
         const selectedDateTime = new Date(`${fecha}T${hora}:00`);
 
-        // Validación: No permitir seleccionar horas pasadas del día actual
-        if (selectedDate.toDateString() === now.toDateString()) { // Si la fecha seleccionada es hoy
-            if (selectedDateTime < currentDateTime) { // Si la hora seleccionada ya pasó hoy
+        if (selectedDate.toDateString() === now.toDateString()) { 
+            if (selectedDateTime < currentDateTime) { 
                 setAvailableCanchasCount(0);
                 setAvailabilityMessage('No puedes reservar una hora que ya ha pasado hoy.');
                 setMensaje({ type: 'error', text: 'Hora en el pasado no disponible.' });
@@ -163,7 +172,7 @@ function ReservaForm() {
             setAvailableCanchasCount(count);
             if (count > 0) {
                 setAvailabilityMessage(`¡Hay ${count} canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}!`);
-                setMensaje({ text: '', type: '' }); // Limpia mensajes de error previos
+                setMensaje({ text: '', type: '' }); 
             } else {
                 setAvailabilityMessage(`No hay canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}. Elige otro horario o tipo.`);
                 setMensaje({ type: 'error', text: 'Horario no disponible.' });
@@ -179,8 +188,6 @@ function ReservaForm() {
     }, [formulario.fecha, formulario.hora, complejo, selectedTipoCancha]);
 
 
-    // Efecto para verificar disponibilidad cuando cambian los campos clave de la reserva
-    // Se ejecuta al cambiar la fecha, hora o tipo de cancha.
     useEffect(() => {
         if (complejo && formulario.fecha && formulario.hora && selectedTipoCancha) {
             checkAvailability();
@@ -200,12 +207,10 @@ function ReservaForm() {
         
         if (name === 'tipoCancha') {
             setSelectedTipoCancha(value);
-            // Al cambiar el tipo de cancha, resetea la disponibilidad para que se vuelva a calcular
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
         }
         if (name === 'fecha' || name === 'hora') {
-            // Al cambiar fecha u hora, resetea la disponibilidad
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
         }
@@ -217,7 +222,6 @@ function ReservaForm() {
 
         const { nombre, apellido, dni, email, telefono, fecha, hora, metodoPago } = formulario;
 
-        // Validaciones del lado del cliente
         if (!complejo) { setMensaje({ type: 'error', text: 'Error: No hay complejo seleccionado.' }); return; }
         if (!selectedTipoCancha) { setMensaje({ type: 'error', text: 'Debes seleccionar un tipo de cancha.' }); return; }
         if (!nombre.trim() || !apellido.trim() || !dni || !email.trim() || !telefono.trim() || !fecha || !hora || !metodoPago) {
@@ -237,7 +241,6 @@ function ReservaForm() {
             return;
         }
 
-        // Validación de disponibilidad final antes de enviar
         if (availableCanchasCount === null || availableCanchasCount <= 0) {
             setMensaje({ type: 'error', text: 'No hay canchas disponibles para este horario. Por favor, elige otro o espera la verificación.' });
             return;
@@ -246,7 +249,7 @@ function ReservaForm() {
         setIsSubmitting(true);
 
         const reservaData = {
-            complejoId: complejo.id, // Usamos el ID del complejo cargado
+            complejoId: complejo.id, 
             tipoCancha: selectedTipoCancha,
             nombre: nombre.trim(),
             apellido: apellido.trim(),
@@ -264,7 +267,6 @@ function ReservaForm() {
 
             console.log("Reserva creada con ID:", reservaCreada.id, "Método de pago:", reservaCreada.metodoPago, "Complejo:", reservaCreada.complejoNombre, "Cancha asignada:", reservaCreada.nombreCanchaAsignada);
 
-            // Resetea solo los campos del formulario, no los selectores de complejo/tipo
             setFormulario(prevForm => ({
                 ...prevForm,
                 nombre: '',
@@ -338,7 +340,6 @@ function ReservaForm() {
     };
 
     if (isLoadingInitialData) return <p className="loading-message">Cargando complejo...</p>;
-    // Modificado: Si no hay complejo Y no está cargando, significa que no se pudo cargar el complejo
     if (!complejo && !isLoadingInitialData) return <p className="error-message">No se pudo cargar el complejo o no se especificó uno para reservar. Por favor, asegúrate de acceder a la reserva desde la tarjeta de un complejo válido.</p>;
 
     return (
@@ -352,7 +353,7 @@ function ReservaForm() {
                     <p><strong>Ubicación:</strong> {complejo.ubicacion}</p>
                     <p><strong>Teléfono:</strong> {complejo.telefono}</p>
                     <p><strong>Horario de atención:</strong> {complejo.horarioApertura} - {complejo.horarioCierre}</p>
-                    {selectedTipoCancha && complejo.canchaPrices && complejo.canchaPrices[selectedTipoCancha] != null && ( // Asegurarse que el precio no sea null/undefined
+                    {selectedTipoCancha && complejo.canchaPrices && complejo.canchaPrices[selectedTipoCancha] != null && ( 
                         <p className="reserva-price">
                             <strong>Precio por Hora ({selectedTipoCancha}):</strong> ${complejo.canchaPrices[selectedTipoCancha].toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                         </p>
@@ -360,19 +361,17 @@ function ReservaForm() {
                 </div>
             )}
 
-            {/* El subtítulo se ajusta para reflejar que el complejo ya está seleccionado */}
             <h3 className="reserva-form-subtitle">1. Selecciona Tipo de Cancha, Fecha y Hora</h3>
             <form onSubmit={handleSubmit} className="reserva-formulario" noValidate>
                 <div className="form-group">
                     <label htmlFor="complejoId">Complejo:</label>
-                    {/* El input de complejo se bloquea y muestra el nombre del complejo preseleccionado */}
                     <input
                         type="text"
                         id="complejoId"
                         name="complejoId"
                         value={complejo ? complejo.nombre : 'Cargando...'}
-                        disabled // Siempre deshabilitado
-                        className="blocked-input" // Clase para estilo visual de bloqueado
+                        disabled
+                        className="blocked-input"
                     />
                 </div>
 
@@ -422,7 +421,6 @@ function ReservaForm() {
                         <option value="">Selecciona una hora</option>
                         {hoursOptions.map(hour => (
                             <option key={hour} value={hour} disabled={
-                                // Deshabilita horas que ya pasaron en el día actual
                                 (new Date(formulario.fecha).toDateString() === new Date().toDateString() && 
                                  parseInt(hour.substring(0, 2), 10) < new Date().getHours())
                             }>
