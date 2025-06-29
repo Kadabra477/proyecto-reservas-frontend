@@ -174,7 +174,7 @@ function ReservaForm() {
                 setAvailabilityMessage(`¡Hay ${count} canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}!`);
                 setMensaje({ text: '', type: '' }); 
             } else {
-                setAvailabilityMessage(`No hay canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}. Elige otro horario o tipo.`);
+                setAvailabilityMessage(`No hay canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}. Elige otro horario.`);
                 setMensaje({ type: 'error', text: 'Horario no disponible.' });
             }
         } catch (err) {
