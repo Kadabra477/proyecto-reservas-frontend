@@ -4,161 +4,114 @@
     background-color: var(--white, #ffffff);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra más sutil */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
-    min-height: 500px; 
-    width: 100%;
+    width: 300px; /* Ancho fijo para las tarjetas, ajusta según el diseño de tu grid */
+    min-height: auto; /* IMPORTANTE: Eliminar o establecer en auto para no forzar una altura mínima grande */
+    margin: 15px; /* Espacio alrededor de cada tarjeta cuando están en un contenedor flex/grid */
+    cursor: pointer; /* Indica que la tarjeta es clickable */
 }
 
 .complejo-card-item:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px); /* Efecto de "levantar" más suave */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Nuevo contenedor para la imagen para controlar mejor su tamaño */
+.complejo-card-image-container {
+    width: 100%;
+    height: 180px; /* Altura fija para la imagen */
+    overflow: hidden; /* Recorta la imagen si es necesario */
+    display: flex; /* Para centrar la imagen dentro del contenedor */
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-light, #eee);
 }
 
 .complejo-card-img {
     width: 100%;
-    aspect-ratio: 3 / 2; /* Relación de aspecto 3:2 (Ancho:Alto) */
-    object-fit: cover;
+    height: 100%; /* La imagen ocupará el 100% del contenedor */
+    object-fit: cover; /* Recorta la imagen para que cubra el espacio sin distorsionarse */
     object-position: center;
-    border-bottom: 1px solid var(--gray-light, #eee);
+    display: block; /* Elimina el espacio extra debajo de la imagen */
 }
 
 .complejo-card-content {
-    padding: 20px;
+    padding: 15px; /* Reducir el padding para hacerla más compacta */
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
 .complejo-card-title {
-    font-size: 1.8em;
+    font-size: 1.5em; /* Tamaño de título más pequeño */
     color: var(--primary-dark, #0056b3);
-    margin-bottom: 10px;
+    margin-bottom: 8px; /* Menos margen */
     font-weight: 700;
+    white-space: nowrap; /* Evita que el nombre se rompa en varias líneas */
+    overflow: hidden; /* Oculta el texto que se desborda */
+    text-overflow: ellipsis; /* Añade puntos suspensivos */
 }
 
-.complejo-card-description {
-    font-size: 0.95em;
+.complejo-card-location {
+    font-size: 0.9em;
     color: var(--text-light, #666);
-    line-height: 1.5;
-    margin-bottom: 15px;
-    flex-grow: 1;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.complejo-card-location i {
+    margin-right: 5px;
+    color: var(--primary, #007bff);
+}
+
+.complejo-card-description-short { /* Nuevo estilo para la descripción acortada */
+    font-size: 0.85em; /* Tamaño de fuente más pequeño */
+    color: var(--text-light, #666);
+    line-height: 1.4;
+    margin-bottom: 12px; /* Menos margen */
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 3; 
+    -webkit-line-clamp: 2; /* Muestra solo 2 líneas de descripción */
     -webkit-box-orient: vertical;
-    line-clamp: 3;
+    line-clamp: 2;
 }
 
-.complejo-details-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin-bottom: 15px;
+.complejo-card-canchas-summary { /* Estilo para el resumen de canchas */
     font-size: 0.9em;
     color: var(--text-dark, #444);
-}
-
-.complejo-details-grid p {
-    margin: 0;
-}
-
-h4 {
-    font-size: 1.1em;
-    color: var(--primary-dark, #0056b3);
-    margin-top: 15px;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-.complejo-card-cancha-types {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 20px;
-}
-
-.cancha-type-item {
-    background-color: var(--background-light, #f0f0f0);
-    border-radius: 5px;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    font-size: 0.9em;
-    color: var(--text-dark, #333);
-}
-
-.cancha-type-item strong {
-    color: var(--primary, #007bff);
-    margin-right: 5px;
-}
-
-.cancha-type-item .type-main-info {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 5px;
-}
-
-.cancha-type-item .type-price {
-    font-weight: bold;
-    color: var(--success, #28a745);
-    white-space: nowrap;
-}
-
-.cancha-type-item .type-features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    font-size: 0.85em;
-    margin-top: 5px;
-}
-
-.feature-chip {
-    background-color: var(--primary);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
     font-weight: 500;
+    margin-bottom: 15px;
 }
 
-.feature-chip.surface {
-    background-color: #6c757d;
-}
+/* El resto de los estilos relacionados con .complejo-details-grid, h4,
+   .complejo-card-cancha-types, .cancha-type-item, .feature-chip
+   se pueden eliminar de este CSS o mantener si los quieres usar en la página de detalles
+   y compartirlos, pero no serán usados por ComplejoCard.jsx. */
 
-.feature-chip.icon span {
-    margin-right: 5px;
-}
-
-.no-canchas-info {
-    font-style: italic;
-    color: var(--text-light, #777);
-    font-size: 0.9em;
-    margin-top: 10px;
-}
-
+/* Ajustes para el contenedor de botones */
 .complejo-card-buttons-container {
     display: flex;
-    gap: 10px;
-    margin-top: auto;
+    flex-direction: column; /* Botones apilados verticalmente */
+    gap: 8px; /* Espacio entre botones */
+    margin-top: auto; /* Empuja los botones hacia abajo */
     width: 100%;
+    padding-top: 10px; /* Un poco de espacio antes de los botones */
 }
 
 .complejo-card-button {
-    padding: 12px 15px;
-    font-size: 0.95em;
+    padding: 10px 15px; /* Padding más pequeño */
+    font-size: 0.9em; /* Fuente más pequeña */
     font-weight: bold;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    flex: 1;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    width: 100%; /* Botones ocupan todo el ancho disponible */
 }
 
 .complejo-card-button.primary {
@@ -168,7 +121,7 @@ h4 {
 
 .complejo-card-button.primary:hover {
     background-color: var(--primary-dark, #0056b3);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .complejo-card-button.secondary {
@@ -178,29 +131,28 @@ h4 {
 }
 
 .complejo-card-button.secondary:hover {
-    background-color: var(--primary-dark, #0056b3);
+    background-color: var(--primary, #007bff); /* Invierte los colores en hover para secondary */
     color: white;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 /* Media Queries para ComplejoCard */
 @media (min-width: 768px) {
-    .complejo-details-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    /* Si estás usando un grid para listar los complejos, este media query podría ir en el padre */
+    /* .complejo-card-item { width: calc(33.333% - 30px); } */ /* Ejemplo para 3 columnas con margen */
 }
 @media (max-width: 480px) {
+    .complejo-card-item {
+        width: 100%; /* En pantallas muy pequeñas, que ocupe el ancho completo */
+        margin: 10px 0; /* Menos margen horizontal, más vertical */
+    }
     .complejo-card-title {
-        font-size: 1.6em;
+        font-size: 1.4em;
     }
     .complejo-card-content {
-        padding: 15px;
-    }
-    .complejo-card-img {
-        /* ¡ESTA ES LA LÍNEA QUE DEBE ESTAR ELIMINADA! */
-        /* height: 180px; */ 
+        padding: 12px;
     }
     .complejo-card-buttons-container {
-        flex-direction: column; 
+        flex-direction: column; /* Asegura que los botones siempre estén apilados en móviles */
     }
 }
