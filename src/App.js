@@ -15,8 +15,8 @@ import Home from './features/home/Home';
 import ReservaForm from './features/reservas/ReservaForm';
 import ReservaDetail from './features/reservas/ReservaDetail';
 import AdminPanel from './features/admin/AdminPanel';
-import Complejos from './components/Complejos/Complejos'; // Tu ruta actual para Complejos
-import ComplejoDetalle from './components/Complejos/ComplejoDetalle/ComplejoDetalle'; // ¡NUEVO! Ruta para el detalle del complejo
+import Complejos from './components/Complejos/Complejos'; 
+import ComplejoDetalle from './components/Complejos/ComplejoDetalle/ComplejoDetalle'; 
 import DashboardUsuario from './features/dashboard/DashboardUsuario';
 import ForgotPasswordRequest from './features/auth/ForgotPasswordRequest';
 import ResetPassword from './features/auth/ResetPassword';
@@ -187,10 +187,20 @@ function App() {
                     <Route path="/oauth2/redirect" element={<OAuth2Success onLoginSuccess={handleLoginSuccess} />} />
 
                     <Route path="/complejos" element={<Complejos />} /> 
-                    {/* ¡NUEVA RUTA AÑADIDA PARA EL DETALLE DEL COMPLEJO! */}
                     <Route path="/complejos/:id" element={<ComplejoDetalle />} />
                     
-                    <Route path="/reservar/:complejoId/:canchaId" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} />
+                    {/* RUTA MODIFICADA Y AÑADIDA PARA RESEVA FORM */}
+                    {/* Ruta genérica para llegar al formulario de reserva (con o sin preselección) */}
+                    <Route 
+                        path="/reservar" 
+                        element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} 
+                    />
+                    {/* Mantener esta ruta solo si tienes un caso de uso específico para reservar con ID de cancha ya conocido */}
+                    <Route 
+                        path="/reservar/:complejoId/:canchaId" 
+                        element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaForm /></RutaProtegida>} 
+                    />
+
                     <Route path="/reservas/:id" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><ReservaDetail /></RutaProtegida>} />
                     <Route path="/dashboard" element={<RutaProtegida rolesRequeridos={['USER', 'ADMIN', 'COMPLEX_OWNER']}><DashboardUsuario /></RutaProtegida>} />
 
