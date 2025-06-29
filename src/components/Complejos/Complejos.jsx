@@ -1,8 +1,23 @@
+// frontend/src/components/Complejos/Complejos.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/axiosConfig'; // Asegúrate de que esta ruta sea correcta
-import ComplejoCard from '../ComplejoCard/ComplejoCard'; // Asegúrate de que esta ruta sea correcta
-import './Complejos.css'; // Asegúrate de que esta ruta sea correcta
+import api from '../../api/axiosConfig'; 
+import ComplejoCard from './ComplejoCard/ComplejoCard'; // RUTA AJUSTADA
+import './Complejos.css'; 
+
+// Nuevo componente para el esqueleto de carga
+const ComplejoCardSkeleton = () => (
+    <div className="complejo-card-item skeleton-loading">
+        <div className="skeleton-image"></div>
+        <div className="complejo-card-content">
+            <div className="skeleton-title"></div>
+            <div className="skeleton-text short"></div>
+            <div className="skeleton-text medium"></div>
+            <div className="skeleton-text long"></div>
+            <div className="skeleton-button"></div>
+        </div>
+    </div>
+);
 
 function Complejos() {
     const [complejos, setComplejos] = useState([]);
@@ -23,11 +38,11 @@ function Complejos() {
             }
         } catch (err) {
             console.error("Error al cargar complejos:", err);
-            if (err.response && err.response.status === 500) {
-                setError('Hubo un problema con el servidor al cargar los complejos. Por favor, intenta de nuevo más tarde.');
-            } else if (err.response && err.response.status === 204) {
+            if (err.response && err.response.status === 204) {
                 setComplejos([]);
-                setError(null);
+                setError(null); 
+            } else if (err.response && err.response.status === 500) {
+                setError('Hubo un problema con el servidor al cargar los complejos. Por favor, intenta de nuevo más tarde.');
             } else {
                 setError('Error al cargar los complejos disponibles. Intenta de nuevo más tarde.');
             }
@@ -40,21 +55,39 @@ function Complejos() {
         fetchComplejos();
     }, [fetchComplejos]);
 
-    // Eliminado: handleReserveAnyCancha
-
     if (loading) {
-        // <-- MEJORA DE DISEÑO: Usar un mensaje de carga más visual si lo deseas -->
-        return <div className="complejos-container loading-message">Cargando complejos...</div>;
+        return (
+            <div className="complejos-container">
+                <h1 className="complejos-title">Encuentra Tu Cancha Ideal</h1>
+                <p className="complejos-subtitle">Explora nuestros complejos deportivos y reserva tu espacio.</p>
+                <div className="complejos-grid">
+                    {Array.from({ length: 3 }).map((_, index) => ( 
+                        <ComplejoCardSkeleton key={index} />
+                    ))}
+                </div>
+                <div className="loading-message-box">
+                    <div className="spinner"></div>
+                    <h3>Cargando complejos...</h3>
+                    <p>Estamos buscando las mejores opciones para vos.</p>
+                </div>
+            </div>
+        );
     }
 
     if (error) {
-        // <-- MEJORA DE DISEÑO: Estilo de mensaje de error más prominente -->
-        return <div className="complejos-container error-message">{error}</div>;
+        return (
+            <div className="complejos-container">
+                <div className="error-message-box">
+                    <h3>❌ ¡Ups! Algo salió mal.</h3>
+                    <p>{error}</p>
+                    <button className="retry-button" onClick={fetchComplejos}>Intentar de Nuevo</button>
+                </div>
+            </div>
+        );
     }
 
     return (
         <div className="complejos-container">
-            {/* <-- MEJORA DE DISEÑO: Título más llamativo y descriptivo --> */}
             <h1 className="complejos-title">Encuentra Tu Cancha Ideal</h1>
             <p className="complejos-subtitle">Explora nuestros complejos deportivos y reserva tu espacio.</p>
 
@@ -65,13 +98,12 @@ function Complejos() {
                     ))}
                 </div>
             ) : (
-                // <-- MEJORA DE DISEÑO: Mensaje cuando no hay complejos -->
                 <div className="no-complejos-section">
+                    <span role="img" aria-label="emoji" className="no-complejos-icon">😔</span>
                     <p className="no-complejos-message">
                         Parece que no hay complejos deportivos disponibles en este momento.
                         <br />¡Vuelve a revisar más tarde o contacta al administrador!
                     </p>
-                    {/* Puedes añadir un icono o una ilustración aquí si lo deseas */}
                 </div>
             )}
         </div>

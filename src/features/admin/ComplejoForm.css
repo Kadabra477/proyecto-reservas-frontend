@@ -1,0 +1,232 @@
+/* frontend/src/components/AdminPanel/ComplejoForm.css */
+
+.admin-complejo-form {
+    background-color: var(--white, #ffffff);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    margin-bottom: 40px;
+}
+
+.admin-complejo-form h3 {
+    font-size: 1.8em;
+    color: var(--primary-dark, #0056b3);
+    margin-bottom: 25px;
+    text-align: center;
+    font-weight: 700;
+    border-bottom: 2px solid var(--gray-light);
+    padding-bottom: 10px;
+}
+
+.admin-form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.admin-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-dark, #333);
+    font-size: 0.95em;
+}
+
+.admin-form-group input[type="text"],
+.admin-form-group input[type="email"],
+.admin-form-group input[type="tel"],
+.admin-form-group input[type="url"],
+.admin-form-group input[type="number"],
+.admin-form-group input[type="time"],
+.admin-form-group textarea,
+.admin-form-group select {
+    width: calc(100% - 20px);
+    padding: 12px 10px;
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-form-group input:focus,
+.admin-form-group textarea:focus,
+.admin-form-group select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.admin-form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.admin-form-group .obligatorio {
+    color: var(--danger);
+    font-weight: bold;
+}
+
+.small-info {
+    font-size: 0.85em;
+    color: var(--text-light, #777);
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+.image-preview-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.image-preview-container p {
+    font-size: 0.9em;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.image-preview {
+    max-width: 100%;
+    height: 150px;
+    object-fit: contain;
+    border: 1px solid var(--gray-light);
+    border-radius: 8px;
+    background-color: var(--background-light);
+    padding: 5px;
+}
+
+/* Checkbox specific styles */
+.admin-form-group.checkbox {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.admin-form-group.checkbox input[type="checkbox"] {
+    width: auto; /* Ancho automático para checkboxes */
+    margin-right: 10px;
+    transform: scale(1.2); /* Aumenta un poco el tamaño del checkbox */
+    accent-color: var(--primary); /* Cambia el color del checkbox nativo */
+}
+
+.admin-form-group.checkbox label {
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.canchas-dinamicas-container {
+    border: 1px dashed var(--primary-dark);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    background-color: rgba(0, 123, 255, 0.03); /* Fondo muy suave */
+}
+
+.cancha-item-form {
+    background-color: var(--white);
+    border: 1px solid var(--gray-light);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.cancha-item-form h4 {
+    font-size: 1.3em;
+    color: var(--primary);
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: left;
+    border-bottom: 1px dashed var(--gray-light);
+    padding-bottom: 5px;
+}
+
+.remove-cancha-btn {
+    background-color: var(--danger);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.remove-cancha-btn:hover {
+    background-color: #c82333; /* Un rojo más oscuro */
+}
+
+.admin-btn-add {
+    background-color: var(--success);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.admin-btn-add:hover {
+    background-color: #218838; /* Un verde más oscuro */
+}
+
+.admin-form-buttons {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-light);
+}
+
+.admin-btn-save, .admin-btn-cancel {
+    padding: 12px 25px;
+    font-size: 1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.admin-btn-save {
+    background-color: var(--primary);
+    color: white;
+}
+
+.admin-btn-save:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.admin-btn-cancel {
+    background-color: var(--gray);
+    color: var(--text-dark);
+}
+
+.admin-btn-cancel:hover {
+    background-color: #a0a0a0;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .admin-complejo-form {
+        padding: 20px;
+    }
+    .admin-complejo-form h3 {
+        font-size: 1.5em;
+    }
+    .admin-form-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .admin-btn-save, .admin-btn-cancel {
+        width: 100%;
+    }
+}

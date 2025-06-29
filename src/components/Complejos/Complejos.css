@@ -1,5 +1,21 @@
 /* frontend/src/features/canchas/Complejos.css */
 
+:root {
+    --primary: #007bff;
+    --primary-dark: #0056b3;
+    --background-light: #f9f9f9;
+    --white: #ffffff;
+    --text: #333;
+    --text-light: #555;
+    --text-dark: #444;
+    --gray: #cccccc;
+    --gray-light: #eee;
+    --success: #28a745;
+    --danger: #dc3545;
+    --info: #17a2b8;
+    --warning: #ffc107;
+}
+
 .complejos-container {
     max-width: 1200px;
     margin: 50px auto;
@@ -49,7 +65,12 @@
     align-items: center;
     justify-content: center;
     min-height: 200px;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05); /* Sombra interna sutil */
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.no-complejos-icon {
+    font-size: 3em;
+    margin-bottom: 20px;
 }
 
 .no-complejos-message {
@@ -128,6 +149,59 @@
     background-color: var(--primary-dark);
 }
 
+/* Estilos para el esqueleto de carga de ComplejoCard */
+.complejo-card-item.skeleton-loading {
+    background-color: #e0e0e0; /* Color base del esqueleto */
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.skeleton-image {
+    width: 100%;
+    height: 220px; /* Misma altura que la imagen real */
+    background-color: #ccc;
+    border-bottom: 1px solid #bbb;
+}
+
+.skeleton-title {
+    width: 80%;
+    height: 25px;
+    background-color: #ccc;
+    margin: 0 auto 10px auto;
+    border-radius: 4px;
+}
+
+.skeleton-text {
+    background-color: #ccc;
+    height: 15px;
+    margin: 5px auto;
+    border-radius: 3px;
+}
+
+.skeleton-text.short {
+    width: 60%;
+}
+
+.skeleton-text.medium {
+    width: 75%;
+}
+
+.skeleton-text.long {
+    width: 90%;
+}
+
+.skeleton-button {
+    width: 80%;
+    height: 40px;
+    background-color: #bbb;
+    margin: 20px auto 0 auto;
+    border-radius: 6px;
+}
+
+@keyframes pulse {
+    0% { background-color: #e0e0e0; }
+    50% { background-color: #f0f0f0; }
+    100% { background-color: #e0e0e0; }
+}
 
 /* Media Queries */
 @media (max-width: 768px) {

@@ -1,7 +1,10 @@
+// frontend/src/features/admin/AdminPanel.js
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axiosConfig';
 import AdminEstadisticas from './AdminEstadisticas';
-import './AdminPanel.css';
+import ComplejoForm from './ComplejoForm'; // RUTA AJUSTADA (asumiendo que ComplejoForm está en el mismo directorio)
+import ConfirmationModal from '../../components/Common/ConfirmationModal/ConfirmationModal'; // RUTA AJUSTADA
+import './AdminPanel.css'; // Asegúrate de que este archivo CSS exista en src/features/admin/
 
 // Estado inicial para un formulario de COMPLEJO nuevo
 const estadoInicialComplejoAdmin = {
@@ -13,7 +16,7 @@ const estadoInicialComplejoAdmin = {
     fotoUrl: '',
     horarioApertura: '10:00',
     horarioCierre: '23:00',
-    emailPropietario: '', // Campo para la creación por ADMIN
+    emailPropietario: '', 
     canchas: [{ tipoCancha: '', cantidad: '', precioHora: '', superficie: '', iluminacion: false, techo: false }]
 };
 
@@ -21,23 +24,31 @@ function AdminPanel() {
     const [complejos, setComplejos] = useState([]);
     const [reservas, setReservas] = useState([]);
     const [usuarios, setUsuarios] = useState([]);
-    const [activeTab, setActiveTab] = useState('complejos'); // Pestaña inicial por defecto
+    const [activeTab, setActiveTab] = useState('complejos');
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
     const [isLoadingData, setIsLoadingData] = useState(false);
-    const [editingComplejo, setEditingComplejo] = useState(null); // Almacena el objeto complejo completo si estamos editando
-    const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin); // Estado del formulario de creación/edición
+    const [editingComplejo, setEditingComplejo] = useState(null);
+    const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin);
 
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
 
-    // **CRÍTICO:** Obtener los roles del usuario como un ARRAY de strings (ej: ['ADMIN', 'USER'])
+    // Estados para el modal de confirmación
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalConfig, setModalConfig] = useState({
+        title: '',
+        message: '',
+        onConfirm: () => {},
+        confirmButtonText: 'Confirmar',
+        cancelButtonText: 'Cancelar',
+        type: 'warning'
+    });
+
     const userRoles = JSON.parse(localStorage.getItem('userRoles') || '[]');
-    const isAdmin = userRoles.includes('ADMIN'); // true si el array incluye 'ADMIN'
-    const isComplexOwner = userRoles.includes('COMPLEX_OWNER'); // true si el array incluye 'COMPLEX_OWNER'
+    const isAdmin = userRoles.includes('ADMIN');
+    const isComplexOwner = userRoles.includes('COMPLEX_OWNER');
 
-    // Determinar el rol a pasar a AdminEstadisticas de manera explícita
     const roleForStats = isAdmin ? 'ADMIN' : (isComplexOwner ? 'COMPLEX_OWNER' : null);
-
 
     const mapComplejoToFormCanchas = useCallback((complejo) => {
         const canchasArray = [];
@@ -71,9 +82,7 @@ function AdminPanel() {
         return canchasArray;
     }, []);
 
-    // Este useEffect se encarga de poblar el formulario cuando se selecciona un complejo para editar
     useEffect(() => {
-        // Solo poblar si editingComplejo es un objeto con un ID válido (es decir, no es el estadoInicial vacío)
         if (editingComplejo && editingComplejo.id) {
             setNuevoComplejoAdmin({
                 id: editingComplejo.id,
@@ -88,11 +97,9 @@ function AdminPanel() {
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
         } else {
-            // Si no estamos editando o editingComplejo se reseteó a null, resetea el formulario
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
         }
     }, [editingComplejo, mapComplejoToFormCanchas]);
-
 
     useEffect(() => {
         let timer;
@@ -104,7 +111,6 @@ function AdminPanel() {
         return () => clearTimeout(timer);
     }, [mensaje]);
 
-    // Función para cargar los complejos (todos para ADMIN, solo los suyos para COMPLEX_OWNER)
     const fetchComplejos = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
@@ -121,7 +127,6 @@ function AdminPanel() {
         }
     }, [isAdmin]);
 
-    // Función para cargar las reservas (todas para ADMIN, solo las suyas para COMPLEX_OWNER)
     const fetchReservas = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
@@ -132,7 +137,7 @@ function AdminPanel() {
         } catch (err) {
             console.error('Error al obtener reservas:', err);
             if (err.response?.status === 404) {
-                setReservas([]); // Limpia las reservas para que no intente renderizar data vieja
+                setReservas([]);
                 setMensaje({ text: 'No hay reservas registradas para mostrar.', type: 'info' });
             } else {
                 const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al cargar la lista de reservas.';
@@ -143,7 +148,6 @@ function AdminPanel() {
         }
     }, [isAdmin]);
 
-    // Función para cargar usuarios (solo para ADMIN)
     const fetchUsuarios = useCallback(async () => {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
@@ -163,7 +167,6 @@ function AdminPanel() {
         }
     }, [isAdmin]);
 
-    // Este useEffect se ejecuta al cambiar de pestaña o al montar el componente
     useEffect(() => {
         const token = localStorage.getItem('jwtToken');
         if (!token) {
@@ -184,7 +187,6 @@ function AdminPanel() {
             // AdminEstadisticas se encarga de su propia carga de datos
         }
     }, [activeTab, fetchComplejos, fetchReservas, fetchUsuarios, isAdmin]);
-
 
     const handleComplejoFormChange = (e) => {
         const { name, value } = e.target;
@@ -214,7 +216,6 @@ function AdminPanel() {
         const newCanchas = nuevoComplejoAdmin.canchas.filter((_, i) => i !== index);
         setNuevoComplejoAdmin(prev => ({ ...prev, canchas: newCanchas }));
     };
-
 
     const handleSaveComplejo = async (e) => {
         e.preventDefault();
@@ -276,7 +277,7 @@ function AdminPanel() {
             canchaTecho
         };
 
-        if (editingComplejo?.id) { // Si estamos en modo edición (ID existe)
+        if (editingComplejo?.id) { 
             try {
                 await api.put(`/complejos/${id}`, payload);
                 setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
@@ -289,7 +290,7 @@ function AdminPanel() {
                 const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al actualizar el complejo.';
                 setMensaje({ text: errorMsg, type: 'error' });
             }
-        } else { // Si estamos creando un nuevo complejo
+        } else {
             const crearPayload = {
                 ...payload,
                 ...(isAdmin && emailPropietario ? { propietarioUsername: emailPropietario } : {}) 
@@ -309,7 +310,6 @@ function AdminPanel() {
     
     const startEditingComplejo = (complejoParaEditar) => {
         setEditingComplejo(complejoParaEditar);
-        // El useEffect ya se encarga de setNuevoComplejoAdmin cuando editingComplejo cambia
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -318,33 +318,54 @@ function AdminPanel() {
         setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
     };
 
-
-    const handleConfirmReserva = async (id) => {
-        setMensaje({ text: '', type: '' });
-        try {
-            await api.put(`/reservas/${id}/confirmar`);
-            setMensaje({ text: 'Reserva confirmada correctamente.', type: 'success' });
-            fetchReservas();
-        } catch (err) {
-            console.error('Error al confirmar la reserva:', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al confirmar la reserva.';
-            setMensaje({ text: errorMsg, type: 'error' });
-        }
+    const handleConfirmReserva = (id) => {
+        setModalConfig({
+            title: 'Confirmar Reserva',
+            message: `¿Estás seguro de que quieres confirmar la reserva con ID: ${id}?`,
+            onConfirm: async () => {
+                setMensaje({ text: '', type: '' });
+                try {
+                    await api.put(`/reservas/${id}/confirmar`);
+                    setMensaje({ text: 'Reserva confirmada correctamente.', type: 'success' });
+                    fetchReservas();
+                } catch (err) {
+                    console.error('Error al confirmar la reserva:', err);
+                    const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al confirmar la reserva.';
+                    setMensaje({ text: errorMsg, type: 'error' });
+                } finally {
+                    setIsModalOpen(false);
+                }
+            },
+            confirmButtonText: 'Sí, Confirmar',
+            cancelButtonText: 'No, Cancelar',
+            type: 'success'
+        });
+        setIsModalOpen(true);
     };
 
-    const handleDeleteReserva = async (id) => {
-        if (window.confirm(`¿Estás seguro de eliminar la reserva con ID: ${id}?`)) {
-            setMensaje({ text: '', type: '' });
-            try {
-                await api.delete(`/reservas/${id}`);
-                setMensaje({ text: 'Reserva eliminada correctamente.', type: 'success' });
-                fetchReservas();
-            } catch (err) {
-                console.error('Error al eliminar la reserva:', err);
-                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar la reserva.';
-                setMensaje({ text: errorMsg, type: 'error' });
-            }
-        }
+    const handleDeleteReserva = (id) => {
+        setModalConfig({
+            title: 'Eliminar Reserva',
+            message: `¿Estás seguro de que quieres eliminar la reserva con ID: ${id}? Esta acción es irreversible.`,
+            onConfirm: async () => {
+                setMensaje({ text: '', type: '' });
+                try {
+                    await api.delete(`/reservas/${id}`);
+                    setMensaje({ text: 'Reserva eliminada correctamente.', type: 'success' });
+                    fetchReservas();
+                } catch (err) {
+                    console.error('Error al eliminar la reserva:', err);
+                    const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar la reserva.';
+                    setMensaje({ text: errorMsg, type: 'error' });
+                } finally {
+                    setIsModalOpen(false);
+                }
+            },
+            confirmButtonText: 'Sí, Eliminar',
+            cancelButtonText: 'No, Cancelar',
+            type: 'danger'
+        });
+        setIsModalOpen(true);
     };
 
     const formatDate = (dateStr) => {
@@ -394,91 +415,116 @@ function AdminPanel() {
         const { value, checked } = e.target;
         setSelectedRoles(prevRoles => {
             if (value === 'ADMIN' && checked) {
-                return ['ADMIN', 'USER']; // ADMIN incluye USER y es excluyente de COMPLEX_OWNER
+                return ['ADMIN', 'USER']; 
             } else if (value === 'COMPLEX_OWNER' && checked) {
-                return ['COMPLEX_OWNER', 'USER']; // COMPLEX_OWNER incluye USER y es excluyente de ADMIN
+                return ['COMPLEX_OWNER', 'USER']; 
             } else if (value === 'USER') {
                 if (checked) {
                     return [...new Set([...prevRoles, 'USER'])];
                 } else {
-                    // Si desmarcamos USER, y no hay ADMIN/COMPLEX_OWNER, lo quitamos
-                    // Si hay ADMIN/COMPLEX_OWNER, USER permanece implícitamente
                     if (prevRoles.includes('ADMIN') || prevRoles.includes('COMPLEX_OWNER')) {
-                        return prevRoles.filter(role => role !== 'USER'); // Lo quitamos explícitamente si existe, para no mostrarlo dos veces
+                        return prevRoles.filter(role => role !== 'USER'); 
                     }
                     return prevRoles.filter(role => role !== 'USER');
                 }
-            } else { // Para otros roles si los hubiera (poco probable aquí)
+            } else { 
                 return checked ? [...prevRoles, value] : prevRoles.filter(role => role !== value);
             }
         }).filter(Boolean);
     };
 
-
     const handleSaveUserRoles = async () => {
         setMensaje({ text: '', type: '' });
         if (!managingUserRoles) return;
 
-        try {
-            let rolesToActualSend = [];
-            // Si ADMIN está seleccionado, solo se envía ROLE_ADMIN y ROLE_USER
-            if (selectedRoles.includes('ADMIN')) {
-                rolesToActualSend = ['ROLE_ADMIN', 'ROLE_USER'];
-            } 
-            // Si COMPLEX_OWNER está seleccionado (y no ADMIN), solo se envía ROLE_COMPLEX_OWNER y ROLE_USER
-            else if (selectedRoles.includes('COMPLEX_OWNER')) {
-                rolesToActualSend = ['ROLE_COMPLEX_OWNER', 'ROLE_USER'];
-            } 
-            // Si no hay roles especiales, o solo USER estaba seleccionado, por defecto es ROLE_USER
-            else if (selectedRoles.includes('USER') || selectedRoles.length === 0) {
-                 rolesToActualSend = ['ROLE_USER'];
-            }
-            // Aseguramos que no haya duplicados si por alguna razón 'USER' se agregó manualmente
-            rolesToActualSend = [...new Set(rolesToActualSend)];
-            
-            await api.put(`/users/${managingUserRoles.id}/roles`, rolesToActualSend);
-            
-            setMensaje({ text: `Roles de ${managingUserRoles.username} actualizados correctamente.`, type: 'success' });
-            fetchUsuarios();
-            setManagingUserRoles(null);
-            setSelectedRoles([]);
-        } catch (err) {
-            console.error('Error al guardar roles:', err);
-            const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al guardar los roles.';
-            setMensaje({ text: errorMsg, type: 'error' });
-        }
+        setModalConfig({
+            title: 'Confirmar Cambio de Roles',
+            message: `¿Estás seguro de que quieres actualizar los roles de ${managingUserRoles.username}?`,
+            onConfirm: async () => {
+                try {
+                    let rolesToActualSend = [];
+                    if (selectedRoles.includes('ADMIN')) {
+                        rolesToActualSend = ['ROLE_ADMIN', 'ROLE_USER'];
+                    } 
+                    else if (selectedRoles.includes('COMPLEX_OWNER')) {
+                        rolesToActualSend = ['ROLE_COMPLEX_OWNER', 'ROLE_USER'];
+                    } 
+                    else if (selectedRoles.includes('USER') || selectedRoles.length === 0) {
+                        rolesToActualSend = ['ROLE_USER'];
+                    }
+                    rolesToActualSend = [...new Set(rolesToActualSend)];
+                    
+                    await api.put(`/users/${managingUserRoles.id}/roles`, rolesToActualSend);
+                    
+                    setMensaje({ text: `Roles de ${managingUserRoles.username} actualizados correctamente.`, type: 'success' });
+                    fetchUsuarios();
+                    setManagingUserRoles(null);
+                    setSelectedRoles([]);
+                } catch (err) {
+                    console.error('Error al guardar roles:', err);
+                    const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al guardar los roles.';
+                    setMensaje({ text: errorMsg, type: 'error' });
+                } finally {
+                    setIsModalOpen(false);
+                }
+            },
+            confirmButtonText: 'Sí, Guardar',
+            cancelButtonText: 'No, Cancelar',
+            type: 'info'
+        });
+        setIsModalOpen(true);
     };
 
-    const handleActivateUser = async (userId, username) => {
-        if (window.confirm(`¿Estás seguro de activar la cuenta del usuario ${username}?`)) {
-            setMensaje({ text: '', type: '' });
-            try {
-                await api.put(`/users/admin/users/${userId}/activate`);
-                setMensaje({ text: `Cuenta de ${username} activada correctamente.`, type: 'success' });
-                fetchUsuarios();
-            } catch (err) {
-                console.error('Error al activar usuario:', err);
-                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al activar la cuenta.';
-                setMensaje({ text: errorMsg, type: 'error' });
-            }
-        }
+    const handleActivateUser = (userId, username) => {
+        setModalConfig({
+            title: 'Activar Cuenta de Usuario',
+            message: `¿Estás seguro de que quieres activar la cuenta del usuario ${username}?`,
+            onConfirm: async () => {
+                setMensaje({ text: '', type: '' });
+                try {
+                    await api.put(`/users/admin/users/${userId}/activate`);
+                    setMensaje({ text: `Cuenta de ${username} activada correctamente.`, type: 'success' });
+                    fetchUsuarios();
+                } catch (err) {
+                    console.error('Error al activar usuario:', err);
+                    const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al activar la cuenta.';
+                    setMensaje({ text: errorMsg, type: 'error' });
+                } finally {
+                    setIsModalOpen(false);
+                }
+            },
+            confirmButtonText: 'Sí, Activar',
+            cancelButtonText: 'No, Cancelar',
+            type: 'success'
+        });
+        setIsModalOpen(true);
     };
 
-    const handleDeleteComplejo = async (id) => {
-        if (window.confirm(`¿Estás seguro de eliminar el complejo con ID: ${id}? Esta acción es irreversible.`)) {
-            setMensaje({ text: '', type: '' });
-            try {
-                await api.delete(`/complejos/${id}`);
-                setMensaje({ text: 'Complejo eliminado correctamente.', type: 'success' });
-                fetchComplejos();
-                setEditingComplejo(null);
-                setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            } catch (err) {
-                console.error('Error al eliminar el complejo:', err);
-                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el complejo.';
-                setMensaje({ text: errorMsg, type: 'error' });
-            }
-        }
+    const handleDeleteComplejo = (id) => {
+        setModalConfig({
+            title: 'Eliminar Complejo',
+            message: `¿Estás seguro de que quieres eliminar el complejo con ID: ${id}? Esta acción es irreversible y eliminará todas las canchas y reservas asociadas.`,
+            onConfirm: async () => {
+                setMensaje({ text: '', type: '' });
+                try {
+                    await api.delete(`/complejos/${id}`);
+                    setMensaje({ text: 'Complejo eliminado correctamente.', type: 'success' });
+                    fetchComplejos();
+                    setEditingComplejo(null);
+                    setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
+                } catch (err) {
+                    console.error('Error al eliminar el complejo:', err);
+                    const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el complejo.';
+                    setMensaje({ text: errorMsg, type: 'error' });
+                } finally {
+                    setIsModalOpen(false);
+                }
+            },
+            confirmButtonText: 'Sí, Eliminar',
+            cancelButtonText: 'No, Cancelar',
+            type: 'danger'
+        });
+        setIsModalOpen(true);
     };
 
     return (
@@ -494,7 +540,6 @@ function AdminPanel() {
                 >
                     Gestionar Complejos
                 </button>
-                {/* Modificación para que ADMIN no vea "Gestionar Reservas" ni "Ver Estadísticas" si esa es la intención */}
                 {isComplexOwner && (
                     <button
                         className={`admin-tab-button ${activeTab === 'reservas' ? 'active' : ''}`}
@@ -513,7 +558,6 @@ function AdminPanel() {
                         Gestionar Usuarios
                     </button>
                 )}
-                {/* Modificación para que ADMIN no vea "Ver Estadísticas" si esa es la intención */}
                 {isComplexOwner && ( 
                     <button
                         className={`admin-tab-button ${activeTab === 'estadisticas' ? 'active' : ''}`}
@@ -527,181 +571,33 @@ function AdminPanel() {
 
             {activeTab === 'complejos' && (
                 <div className="admin-tab-content">
-                    {/* Título dinámico para el formulario */}
                     <h2>{editingComplejo?.id ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
 
-                    {/* Mensajes informativos según el rol y si se está editando */}
                     {isAdmin && !editingComplejo?.id && ( 
-                        <p className="info-message">Como Administrador General, puedes crear y editar cualquier complejo. Puedes asignarlos a un propietario existente.</p>
+                        <p className="info-message">Como **Administrador General**, puedes crear y editar cualquier complejo. Puedes asignarlos a un propietario existente.</p>
                     )}
                     {isComplexOwner && !editingComplejo?.id && complejos.length > 0 && ( 
-                        <p className="info-message">Selecciona un complejo de la lista para gestionarlo.</p>
+                        <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Para crear nuevos complejos, contacta a un Administrador.</p>
                     )}
                     {isComplexOwner && !editingComplejo?.id && complejos.length === 0 && ( 
                         <p className="info-message">No tienes complejos registrados. Contacta a un administrador para agregar el tuyo.</p>
                     )}
 
-                    {/* Formulario de Creación/Edición: Se muestra si es ADMIN o si es COMPLEX_OWNER Y está editando */}
-                    {(isAdmin || (isComplexOwner && editingComplejo?.id)) ? ( 
-                        <form className="admin-complejo-form" onSubmit={handleSaveComplejo}>
-                            <h3>Datos Generales del Complejo</h3>
-                            <div className="admin-form-group">
-                                <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
-                                <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre} onChange={handleComplejoFormChange} required placeholder='Ej: El Alargue' />
-                            </div>
-
-                            {/* El campo emailPropietario solo es relevante para ADMIN al CREAR un complejo */}
-                            {isAdmin && !editingComplejo?.id && ( 
-                                <div className="admin-form-group">
-                                    <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
-                                    <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo?.id && isAdmin} placeholder='dueño@ejemplo.com' />
-                                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol &quot;COMPLEX_OWNER&quot; si no lo tiene.</p>
-                                </div>
-                            )}
-                            
-                            <> {/* Este fragmento <> está dentro del condicional padre */}
-                                <div className="admin-form-group">
-                                    <label htmlFor="descripcion">Descripción:</label>
-                                    <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
-                                </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
-                                    <input type="text" id="ubicacion" name="ubicacion" value={nuevoComplejoAdmin.ubicacion} onChange={handleComplejoFormChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
-                                </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="telefono">Teléfono:</label>
-                                    <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
-                                    </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="fotoUrl">URL de Foto Principal:</label>
-                                    <input type="url" id="fotoUrl" name="fotoUrl" value={nuevoComplejoAdmin.fotoUrl} onChange={handleComplejoFormChange} placeholder='https://ejemplo.com/foto_complejo.jpg' />
-                                </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="horarioApertura">Horario Apertura: <span className="obligatorio">*</span></label>
-                                    <input type="time" id="horarioApertura" name="horarioApertura" value={nuevoComplejoAdmin.horarioApertura} onChange={handleComplejoFormChange} required />
-                                </div>
-                                <div className="admin-form-group">
-                                    <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
-                                    <input type="time" id="horarioCierre" name="horarioCierre" value={nuevoComplejoAdmin.horarioCierre} onChange={handleComplejoFormChange} required />
-                                </div>
-                                
-                                <h3>Detalles de Canchas</h3>
-                                <div className="canchas-dinamicas-container">
-                                    {nuevoComplejoAdmin.canchas.map((cancha, index) => (
-                                        <div key={index} className="cancha-item-form">
-                                            <h4>Cancha #{index + 1}</h4>
-                                            <div className="admin-form-group">
-                                                <label htmlFor={`tipoCancha-${index}`}>Tipo de Cancha: <span className="obligatorio">*</span></label>
-                                                <select
-                                                    id={`tipoCancha-${index}`}
-                                                    name="tipoCancha"
-                                                    value={cancha.tipoCancha}
-                                                    onChange={(e) => handleCanchaChange(index, e)}
-                                                    required
-                                                >
-                                                    <option value="">Selecciona un tipo</option>
-                                                    <option value="Fútbol 5">Fútbol 5</option>
-                                                    <option value="Fútbol 7">Fútbol 7</option>
-                                                    <option value="Fútbol 11">Fútbol 11</option>
-                                                    <option value="Pádel">Pádel</option>
-                                                    <option value="Tenis">Tenis</option>
-                                                    <option value="Básquet">Básquet</option>
-                                                </select>
-                                            </div>
-                                            <div className="admin-form-group">
-                                                <label htmlFor={`cantidad-${index}`}>Cantidad de Canchas de este Tipo: <span className="obligatorio">*</span></label>
-                                                <input
-                                                    type="number"
-                                                    id={`cantidad-${index}`}
-                                                    name="cantidad"
-                                                    value={cancha.cantidad}
-                                                    onChange={(e) => handleCanchaChange(index, e)}
-                                                    required
-                                                    min="1"
-                                                    placeholder='Ej: 6'
-                                                />
-                                            </div>
-                                            <div className="admin-form-group">
-                                                <label htmlFor={`precioHora-${index}`}>Precio por Hora ($): <span className="obligatorio">*</span></label>
-                                                <input
-                                                    type="number"
-                                                    id={`precioHora-${index}`}
-                                                    name="precioHora"
-                                                    value={cancha.precioHora}
-                                                    onChange={(e) => handleCanchaChange(index, e)}
-                                                    required
-                                                    step="0.01"
-                                                    min="0"
-                                                    placeholder='Ej: 35000.00'
-                                                />
-                                            </div>
-                                            <div className="admin-form-group">
-                                                <label htmlFor={`superficie-${index}`}>Superficie: <span className="obligatorio">*</span></label>
-                                                <select
-                                                    id={`superficie-${index}`}
-                                                    name="superficie"
-                                                    value={cancha.superficie}
-                                                    onChange={(e) => handleCanchaChange(index, e)}
-                                                    required
-                                                >
-                                                    <option value="">Selecciona una superficie</option>
-                                                    <option value="Césped Sintético">Césped Sintético</option>
-                                                    <option value="Polvo de Ladrillo">Polvo de Ladrillo</option>
-                                                    <option value="Cemento">Cemento</option>
-                                                    <option value="Parquet">Parquet</option>
-                                                </select>
-                                            </div>
-                                            <div className="admin-form-group checkbox">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`iluminacion-${index}`}
-                                                    name="iluminacion"
-                                                    checked={cancha.iluminacion}
-                                                    onChange={(e) => handleCanchaChange(index, e)}
-                                                />
-                                                <label htmlFor={`iluminacion-${index}`}>Tiene Iluminación</label>
-                                            </div>
-                                            <div className="admin-form-group checkbox">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`techo-${index}`}
-                                                    name="techo"
-                                                    checked={cancha.techo}
-                                                    onChange={(e) => handleCanchaChange(index, e)}
-                                                />
-                                                <label htmlFor={`techo-${index}`}>Tiene Techo</label>
-                                            </div>
-                                            {nuevoComplejoAdmin.canchas.length > 1 && (
-                                                <button type="button" className="admin-btn-delete remove-cancha-btn" onClick={() => handleRemoveCancha(index)}>
-                                                    Eliminar Cancha
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                                <button type="button" className="admin-btn-add" onClick={handleAddCancha}>
-                                    Agregar Tipo de Cancha
-                                </button>
-                            </>
-                            {/* FIN de los campos de detalle */}
-
-                            <div className="admin-form-buttons">
-                                <button type="submit" className="admin-btn-save">
-                                    {editingComplejo?.id ? 'Actualizar Complejo' : 'Crear Complejo'}
-                                </button>
-                                {editingComplejo?.id && ( // Solo muestra el botón si hay un ID de complejo en edición
-                                    <button type="button" className="admin-btn-cancel" onClick={cancelEditingComplejo}>
-                                        Cancelar Edición
-                                    </button>
-                                )}
-                            </div>
-                        </form>
-                    ) : (
-                        // Mensaje para COMPLEX_OWNER cuando no está editando y el formulario no se muestra
-                        isComplexOwner && !editingComplejo?.id && (
-                            <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Para crear nuevos complejos, contacta a un Administrador.</p>
-                        )
+                    {(isAdmin || (isComplexOwner && editingComplejo?.id)) && ( 
+                        <ComplejoForm
+                            nuevoComplejoAdmin={nuevoComplejoAdmin}
+                            handleComplejoFormChange={handleComplejoFormChange}
+                            handleCanchaChange={handleCanchaChange}
+                            handleAddCancha={handleAddCancha}
+                            handleRemoveCancha={handleRemoveCancha}
+                            handleSaveComplejo={handleSaveComplejo}
+                            editingComplejo={editingComplejo}
+                            cancelEditingComplejo={cancelEditingComplejo}
+                            isAdmin={isAdmin}
+                            mensaje={mensaje}
+                        />
                     )}
+                    
                     <div className="admin-list-container">
                         <h3>{isAdmin ? 'Todos los Complejos' : 'Mis Complejos'}</h3>
                         {isLoadingData ? <p>Cargando complejos...</p> : (
@@ -749,7 +645,6 @@ function AdminPanel() {
                 </div>
             )}
 
-            {/* Sección de Reservas: Visible para ADMIN o COMPLEX_OWNER */}
             {activeTab === 'reservas' && (isAdmin || isComplexOwner) && (
                 <div className="admin-tab-content">
                     <h2>Reservas Registradas</h2>
@@ -814,7 +709,6 @@ function AdminPanel() {
                 </div>
             )}
 
-            {/* Sección de Usuarios: Visible solo para ADMIN */}
             {activeTab === 'usuarios' && isAdmin && (
                 <div className="admin-tab-content">
                     <h2>Gestionar Usuarios y Roles</h2>
@@ -912,10 +806,20 @@ function AdminPanel() {
                 </div>
             )}
 
-            {/* Sección de Estadísticas: Visible para ADMIN o COMPLEX_OWNER */}
             {activeTab === 'estadisticas' && (isAdmin || isComplexOwner) && roleForStats && (
                 <AdminEstadisticas userRole={roleForStats} />
             )}
+
+            <ConfirmationModal 
+                isOpen={isModalOpen}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                onConfirm={modalConfig.onConfirm}
+                onCancel={() => setIsModalOpen(false)}
+                confirmButtonText={modalConfig.confirmButtonText}
+                cancelButtonText={modalConfig.cancelButtonText}
+                type={modalConfig.type}
+            />
         </div>
     );
 }

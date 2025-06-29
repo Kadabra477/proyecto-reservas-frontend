@@ -1,11 +1,16 @@
+// frontend/src/components/Complejos/ComplejoCard/ComplejoCard.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './ComplejoCard.css'; // Asegúrate de que esta ruta sea correcta
+import './ComplejoCard.css'; // RUTA AJUSTADA
 
-const placeholderImage = '/imagenes/default-complejo.png'; // Imagen por defecto si no hay foto
+const placeholderImage = '/imagenes/default-complejo.png'; 
 
 function ComplejoCard({ complejo }) {
     const navigate = useNavigate();
+
+    const handleViewDetailsClick = () => {
+        navigate(`/complejos/${complejo.id}`);
+    };
 
     const handleReserveClick = () => {
         navigate('/reservar', { state: { preselectedComplejoId: complejo.id } });
@@ -28,16 +33,18 @@ function ComplejoCard({ complejo }) {
             <ul className="complejo-card-cancha-types">
                 {Object.keys(complejo.canchaCounts).map(tipo => (
                     <li key={tipo} className="cancha-type-item">
-                        <span className="type-name"><strong>{tipo}</strong>: {complejo.canchaCounts[tipo]} canchas</span>
-                        {complejo.canchaPrices && complejo.canchaPrices[tipo] != null && (
-                            <span className="type-price"> - ${formatPrice(complejo.canchaPrices[tipo])}/hr</span>
-                        )}
+                        <div className="type-main-info">
+                            <span className="type-name"><strong>{tipo}</strong>: {complejo.canchaCounts[tipo]} canchas</span>
+                            {complejo.canchaPrices && complejo.canchaPrices[tipo] != null && (
+                                <span className="type-price">${formatPrice(complejo.canchaPrices[tipo])}/hr</span>
+                            )}
+                        </div>
                         <div className="type-features">
                             {complejo.canchaSurfaces && complejo.canchaSurfaces[tipo] && (
-                                <span className="type-surface"> ({complejo.canchaSurfaces[tipo]})</span>
+                                <span className="feature-chip surface">{complejo.canchaSurfaces[tipo]}</span>
                             )}
-                            {complejo.canchaIluminacion && complejo.canchaIluminacion[tipo] ? <span title="Con Iluminación">💡</span> : ''}
-                            {complejo.canchaTecho && complejo.canchaTecho[tipo] ? <span title="Con Techo">☂️</span> : ''}
+                            {complejo.canchaIluminacion && complejo.canchaIluminacion[tipo] && <span className="feature-chip icon" title="Con Iluminación">💡 Iluminación</span>}
+                            {complejo.canchaTecho && complejo.canchaTecho[tipo] && <span className="feature-chip icon" title="Con Techo">☂️ Techo</span>}
                         </div>
                     </li>
                 ))}
@@ -69,12 +76,20 @@ function ComplejoCard({ complejo }) {
                 <h4>Tipos de Canchas:</h4>
                 {renderCanchaTypes()}
 
-                <button
-                    onClick={handleReserveClick}
-                    className="complejo-card-button"
-                >
-                    Reservar en este Complejo
-                </button>
+                <div className="complejo-card-buttons-container">
+                    <button
+                        onClick={handleViewDetailsClick}
+                        className="complejo-card-button secondary"
+                    >
+                        Ver Detalles
+                    </button>
+                    <button
+                        onClick={handleReserveClick}
+                        className="complejo-card-button primary"
+                    >
+                        Reservar
+                    </button>
+                </div>
             </div>
         </div>
     );
