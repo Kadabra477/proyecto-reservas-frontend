@@ -21,12 +21,13 @@ function DashboardUsuario() {
         setLoading(true);
         setError(null);
         try {
-            // CAMBIO: La ruta correcta para obtener reservas del usuario es /api/reservas/usuario
+            // RUTA CORREGIDA: Accede a /api/reservas/usuario para obtener las reservas del usuario logueado
             const reservasRes = await api.get('/reservas/usuario'); 
             setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
         } catch (err) {
             console.error("Error al recargar reservas:", err);
-            if (!(err.response && err.response.status === 401)) {
+            // Si no es un error de autenticación (401), muestra un mensaje de error
+            if (!(err.response && err.response.status === 401)) { 
                 setError("No se pudieron recargar las reservas. Intenta de nuevo.");
             }
             setMisReservas([]);
@@ -53,7 +54,7 @@ function DashboardUsuario() {
                     setBio(userData.bio || '');
                 }
 
-                // CAMBIO: La ruta correcta para obtener reservas del usuario es /api/reservas/usuario
+                // RUTA CORREGIDA: Accede a /api/reservas/usuario para obtener las reservas del usuario logueado
                 const reservasRes = await api.get('/reservas/usuario');
                 if (isMounted) {
                     setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
@@ -62,7 +63,7 @@ function DashboardUsuario() {
             } catch (err) {
                 console.error("Error al cargar datos del dashboard:", err);
                 if (isMounted) {
-                    if (!(err.response && err.response.status === 401)) { // Evita mostrar error si es un 401 (ya manejado por interceptor)
+                    if (!(err.response && err.response.status === 401)) { 
                         setError("No se pudieron cargar los datos del perfil o las reservas. Intenta recargar la página.");
                     }
                     setMisReservas([]);
@@ -126,7 +127,7 @@ function DashboardUsuario() {
     const formatLocalDateTime = (dateTimeString) => {
         if (!dateTimeString) return 'Fecha no disponible';
         try {
-            // Asegurarse de formatear a la zona horaria correcta de Argentina
+            // Formatear a la zona horaria de Argentina para consistencia
             const date = new Date(dateTimeString);
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' };
             return date.toLocaleString('es-AR', options);

@@ -1,4 +1,3 @@
-// frontend/src/App.js
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     BrowserRouter as Router,
@@ -117,21 +116,14 @@ function App() {
             }
 
             try {
-                // Modificado: Se elimina la validación explícita del token aquí
-                // si el axios interceptor ya se encarga de los 401 y redirecciones.
-                // Si este endpoint /auth/validate-token está dando 404 constantemente,
-                // la validación real la hará el backend al intentar acceder a una ruta protegida.
-                // const res = await fetch(`${process.env.REACT_APP_API_URL}/auth/validate-token`, {
-                //     method: "GET",
-                //     headers: {
-                //         "Authorization": `Bearer ${token}`
-                //     }
-                // });
-                // if (!res.ok) throw new Error("Token inválido o expirado");
+                // Se elimina la validación explícita del token aquí porque el interceptor de Axios
+                // y el backend (SecurityConfig) manejan los 401s y la expiración de forma centralizada.
+                // Si el token es inválido/expirado, Axios lo detectará y redirigirá.
 
                 const decodedToken = jwtDecode(token);
-                // Usar la hora actual en Argentina para verificar la expiración
-                const currentTimeArgentinaSeconds = Math.floor(new Date().toLocaleString('en-US', {timeZone: 'America/Argentina/Buenos_Aires', hour12: false}).getTime() / 1000);
+                // Obtener la hora actual de Argentina para verificar la expiración del token
+                const nowArgentina = new Date().toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
+                const currentTimeArgentinaSeconds = Math.floor(new Date(nowArgentina).getTime() / 1000);
                 
                 if (decodedToken.exp < currentTimeArgentinaSeconds) {
                     throw new Error("Token expirado (hora de Argentina)");

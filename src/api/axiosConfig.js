@@ -1,4 +1,3 @@
-// frontend/src/api/axiosConfig.js
 import axios from 'axios';
 
 // La URL base para el backend, SIN el '/api'
@@ -10,7 +9,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: false, // Puedes cambiar a true si manejas cookies/sesiones en el backend
+  withCredentials: false, 
 });
 
 // Interceptor para añadir el token JWT a cada petición saliente
@@ -39,7 +38,7 @@ api.interceptors.response.use(
       localStorage.removeItem('jwtToken');
       localStorage.removeItem('username');
       localStorage.removeItem('nombreCompleto');
-      localStorage.removeItem('userRoles'); // Cambiado de 'userRole' a 'userRoles'
+      localStorage.removeItem('userRoles'); // CORREGIDO: Usar 'userRoles' consistentemente
       // Redirigir al login
       window.location.href = '/login?unauthorized=true';
     }
