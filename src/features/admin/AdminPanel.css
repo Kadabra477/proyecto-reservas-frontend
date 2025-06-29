@@ -27,7 +27,6 @@
     text-align: center;
     font-weight: 600;
     border-left: 5px solid;
-    animation: fadeOutMessage 5s forwards;
     max-width: 800px; 
     opacity: 1; 
 }
