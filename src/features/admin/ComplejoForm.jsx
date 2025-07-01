@@ -163,7 +163,7 @@ const ComplejoForm = ({
             <div className="canchas-dinamicas-container">
                 {nuevoComplejoAdmin.canchas.map((cancha, index) => (
                     <div key={index} className="cancha-item-form">
-                        <h4>Cancha #{index + 1}</h4>
+                        <h4>Espacio deportivo #{index + 1}</h4>
                         <div className="admin-form-group">
                             <label htmlFor={`tipoCancha-${index}`}>Tipo de Cancha: <span className="obligatorio">*</span></label>
                             <select
