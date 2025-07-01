@@ -105,12 +105,13 @@
 /* Botón Iniciar Sesión */
 .btn-navbar-primary {
     background-color: var(--primary);
-    color: white;
+    color: white; /* Asegurar texto blanco */
     border-color: var(--primary);
 }
 
 .btn-navbar-primary:hover {
     background-color: var(--primary-dark);
+    color: white; /* AÑADIDO: Asegurar texto blanco en hover */
     border-color: var(--primary-dark);
     transform: translateY(-1px); /* Efecto de "levantar" sutil */
 }
@@ -118,12 +119,13 @@
 /* Botón Registrarse */
 .btn-navbar-secondary {
     background-color: var(--secondary); /* Fondo gris */
-    color: white;
+    color: white; /* Asegurar texto blanco */
     border-color: var(--secondary);
 }
 
 .btn-navbar-secondary:hover {
     background-color: var(--secondary-dark); /* Gris más oscuro */
+    color: white; /* AÑADIDO: Asegurar texto blanco en hover */
     border-color: var(--secondary-dark);
     transform: translateY(-1px);
 }
@@ -137,7 +139,7 @@
 
 .btn-navbar-logout:hover {
     background-color: var(--danger);
-    color: white;
+    color: white; /* AÑADIDO: Asegurar texto blanco en hover */
     transform: translateY(-1px);
 }
 
