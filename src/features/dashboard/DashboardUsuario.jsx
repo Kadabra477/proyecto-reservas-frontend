@@ -21,12 +21,10 @@ function DashboardUsuario() {
         setLoading(true);
         setError(null);
         try {
-            // RUTA CORREGIDA: Accede a /api/reservas/usuario para obtener las reservas del usuario logueado
             const reservasRes = await api.get('/reservas/usuario'); 
             setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
         } catch (err) {
             console.error("Error al recargar reservas:", err);
-            // Si no es un error de autenticación (401), muestra un mensaje de error
             if (!(err.response && err.response.status === 401)) { 
                 setError("No se pudieron recargar las reservas. Intenta de nuevo.");
             }
@@ -54,7 +52,6 @@ function DashboardUsuario() {
                     setBio(userData.bio || '');
                 }
 
-                // RUTA CORREGIDA: Accede a /api/reservas/usuario para obtener las reservas del usuario logueado
                 const reservasRes = await api.get('/reservas/usuario');
                 if (isMounted) {
                     setMisReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
@@ -127,7 +124,8 @@ function DashboardUsuario() {
     const formatLocalDateTime = (dateTimeString) => {
         if (!dateTimeString) return 'Fecha no disponible';
         try {
-            // Formatear a la zona horaria de Argentina para consistencia
+            // Se asume que el backend ya envía LocalDateTime en la zona horaria correcta (Argentina GMT-3).
+            // Directamente formateamos usando 'es-AR' y la opción timeZone para consistencia visual.
             const date = new Date(dateTimeString);
             const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Argentina/Buenos_Aires' };
             return date.toLocaleString('es-AR', options);
@@ -191,31 +189,49 @@ function DashboardUsuario() {
         }
     };
 
-    const formatReservaEstado = (estado) => {
+    const formatReservaEstado = (estado, pagada, metodoPago) => {
         if (!estado) return 'Desconocido';
-        estado = estado.toLowerCase();
+        estado = estado.toLowerCase(); // Normalizamos a minúsculas
+        metodoPago = metodoPago ? metodoPago.toLowerCase() : '';
+
         switch (estado) {
-            case 'pendiente': return 'Pendiente';
-            case 'confirmada': return 'Confirmada';
-            case 'confirmada_efectivo': return 'Confirmada (Efectivo)';
-            case 'pendiente_pago_mp': return 'Pendiente (Mercado Pago)';
-            case 'pagada': return 'Pagada';
-            case 'rechazada_pago_mp': return 'Rechazada (Mercado Pago)';
-            case 'cancelada': return 'Cancelada';
+            case 'pagada': 
+                return 'Pagada';
+            case 'confirmada': // Un estado genérico de confirmada
+                if (metodoPago === 'efectivo' && !pagada) return 'Pendiente (Efectivo)';
+                return 'Confirmada';
+            case 'pendiente_pago_efectivo': 
+                return 'Pendiente (Efectivo)'; // Renombrado para claridad
+            case 'pendiente_pago_mp': 
+                return 'Pendiente (Mercado Pago)';
+            case 'pendiente': // Para estados iniciales que no tienen método de pago definido aún
+                return 'Pendiente';
+            case 'rechazada_pago_mp': 
+                return 'Rechazada (Mercado Pago)';
+            case 'cancelada': 
+                return 'Cancelada';
             default: return estado.charAt(0).toUpperCase() + estado.slice(1);
         }
     };
 
-    const getStatusClass = (estado) => {
+    const getStatusClass = (estado, pagada, metodoPago) => {
         estado = estado.toLowerCase();
+        metodoPago = metodoPago ? metodoPago.toLowerCase() : '';
+
+        if (pagada) return 'status-pagada';
+
         switch (estado) {
-            case 'pagada': return 'status-pagada';
-            case 'confirmada':
-            case 'confirmada_efectivo': return 'status-confirmada';
             case 'pendiente':
-            case 'pendiente_pago_mp': return 'status-pendiente';
+            case 'pendiente_pago_mp': 
+            case 'pendiente_pago_efectivo':
+                return 'status-pendiente'; // Unificamos los pendientes a una misma clase
+            case 'confirmada':
+                // Si es confirmada pero no pagada y es efectivo, también es "pendiente" para fines de estilo.
+                if (metodoPago === 'efectivo' && !pagada) return 'status-pendiente';
+                return 'status-confirmada';
             case 'rechazada_pago_mp':
-            case 'cancelada': return 'status-cancelada';
+            case 'cancelada': 
+                return 'status-cancelada'; // Unificamos cancelada/rechazada a una misma clase de "rojo"
             default: return 'status-desconocido';
         }
     };
@@ -243,15 +259,21 @@ function DashboardUsuario() {
     }
 
     // Identificar la próxima reserva si existe
-    // Asegurarse de comparar fechas en la misma zona horaria para consistencia
+    // Convertir la hora local del cliente a la hora de Argentina para la comparación.
+    // Esto es crítico para que las "próximas reservas" sean consistentes.
     const nowArgentinaClient = new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Argentina/Buenos_Aires'}));
-    const proximasReservas = misReservas.filter(reserva => new Date(reserva.fechaHora) > nowArgentinaClient)
-                                      .sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora));
-    const proximaReserva = proximasReservas.length > 0 ? proximasReservas[0] : null;
+    
+    // Filtrar y ordenar próximas reservas
+    const proximasReservas = misReservas
+        .filter(reserva => new Date(reserva.fechaHora) > nowArgentinaClient)
+        .sort((a, b) => new Date(a.fechaHora) - new Date(b.fechaHora)); // Orden ascendente
 
-    // Reservas pasadas
-    const reservasPasadas = misReservas.filter(reserva => new Date(reserva.fechaHora) <= nowArgentinaClient)
-                                      .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora)); 
+    // Filtrar y ordenar reservas pasadas
+    const reservasPasadas = misReservas
+        .filter(reserva => new Date(reserva.fechaHora) <= nowArgentinaClient)
+        .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora)); // Orden descendente
+
+    const proximaReserva = proximasReservas.length > 0 ? proximasReservas[0] : null;
 
 
     return (
@@ -335,8 +357,8 @@ function DashboardUsuario() {
                                 <div className="reserva-highlight-details">
                                     <p><strong>{proximaReserva.complejoNombre}</strong></p>
                                     <p>{proximaReserva.tipoCanchaReservada} - {formatLocalDateTime(proximaReserva.fechaHora)}</p>
-                                    <span className={`reserva-status-badge ${getStatusClass(proximaReserva.estado)}`}>
-                                        {formatReservaEstado(proximaReserva.estado)}
+                                    <span className={`reserva-status-badge ${getStatusClass(proximaReserva.estado, proximaReserva.pagada, proximaReserva.metodoPago)}`}>
+                                        {formatReservaEstado(proximaReserva.estado, proximaReserva.pagada, proximaReserva.metodoPago)}
                                     </span>
                                 </div>
                             </div>
@@ -357,13 +379,13 @@ function DashboardUsuario() {
                 <h2>Todas tus Reservas ({misReservas.length})</h2>
                 {misReservas.length > 0 ? (
                     <div className="reservas-grid">
-                        {/* Mapear todas las reservas, ya ordenadas si quieres mostrar próximas primero */}
+                        {/* Mapear todas las reservas, uniendo próximas y pasadas */}
                         {proximasReservas.concat(reservasPasadas).map((reserva) => (
                             <div key={reserva.id} className="reserva-item-card" onClick={() => handleOpenModal(reserva)}>
                                 <div className="reserva-card-header">
                                     <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
-                                    <span className={`reserva-status-badge ${getStatusClass(reserva.estado)}`}>
-                                        {formatReservaEstado(reserva.estado)}
+                                    <span className={`reserva-status-badge ${getStatusClass(reserva.estado, reserva.pagada, reserva.metodoPago)}`}>
+                                        {formatReservaEstado(reserva.estado, reserva.pagada, reserva.metodoPago)}
                                     </span>
                                 </div>
                                 <p className="reserva-card-detail"><strong>Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
@@ -395,13 +417,14 @@ function DashboardUsuario() {
                         <p><strong>Cancha Asignada:</strong> {modalReserva.nombreCanchaAsignada || 'N/A'}</p>
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
                         <p><strong>Precio Total:</strong> ${modalReserva.precioTotal ? modalReserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                        <p><strong>Estado:</strong> {formatReservaEstado(modalReserva.estado)}</p>
+                        <p><strong>Estado:</strong> {formatReservaEstado(modalReserva.estado, modalReserva.pagada, modalReserva.metodoPago)}</p>
                         <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${capitalizeFirstLetter(modalReserva.metodoPago || '?')})` : 'Pendiente de Pago'}</p>
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
                         <p><strong>DNI:</strong> {modalReserva.dni || '-'}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
 
-                        {modalReserva.jugadores && modalReserva.jugadores.length > 0 && (
+                        {/* Se remueve la muestra de jugadores y equipos ya que la funcionalidad es en frontend */}
+                        {/* {modalReserva.jugadores && modalReserva.jugadores.length > 0 && (
                             <p><strong>Jugadores:</strong> {modalReserva.jugadores.join(', ')}</p>
                         )}
                         {modalReserva.equipo1 && modalReserva.equipo1.length > 0 && (
@@ -409,7 +432,7 @@ function DashboardUsuario() {
                         )}
                         {modalReserva.equipo2 && modalReserva.equipo2.length > 0 && (
                             <p><strong>Equipo 2:</strong> {Array.from(modalReserva.equipo2).join(', ')}</p>
-                        )}
+                        )} */}
 
                         {modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_efectivo' && (
                             <button
@@ -451,6 +474,7 @@ function DashboardUsuario() {
                             </button>
                         )}
 
+                        {/* Textos y clases de estado unificados */}
                         {modalReserva.estado === 'pendiente' && (
                             <p className="text-warning">Esta reserva está pendiente de procesamiento inicial. Las opciones de pago/boleto aparecerán una vez el método de pago se determine.</p>
                         )}
