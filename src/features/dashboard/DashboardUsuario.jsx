@@ -191,7 +191,6 @@ function DashboardUsuario() {
         }
     };
 
-    // Función UNIFICADA para obtener el texto del estado y pago
     const getCombinedStatusAndPaymentInfo = (estado, pagada, metodoPago) => {
         estado = estado ? estado.toLowerCase() : 'desconocido';
         metodoPago = metodoPago ? metodoPago.toLowerCase() : '';
@@ -236,7 +235,6 @@ function DashboardUsuario() {
         );
     };
 
-    // Función para obtener la clase CSS del estado (colores)
     const getStatusClass = (estado, pagada, metodoPago) => {
         estado = estado ? estado.toLowerCase() : 'desconocido';
         metodoPago = metodoPago ? metodoPago.toLowerCase() : '';
@@ -279,16 +277,13 @@ function DashboardUsuario() {
         );
     }
 
-    // Obtener la hora actual de Argentina para comparaciones de fecha/hora
     const nowArgentinaClient = new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Argentina/Buenos_Aires'}));
     
     // --- LÓGICA MEJORADA PARA "RESUMEN DE RESERVAS" ---
-    // 1. Filtrar solo las reservas activas (no canceladas/rechazadas)
     const activeReservas = misReservas.filter(reserva => 
         reserva.estado !== 'cancelada' && reserva.estado !== 'rechazada_pago_mp'
     );
 
-    // 2. Ordenar todas las reservas activas por fecha y hora ascendente
     const sortedActiveReservas = activeReservas.sort((a, b) => 
         new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime()
     );
@@ -296,7 +291,6 @@ function DashboardUsuario() {
     let nextOrLastActiveReserva = null;
     let nextOrLastActiveReservaLabel = '';
 
-    // Buscar la próxima reserva (estrictamente futura)
     const upcomingReservas = sortedActiveReservas.filter(reserva => 
         new Date(reserva.fechaHora).getTime() > nowArgentinaClient.getTime()
     );
@@ -305,29 +299,21 @@ function DashboardUsuario() {
         nextOrLastActiveReserva = upcomingReservas[0];
         nextOrLastActiveReservaLabel = 'Tu Próxima Reserva:';
     } else if (activeReservas.length > 0) {
-        // Si no hay próximas, encontrar la última reserva activa que ya pasó
-        // Para esto, ordenamos las activas en orden descendente y tomamos la primera
         const mostRecentPastActiveReservas = activeReservas.sort((a, b) =>
             new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime()
         );
         nextOrLastActiveReserva = mostRecentPastActiveReservas[0];
-        nextOrLastActiveReservaLabel = 'Tu Última Reserva:';
+        nextOrLastActiveReservaLabel = 'Tu Última Reserva Activa:'; // Cambio de etiqueta
     }
 
-    // --- FIN LÓGICA MEJORADA PARA "RESUMEN DE RESERVAS" ---
-
-
     // --- LÓGICA PARA "TODAS TUS RESERVAS" (SEPARANDO FUTURAS E HISTORIAL) ---
-    // Ya tenemos 'upcomingReservas' del paso anterior, solo necesitamos el historial
     const historialReservas = activeReservas
         .filter(reserva => new Date(reserva.fechaHora).getTime() <= nowArgentinaClient.getTime())
-        .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime()); // De más reciente a más antigua
+        .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime());
     
-    // Reservas canceladas/rechazadas (pueden ser mostradas en su propia sección o al final del historial)
     const cancelledOrRejectedReservas = misReservas.filter(reserva => 
         reserva.estado === 'cancelada' || reserva.estado === 'rechazada_pago_mp'
     ).sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime());
-    // --- FIN LÓGICA PARA "TODAS TUS RESERVAS" ---
 
 
     return (
@@ -423,6 +409,7 @@ function DashboardUsuario() {
 
                     <div className="action-buttons-group">
                         <Link to="/complejos" className="btn btn-primary btn-full-width">Hacer una Nueva Reserva</Link>
+                        {/* El botón ahora desplaza a la sección de próximas reservas */}
                         <button onClick={() => document.getElementById('upcoming-reservations-section').scrollIntoView({ behavior: 'smooth' })} className="btn btn-secondary btn-full-width">Ver todas mis reservas</button>
                     </div>
                 </div>
@@ -434,7 +421,7 @@ function DashboardUsuario() {
                 {upcomingReservas.length > 0 ? (
                     <div className="reservas-grid">
                         {upcomingReservas.map((reserva) => (
-                            <div key={reserva.id} className="reserva-item-card" onClick={() => handleOpenModal(reserva)}>
+                            <div key={reserva.id} className="reserva-item-card" onClick={() => handleOpenModal(reserva)}> {/* Estas sí son cliqueables */}
                                 <div className="reserva-card-header">
                                     <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
                                     <span className={`reserva-status-badge ${getStatusClass(reserva.estado, reserva.pagada, reserva.metodoPago)}`}>
@@ -458,7 +445,12 @@ function DashboardUsuario() {
                 {historialReservas.length > 0 ? (
                     <div className="reservas-grid">
                         {historialReservas.map((reserva) => (
-                            <div key={reserva.id} className="reserva-item-card status-past" onClick={() => handleOpenModal(reserva)}> {/* Añadida clase status-past */}
+                            <div 
+                                key={reserva.id} 
+                                className="reserva-item-card status-past"
+                                // REMOVIDO: onClick para que no sea cliqueable
+                                // onClick={() => handleOpenModal(reserva)} 
+                            > 
                                 <div className="reserva-card-header">
                                     <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
                                     <span className={`reserva-status-badge ${getStatusClass(reserva.estado, reserva.pagada, reserva.metodoPago)}`}>
@@ -482,7 +474,12 @@ function DashboardUsuario() {
                     <h2>Reservas Canceladas/Rechazadas ({cancelledOrRejectedReservas.length})</h2>
                     <div className="reservas-grid">
                         {cancelledOrRejectedReservas.map((reserva) => (
-                            <div key={reserva.id} className="reserva-item-card status-cancelled" onClick={() => handleOpenModal(reserva)}> {/* Añadida clase status-cancelled */}
+                            <div 
+                                key={reserva.id} 
+                                className="reserva-item-card status-cancelled"
+                                // REMOVIDO: onClick para que no sea cliqueable
+                                // onClick={() => handleOpenModal(reserva)}
+                            > 
                                 <div className="reserva-card-header">
                                     <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
                                     <span className={`reserva-status-badge ${getStatusClass(reserva.estado, reserva.pagada, reserva.metodoPago)}`}>
@@ -515,7 +512,9 @@ function DashboardUsuario() {
                         <p><strong>DNI:</strong> {modalReserva.dni || '-'}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
                         
-                        {modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_efectivo' && (
+                        {/* El botón PDF solo se mostrará si la reserva es futura o activa/pendiente (no histórica) */}
+                        {(new Date(modalReserva.fechaHora).getTime() > nowArgentinaClient.getTime()) && 
+                         modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_efectivo' && (
                             <button
                                 className="btn btn-info btn-mostrar-boleto"
                                 onClick={() => handleDescargarPdf(modalReserva.id)}
@@ -524,7 +523,8 @@ function DashboardUsuario() {
                             </button>
                         )}
 
-                        {modalReserva.metodoPago === 'mercadopago' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_mp' && (
+                        {(new Date(modalReserva.fechaHora).getTime() > nowArgentinaClient.getTime()) && 
+                         modalReserva.metodoPago === 'mercadopago' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_mp' && (
                             <button
                                 className="btn btn-success btn-pagar-mp"
                                 onClick={async () => {
