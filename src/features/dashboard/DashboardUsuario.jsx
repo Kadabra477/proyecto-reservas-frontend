@@ -191,7 +191,7 @@ function DashboardUsuario() {
         }
     };
 
-    // NUEVA FUNCIÓN: Combina estado y método de pago en una sola línea de texto con icono opcional
+    // Función UNIFICADA para obtener el texto del estado y pago
     const getCombinedStatusAndPaymentInfo = (estado, pagada, metodoPago) => {
         estado = estado ? estado.toLowerCase() : 'desconocido';
         metodoPago = metodoPago ? metodoPago.toLowerCase() : '';
@@ -279,17 +279,55 @@ function DashboardUsuario() {
         );
     }
 
+    // Obtener la hora actual de Argentina para comparaciones de fecha/hora
     const nowArgentinaClient = new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Argentina/Buenos_Aires'}));
     
-    const proximasReservas = misReservas
-        .filter(reserva => new Date(reserva.fechaHora).getTime() > nowArgentinaClient.getTime())
-        .sort((a, b) => new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime()); 
+    // --- LÓGICA MEJORADA PARA "RESUMEN DE RESERVAS" ---
+    // 1. Filtrar solo las reservas activas (no canceladas/rechazadas)
+    const activeReservas = misReservas.filter(reserva => 
+        reserva.estado !== 'cancelada' && reserva.estado !== 'rechazada_pago_mp'
+    );
 
-    const reservasPasadas = misReservas
+    // 2. Ordenar todas las reservas activas por fecha y hora ascendente
+    const sortedActiveReservas = activeReservas.sort((a, b) => 
+        new Date(a.fechaHora).getTime() - new Date(b.fechaHora).getTime()
+    );
+
+    let nextOrLastActiveReserva = null;
+    let nextOrLastActiveReservaLabel = '';
+
+    // Buscar la próxima reserva (estrictamente futura)
+    const upcomingReservas = sortedActiveReservas.filter(reserva => 
+        new Date(reserva.fechaHora).getTime() > nowArgentinaClient.getTime()
+    );
+
+    if (upcomingReservas.length > 0) {
+        nextOrLastActiveReserva = upcomingReservas[0];
+        nextOrLastActiveReservaLabel = 'Tu Próxima Reserva:';
+    } else if (activeReservas.length > 0) {
+        // Si no hay próximas, encontrar la última reserva activa que ya pasó
+        // Para esto, ordenamos las activas en orden descendente y tomamos la primera
+        const mostRecentPastActiveReservas = activeReservas.sort((a, b) =>
+            new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime()
+        );
+        nextOrLastActiveReserva = mostRecentPastActiveReservas[0];
+        nextOrLastActiveReservaLabel = 'Tu Última Reserva:';
+    }
+
+    // --- FIN LÓGICA MEJORADA PARA "RESUMEN DE RESERVAS" ---
+
+
+    // --- LÓGICA PARA "TODAS TUS RESERVAS" (SEPARANDO FUTURAS E HISTORIAL) ---
+    // Ya tenemos 'upcomingReservas' del paso anterior, solo necesitamos el historial
+    const historialReservas = activeReservas
         .filter(reserva => new Date(reserva.fechaHora).getTime() <= nowArgentinaClient.getTime())
-        .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime()); 
-
-    const proximaReserva = proximasReservas.length > 0 ? proximasReservas[0] : null;
+        .sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime()); // De más reciente a más antigua
+    
+    // Reservas canceladas/rechazadas (pueden ser mostradas en su propia sección o al final del historial)
+    const cancelledOrRejectedReservas = misReservas.filter(reserva => 
+        reserva.estado === 'cancelada' || reserva.estado === 'rechazada_pago_mp'
+    ).sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime());
+    // --- FIN LÓGICA PARA "TODAS TUS RESERVAS" ---
 
 
     return (
@@ -301,7 +339,7 @@ function DashboardUsuario() {
             </div>
 
             <div className="dashboard-content-grid">
-                {/* Columna Izquierda: Detalles del Perfil */}
+                {/* Columna Izquierda: Tus Datos Personales */}
                 <div className="dashboard-section perfil-detail-card">
                     <h2>Tus Datos Personales</h2>
                     {isEditing ? (
@@ -361,41 +399,41 @@ function DashboardUsuario() {
                     )}
                 </div>
 
-                {/* Columna Derecha: Resumen de Reservas */}
+                {/* Columna Derecha: Resumen de Reservas (Próxima/Última) */}
                 <div className="dashboard-section reservations-summary-card">
                     <h2>Resumen de Reservas</h2>
                     
-                    {proximaReserva ? (
+                    {nextOrLastActiveReserva ? (
                         <div className="next-reservation-highlight">
-                            <h3>Tu Próxima Reserva:</h3>
-                            <div className="reserva-highlight-item" onClick={() => handleOpenModal(proximaReserva)}>
+                            <h3>{nextOrLastActiveReservaLabel}</h3>
+                            <div className="reserva-highlight-item" onClick={() => handleOpenModal(nextOrLastActiveReserva)}>
                                 <div className="reserva-highlight-icon">📅</div>
                                 <div className="reserva-highlight-details">
-                                    <p><strong>{proximaReserva.complejoNombre}</strong></p>
-                                    <p>{proximaReserva.tipoCanchaReservada} - {formatLocalDateTime(proximaReserva.fechaHora)}</p>
-                                    <span className={`reserva-status-badge ${getStatusClass(proximaReserva.estado, proximaReserva.pagada, proximaReserva.metodoPago)}`}>
-                                        {getCombinedStatusAndPaymentInfo(proximaReserva.estado, proximaReserva.pagada, proximaReserva.metodoPago)}
+                                    <p><strong>{nextOrLastActiveReserva.complejoNombre}</strong></p>
+                                    <p>{nextOrLastActiveReserva.tipoCanchaReservada} - {formatLocalDateTime(nextOrLastActiveReserva.fechaHora)}</p>
+                                    <span className={`reserva-status-badge ${getStatusClass(nextOrLastActiveReserva.estado, nextOrLastActiveReserva.pagada, nextOrLastActiveReserva.metodoPago)}`}>
+                                        {getCombinedStatusAndPaymentInfo(nextOrLastActiveReserva.estado, nextOrLastActiveReserva.pagada, nextOrLastActiveReserva.metodoPago)}
                                     </span>
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        <p className="dashboard-info">No tienes próximas reservas.</p>
+                        <p className="dashboard-info">No tienes reservas activas (próximas o recientes).</p>
                     )}
 
                     <div className="action-buttons-group">
                         <Link to="/complejos" className="btn btn-primary btn-full-width">Hacer una Nueva Reserva</Link>
-                        <button onClick={() => document.getElementById('past-reservations-section').scrollIntoView({ behavior: 'smooth' })} className="btn btn-secondary btn-full-width">Ver todas las reservas</button>
+                        <button onClick={() => document.getElementById('upcoming-reservations-section').scrollIntoView({ behavior: 'smooth' })} className="btn btn-secondary btn-full-width">Ver todas mis reservas</button>
                     </div>
                 </div>
             </div>
 
-            {/* Sección de Todas las Reservas (próximas y pasadas) */}
-            <div id="past-reservations-section" className="dashboard-section all-reservations-card">
-                <h2>Todas tus Reservas ({misReservas.length})</h2>
-                {misReservas.length > 0 ? (
+            {/* NUEVA SECCIÓN: Tus Próximas Reservas */}
+            <div id="upcoming-reservations-section" className="dashboard-section all-reservations-card">
+                <h2>Tus Próximas Reservas ({upcomingReservas.length})</h2>
+                {upcomingReservas.length > 0 ? (
                     <div className="reservas-grid">
-                        {proximasReservas.concat(reservasPasadas).map((reserva) => (
+                        {upcomingReservas.map((reserva) => (
                             <div key={reserva.id} className="reserva-item-card" onClick={() => handleOpenModal(reserva)}>
                                 <div className="reserva-card-header">
                                     <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
@@ -406,21 +444,60 @@ function DashboardUsuario() {
                                 <p className="reserva-card-detail"><strong>Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
                                 <p className="reserva-card-detail"><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
                                 <p className="reserva-card-detail"><strong>Precio:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                                {/* REMOVIDO: Este párrafo ya no es necesario, el estado combinado lo maneja */}
-                                {/* {reserva.metodoPago && (
-                                    <p className="reserva-card-detail payment-info">
-                                        <strong>Pago:</strong> {reserva.pagada ? `Pagada (${capitalizeFirstLetter(reserva.metodoPago || '?')})` : 'Pendiente'}
-                                        {reserva.metodoPago.toLowerCase() === 'mercadopago' && <img src={mercadopagoSmallIcon} alt="MP" className="payment-icon-small" />}
-                                        {reserva.metodoPago.toLowerCase() === 'efectivo' && <img src={efectivoSmallIcon} alt="Efectivo" className="payment-icon-small" />}
-                                    </p>
-                                )} */}
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <p className="dashboard-info">Aún no tenés reservas. ¡Es hora de hacer la primera!</p>
+                    <p className="dashboard-info">No tienes reservas próximas.</p>
                 )}
             </div>
+
+            {/* NUEVA SECCIÓN: Historial de Reservas */}
+            <div id="past-reservations-section" className="dashboard-section all-reservations-card">
+                <h2>Historial de Reservas ({historialReservas.length})</h2>
+                {historialReservas.length > 0 ? (
+                    <div className="reservas-grid">
+                        {historialReservas.map((reserva) => (
+                            <div key={reserva.id} className="reserva-item-card status-past" onClick={() => handleOpenModal(reserva)}> {/* Añadida clase status-past */}
+                                <div className="reserva-card-header">
+                                    <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
+                                    <span className={`reserva-status-badge ${getStatusClass(reserva.estado, reserva.pagada, reserva.metodoPago)}`}>
+                                        {getCombinedStatusAndPaymentInfo(reserva.estado, reserva.pagada, reserva.metodoPago)}
+                                    </span>
+                                </div>
+                                <p className="reserva-card-detail"><strong>Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
+                                <p className="reserva-card-detail"><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
+                                <p className="reserva-card-detail"><strong>Precio:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="dashboard-info">Aún no tienes historial de reservas (excluyendo canceladas/rechazadas).</p>
+                )}
+            </div>
+
+            {/* NUEVA SECCIÓN (Opcional): Reservas Canceladas/Rechazadas */}
+            {cancelledOrRejectedReservas.length > 0 && (
+                <div className="dashboard-section all-reservations-card">
+                    <h2>Reservas Canceladas/Rechazadas ({cancelledOrRejectedReservas.length})</h2>
+                    <div className="reservas-grid">
+                        {cancelledOrRejectedReservas.map((reserva) => (
+                            <div key={reserva.id} className="reserva-item-card status-cancelled" onClick={() => handleOpenModal(reserva)}> {/* Añadida clase status-cancelled */}
+                                <div className="reserva-card-header">
+                                    <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
+                                    <span className={`reserva-status-badge ${getStatusClass(reserva.estado, reserva.pagada, reserva.metodoPago)}`}>
+                                        {getCombinedStatusAndPaymentInfo(reserva.estado, reserva.pagada, reserva.metodoPago)}
+                                    </span>
+                                </div>
+                                <p className="reserva-card-detail"><strong>Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
+                                <p className="reserva-card-detail"><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
+                                <p className="reserva-card-detail"><strong>Precio:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
 
             {/* Modal de Detalle de Reserva */}
             {modalReserva && (
@@ -433,7 +510,7 @@ function DashboardUsuario() {
                         <p><strong>Cancha Asignada:</strong> {modalReserva.nombreCanchaAsignada || 'N/A'}</p>
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
                         <p><strong>Precio Total:</strong> ${modalReserva.precioTotal ? modalReserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                        <p><strong>Estado y Pago:</strong> {getCombinedStatusAndPaymentInfo(modalReserva.estado, modalReserva.pagada, modalReserva.metodoPago)}</p> {/* UNIFICADO */}
+                        <p><strong>Estado y Pago:</strong> {getCombinedStatusAndPaymentInfo(modalReserva.estado, modalReserva.pagada, modalReserva.metodoPago)}</p>
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
                         <p><strong>DNI:</strong> {modalReserva.dni || '-'}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
