@@ -1,14 +1,17 @@
-import { useEffect, useRef } from 'react'; // Importar useRef
+import { useEffect, useState, useCallback } from 'react'; // Añadir useState
 import { useNavigate, useLocation } from 'react-router-dom';
 
 function OAuth2Success({ onLoginSuccess }) {
     const navigate = useNavigate();
     const location = useLocation();
-    const hasNavigated = useRef(false); // Usar useRef para un flag persistente
+    // Usamos un estado local para controlar si ya se procesó la redirección.
+    // Esto es más reactivo que useRef para controlar el flujo de renderizado.
+    const [isProcessing, setIsProcessing] = useState(true); 
 
     useEffect(() => {
-        // Si ya hemos intentado navegar, salimos para evitar redirecciones múltiples.
-        if (hasNavigated.current) {
+        // Si ya estamos procesando o ya hemos redirigido, no hacemos nada más.
+        // Esto previene múltiples ejecuciones y el "throttling".
+        if (!isProcessing) {
             return;
         }
 
@@ -17,6 +20,13 @@ function OAuth2Success({ onLoginSuccess }) {
         const username = params.get('username');
         const nombreCompleto = params.get('name');
         const roleFromUrl = params.get('role'); 
+
+        // Limpiamos los parámetros de la URL para evitar re-procesamiento
+        // Esto es crucial para que el componente no se re-ejecute con los mismos params
+        // y el navegador no detecte un bucle de redirección.
+        const cleanUrl = location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
 
         if (token) {
             localStorage.setItem('jwtToken', token);
@@ -35,17 +45,16 @@ function OAuth2Success({ onLoginSuccess }) {
                 onLoginSuccess(token, username, nombreCompleto, rolesToPass);
             }
 
-            // Marcar que ya hemos intentado navegar y luego navegar.
-            hasNavigated.current = true; 
-            navigate('/dashboard');
+            setIsProcessing(false); // Marcar como procesado
+            navigate('/dashboard', { replace: true }); // Usar replace para no dejar la URL de OAuth en el historial
+                                                      // y evitar ir hacia atrás a ella.
 
         } else {
             console.error("OAuth2Success: No se encontró el token en la URL.");
-            // Si no hay token, marcamos que no se intentó navegar por éxito y redirigimos a login
-            hasNavigated.current = true; // También marcar aquí para evitar reintentos si no hay token
-            navigate('/login?error=oauth_failed');
+            setIsProcessing(false); // Marcar como procesado (fallido)
+            navigate('/login?error=oauth_failed', { replace: true });
         }
-    }, [location, navigate, onLoginSuccess]); // Dependencias del useEffect
+    }, [location, navigate, onLoginSuccess, isProcessing]); // Añadir isProcessing a las dependencias
 
     return (
         <div className="oauth2-success-message">
