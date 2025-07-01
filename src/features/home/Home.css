@@ -83,7 +83,7 @@ a:hover {
 /* Hero Section */
 .hero {
     position: relative;
-    height: 650px; /* Altura un poco mayor */
+    height: 650px; 
     background-image: url('../../assets/fondo-cancha-hero.jpg'); 
     background-size: cover;
     background-position: center;
@@ -93,11 +93,11 @@ a:hover {
     color: white;
     text-align: center;
     overflow: hidden;
-    box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.2); /* Sombra interna sutil */
+    box-shadow: inset 0 -10px 20px rgba(0, 0, 0, 0.2); 
 }
 
 .hero-overlay {
-    background-color: rgba(0, 0, 0, 0.75); /* Opacidad un poco mayor */
+    background-color: rgba(0, 0, 0, 0.75); 
     position: absolute;
     top: 0;
     left: 0;
@@ -113,12 +113,12 @@ a:hover {
 }
 
 .hero-content h1 {
-    font-size: 5em; /* Título más grande */
+    font-size: 5em; 
     margin-bottom: 20px;
     color: white;
     font-weight: 800;
-    letter-spacing: -2px; /* Espaciado de letras más ajustado */
-    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5); /* Sombra de texto más definida */
+    letter-spacing: -2px; 
+    text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.5); 
 }
 
 .hero-content h1 span {
@@ -134,54 +134,56 @@ a:hover {
 
 .hero-buttons {
     display: flex;
-    gap: 25px; /* Mayor espacio entre botones */
+    gap: 25px; 
     justify-content: center;
 }
 
 /* Estilos de botones generales para Home */
 .btn-main, .btn-secondary, .btn-secondary-home {
     display: inline-block;
-    padding: 15px 35px; /* Más padding para que sean más grandes */
-    border-radius: var(--radius); /* Usa la variable de radio de borde */
+    padding: 15px 35px; 
+    border-radius: var(--radius); 
     font-weight: 600;
     text-transform: uppercase;
     transition: var(--transition-medium);
-    font-size: 1.15em; /* Tamaño de fuente ligeramente mayor */
+    font-size: 1.15em; 
     white-space: nowrap;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Sombra de texto sutil */
-    box-shadow: var(--shadow); /* Sombra por defecto */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); 
+    box-shadow: var(--shadow); 
 }
 
 .btn-main {
     background-color: var(--primary);
-    color: white;
+    color: white; /* Asegurar que el texto es blanco */
     border: 2px solid var(--primary);
 }
 
 .btn-main:hover {
     background-color: var(--primary-dark);
     border-color: var(--primary-dark);
-    transform: translateY(-3px); /* Efecto de "levantar" */
-    box-shadow: var(--shadow-hover); /* Sombra más pronunciada en hover */
+    color: white; /* Añadido: asegurar texto blanco en hover */
+    transform: translateY(-3px); 
+    box-shadow: var(--shadow-hover); 
 }
 
 .btn-secondary {
     background-color: transparent;
-    color: white;
+    color: white; /* Asegurar que el texto es blanco */
     border: 2px solid white;
 }
 
 .btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.1); /* Fondo más sutil en hover */
-    border-color: var(--primary-light); /* Borde de color primario en hover */
+    background-color: rgba(255, 255, 255, 0.1); 
+    border-color: var(--primary-light); 
+    color: white; /* Añadido: asegurar texto blanco en hover */
     transform: translateY(-3px);
     box-shadow: var(--shadow-hover);
 }
 
 /* Nuevo estilo para el botón "Crear cuenta" en platform-preview */
 .btn-secondary-home {
-    background-color: var(--secondary); /* Fondo gris para este botón */
-    color: white;
+    background-color: var(--secondary); 
+    color: white; /* Asegurar que el texto es blanco */
     border: 2px solid var(--secondary);
     transition: var(--transition-medium);
     box-shadow: var(--shadow);
@@ -189,6 +191,7 @@ a:hover {
 .btn-secondary-home:hover {
     background-color: var(--secondary-dark);
     border-color: var(--secondary-dark);
+    color: white; /* Añadido: asegurar texto blanco en hover */
     transform: translateY(-3px);
     box-shadow: var(--shadow-hover);
 }
@@ -196,19 +199,19 @@ a:hover {
 
 /* How It Works Section */
 .how {
-    padding: 100px 0; /* Más padding vertical */
+    padding: 100px 0; 
     background-color: var(--white);
     text-align: center;
-    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.05); /* Sombra interna superior */
+    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.05); 
 }
 
 .how h2 {
-    font-size: 3.2em; /* Título más grande */
+    font-size: 3.2em; 
     color: var(--primary-dark);
     margin-bottom: 70px;
     position: relative;
 }
-.how h2::after { /* Línea decorativa debajo del título */
+.how h2::after { 
     content: '';
     display: block;
     width: 80px;
@@ -220,33 +223,33 @@ a:hover {
 
 .how .steps {
     display: flex;
-    justify-content: center; /* Centrar los pasos */
-    gap: 40px; /* Mayor espacio entre pasos */
+    justify-content: center; 
+    gap: 40px; 
     flex-wrap: wrap;
 }
 
 .how .step {
-    flex-basis: 28%; /* Ajuste para que quepan mejor en 3 columnas */
+    flex-basis: 28%; 
     min-width: 280px;
-    padding: 35px; /* Más padding interno */
+    padding: 35px; 
     background-color: var(--background-light);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow); /* Sombra estándar */
+    box-shadow: var(--shadow); 
     transition: var(--transition-medium);
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-top: 5px solid transparent; /* Borde superior dinámico */
+    border-top: 5px solid transparent; 
 }
 
 .how .step:hover {
-    transform: translateY(-12px); /* Efecto de "levantar" más pronunciado */
+    transform: translateY(-12px); 
     box-shadow: var(--shadow-hover);
-    border-top-color: var(--primary); /* Color en hover */
+    border-top-color: var(--primary); 
 }
 
 .step-icon {
-    width: 90px; /* Icono más grande */
+    width: 90px; 
     height: 90px;
     background-color: var(--primary);
     border-radius: 50%;
@@ -254,13 +257,13 @@ a:hover {
     align-items: center;
     justify-content: center;
     margin-bottom: 30px;
-    font-size: 3em; /* Tamaño del número */
+    font-size: 3em; 
     color: white;
     font-weight: bold;
-    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4); /* Sombra más definida */
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4); 
     position: relative;
 }
-.step-icon::before { /* Anillo exterior decorativo */
+.step-icon::before { 
     content: '';
     position: absolute;
     top: -5px;
@@ -275,7 +278,7 @@ a:hover {
 .step-icon .step-number {
     border: 3px solid white;
     border-radius: 50%;
-    width: 60px; /* Número más grande */
+    width: 60px; 
     height: 60px;
     display: flex;
     align-items: center;
@@ -284,7 +287,7 @@ a:hover {
 
 
 .step-content h4 {
-    font-size: 1.8em; /* Título de paso más grande */
+    font-size: 1.8em; 
     color: var(--primary-dark);
     margin-bottom: 12px;
 }
@@ -298,19 +301,19 @@ a:hover {
 .platform-preview {
     padding: 100px 0;
     background-color: var(--background);
-    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.03); /* Sombra interna inferior */
+    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.03); 
 }
 
 .platform-preview .section-container {
     display: flex;
     align-items: center;
-    gap: 70px; /* Mayor espacio entre columnas */
+    gap: 70px; 
     flex-wrap: wrap;
 }
 
 .platform-content {
     flex: 1;
-    min-width: 350px; /* Asegura un ancho mínimo razonable */
+    min-width: 350px; 
 }
 
 .platform-content h2 {
@@ -336,7 +339,7 @@ a:hover {
     color: var(--text);
     margin-bottom: 12px;
     position: relative;
-    padding-left: 30px; /* Más espacio para el checkmark */
+    padding-left: 30px; 
 }
 
 .feature-list li::before {
@@ -345,7 +348,7 @@ a:hover {
     left: 0;
     color: var(--success);
     font-weight: bold;
-    font-size: 1.3em; /* Checkmark más grande */
+    font-size: 1.3em; 
 }
 
 .platform-image-container {
@@ -360,8 +363,8 @@ a:hover {
     max-width: 100%;
     height: auto;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-hover); /* Sombra más definida */
-    border: 5px solid var(--white); /* Borde blanco para resaltar */
+    box-shadow: var(--shadow-hover); 
+    border: 5px solid var(--white); 
 }
 
 
@@ -370,7 +373,7 @@ a:hover {
     padding: 100px 0;
     background-color: var(--white);
     text-align: center;
-    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.05); /* Sombra interna inferior */
+    box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.05); 
 }
 
 .benefits h2 {
@@ -379,7 +382,7 @@ a:hover {
     margin-bottom: 70px;
     position: relative;
 }
-.benefits h2::after { /* Línea decorativa debajo del título */
+.benefits h2::after { 
     content: '';
     display: block;
     width: 80px;
@@ -398,7 +401,7 @@ a:hover {
 
 .benefit {
     flex-basis: 22%;
-    min-width: 250px; /* Un poco más grande */
+    min-width: 250px; 
     padding: 35px;
     background-color: var(--background-light);
     border-radius: var(--radius-lg);
@@ -407,7 +410,7 @@ a:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-bottom: 5px solid transparent; /* Borde inferior dinámico */
+    border-bottom: 5px solid transparent; 
 }
 
 .benefit:hover {
@@ -417,7 +420,7 @@ a:hover {
 }
 
 .benefit-icon {
-    font-size: 3.5em; /* Icono más grande */
+    font-size: 3.5em; 
     margin-bottom: 25px;
     color: var(--primary);
 }
@@ -436,17 +439,17 @@ a:hover {
 /* Call to Action Section */
 .cta {
     position: relative;
-    padding: 120px 0; /* Mayor padding vertical */
-    background-image: url('../../assets/fondo-cta.jpg'); /* Una imagen de fondo para el CTA */
+    padding: 120px 0; 
+    background-image: url('../../assets/fondo-cta.jpg'); 
     background-size: cover;
     background-position: center;
     color: white;
     text-align: center;
-    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.2); /* Sombra superior */
+    box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.2); 
 }
 
 .cta-overlay {
-    background-color: rgba(0, 0, 0, 0.8); /* Fondo más oscuro para mayor contraste */
+    background-color: rgba(0, 0, 0, 0.8); 
     position: absolute;
     top: 0;
     left: 0;
@@ -458,13 +461,13 @@ a:hover {
 .cta-content {
     position: relative;
     z-index: 2;
-    max-width: 900px; /* Ancho máximo mayor */
+    max-width: 900px; 
     margin: 0 auto;
     padding: 20px;
 }
 
 .cta-content h2 {
-    font-size: 3.5em; /* Título más grande */
+    font-size: 3.5em; 
     margin-bottom: 20px;
     color: white;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
@@ -478,18 +481,18 @@ a:hover {
 /* WhatsApp Button */
 .whatsapp-button {
     position: fixed;
-    bottom: 30px; /* Un poco más arriba */
-    right: 30px; /* Un poco más a la derecha */
+    bottom: 30px; 
+    right: 30px; 
     background-color: #25d366; 
     color: white; 
     border-radius: 50%;
-    width: 60px; /* Botón más grande */
+    width: 60px; 
     height: 60px;
     display: flex;
     align-items: center; 
     justify-content: center; 
-    font-size: 2.2em; /* Icono más grande */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
+    font-size: 2.2em; 
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); 
     transition: var(--transition-medium);
     z-index: 1000;
     text-decoration: none;
@@ -511,16 +514,16 @@ a:hover {
 
 .whatsapp-button:hover {
     background-color: #128c7e; 
-    transform: scale(1.15); /* Efecto de crecimiento más pronunciado */
+    transform: scale(1.15); 
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 
 /* Footer mejorado */
 .footer {
-    background-color: var(--secondary-dark); /* Color más oscuro para el footer */
+    background-color: var(--secondary-dark); 
     color: white;
-    padding: 50px 0 30px; /* Más padding vertical */
+    padding: 50px 0 30px; 
     text-align: center;
     margin-top: auto;
     width: 100%;
@@ -531,7 +534,7 @@ a:hover {
     justify-content: space-around;
     align-items: center;
     flex-wrap: wrap;
-    gap: 40px; /* Mayor espacio entre elementos */
+    gap: 40px; 
     margin-bottom: 40px;
 }
 
@@ -545,7 +548,7 @@ a:hover {
 }
 
 .footer-logo-link h3 {
-    font-size: 2em; /* Logo más grande */
+    font-size: 2em; 
     color: white;
     margin: 0;
 }
@@ -560,7 +563,7 @@ a:hover {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 30px; /* Mayor espacio entre enlaces */
+    gap: 30px; 
     list-style: none;
     padding: 0;
     margin: 0;
@@ -568,7 +571,7 @@ a:hover {
 
 .footer-link {
     color: white;
-    font-size: 1.1em; /* Enlaces más grandes */
+    font-size: 1.1em; 
     text-decoration: none;
     transition: var(--transition-medium);
     font-family: 'Poppins', sans-serif;
@@ -579,13 +582,13 @@ a:hover {
 
 .footer-link:hover {
     color: var(--primary-light);
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); /* Sombra más pronunciada en hover */
-    transform: scale(1.05); /* Efecto de escala sutil */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6); 
+    transform: scale(1.05); 
 }
 
 
 .footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.15); /* Borde superior más visible */
+    border-top: 1px solid rgba(255, 255, 255, 0.15); 
     padding-top: 25px;
     display: flex;
     justify-content: center;
@@ -613,7 +616,7 @@ a:hover {
     .platform-content, .platform-image-container { width: 100%; }
     .platform-content { order: 2; }
     .platform-image-container { order: 1; }
-    .platform-content .btn-secondary-home { margin: 0 auto; display: block; width: fit-content; } /* Centrar el botón */
+    .platform-content .btn-secondary-home { margin: 0 auto; display: block; width: fit-content; } 
     .cta-content h2 { font-size: 3em; }
     .cta-content p { font-size: 1.2em; }
     .footer-content { flex-direction: column; align-items: center; text-align: center; }
@@ -631,7 +634,7 @@ a:hover {
     .how h2, .benefits h2, .cta-content h2 { font-size: 2.5em; }
     .step-icon { width: 70px; height: 70px; font-size: 2.5em; margin-bottom: 20px; }
     .benefit-icon { font-size: 3em; margin-bottom: 15px; }
-    .how .step, .benefit { flex-basis: 100%; padding: 30px; } /* Una columna en móviles */
+    .how .step, .benefit { flex-basis: 100%; padding: 30px; } 
     .whatsapp-button { width: 55px; height: 55px; font-size: 2em; bottom: 25px; right: 25px; }
     .footer-link { font-size: 1em; padding: 5px 10px; }
 }
