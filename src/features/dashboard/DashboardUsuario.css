@@ -32,12 +32,12 @@
     max-width: var(--max-width);
     margin: 50px auto;
     padding: 30px 25px;
-    background: var(--background-light); /* Fondo claro para todo el dashboard */
+    background: var(--background-light); 
     border-radius: var(--radius-lg);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra principal más pronunciada */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
     display: flex;
     flex-direction: column;
-    gap: 30px; /* Espacio entre secciones principales */
+    gap: 30px; 
 }
 
 /* Mensajes de carga y error */
@@ -59,13 +59,13 @@
 
 /* Tarjeta de Bienvenida */
 .welcome-card {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark)); /* Gradiente atractivo */
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
     color: var(--white);
     padding: 40px;
     border-radius: var(--radius-lg);
     text-align: center;
     box-shadow: var(--shadow-hover);
-    margin-bottom: 20px; /* Espacio extra debajo de la tarjeta de bienvenida */
+    margin-bottom: 20px; 
 }
 
 .welcome-title {
@@ -88,7 +88,7 @@
     gap: 30px;
 }
 
-@media (min-width: 992px) { /* A partir de pantallas de escritorio */
+@media (min-width: 992px) { 
     .dashboard-content-grid {
         grid-template-columns: 1fr 2fr; /* Columna izquierda para perfil, derecha para resumen de reservas */
     }
@@ -100,10 +100,10 @@
     border-radius: var(--radius-lg);
     padding: 25px 30px;
     box-shadow: var(--shadow);
-    border-left: 5px solid var(--primary); /* Borde acentuado */
+    border-left: 5px solid var(--primary); 
     display: flex;
     flex-direction: column;
-    height: 100%; /* Para que las columnas tengan la misma altura */
+    height: 100%; 
 }
 
 .dashboard-section h2 {
@@ -117,7 +117,7 @@
 
 /* PERFIL - Detalles Personales */
 .perfil-detail-card {
-    border-color: var(--secondary); /* Color diferente para el borde de perfil */
+    border-color: var(--secondary); 
 }
 
 .perfil-form-edit label {
@@ -203,17 +203,17 @@
 }
 .btn-editar {
     margin-top: 20px;
-    align-self: flex-start; /* Alinea el botón a la izquierda */
+    align-self: flex-start; 
 }
 
 
 /* RESUMEN DE RESERVAS */
 .reservations-summary-card {
-    border-color: var(--info); /* Borde de color diferente */
+    border-color: var(--info); 
 }
 
 .next-reservation-highlight {
-    background-color: rgba(var(--info), 0.08); /* Fondo suave con color de acento */
+    background-color: rgba(var(--info), 0.08); 
     border: 1px solid rgba(var(--info), 0.2);
     border-radius: var(--radius);
     padding: 15px 20px;
@@ -244,7 +244,7 @@
 }
 
 .reserva-highlight-icon {
-    font-size: 2.5rem; /* Icono grande */
+    font-size: 2.5rem; 
     line-height: 1;
 }
 
@@ -261,7 +261,7 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-    margin-top: auto; /* Empuja los botones al final de la tarjeta */
+    margin-top: auto; 
 }
 
 .btn-full-width {
@@ -270,7 +270,7 @@
     font-size: 1.1rem;
     font-weight: 600;
     text-align: center;
-    text-decoration: none; /* Para los Links */
+    text-decoration: none; 
     border-radius: var(--radius);
     transition: background-color 0.3s ease, transform 0.2s ease;
     border: none;
@@ -285,7 +285,7 @@
 
 /* SECCIÓN DE TODAS LAS RESERVAS */
 .all-reservations-card {
-    border-color: var(--success); /* Borde verde para esta sección */
+    border-color: var(--success); 
 }
 
 .reservas-grid {
@@ -303,7 +303,7 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-left: 4px solid var(--secondary); /* Borde sutil, se cambiará con el estado */
+    border-left: 4px solid var(--secondary); 
 }
 .reserva-item-card:hover {
     transform: translateY(-5px);
@@ -330,6 +330,8 @@
     margin: 5px 0;
     font-size: 0.95rem;
     color: var(--text);
+    /* Añadido para manejar el texto largo y evitar desbordamiento */
+    word-break: break-word; 
 }
 .reserva-card-detail strong {
     color: var(--text-dark);
@@ -354,6 +356,10 @@
     font-weight: 600;
     text-transform: uppercase;
     white-space: nowrap;
+    /* Añadido para asegurar que el texto del badge no se desborde con el zoom */
+    word-break: break-all; /* Rompe palabras largas */
+    min-width: 80px; /* Asegura un ancho mínimo para que no se vea muy comprimido */
+    text-align: center;
 }
 
 .status-pendiente {
@@ -385,6 +391,10 @@
     justify-content: center;
     align-items: center;
     z-index: 999;
+    /* Asegura que el scroll funciona si hay desbordamiento vertical */
+    overflow-y: auto; 
+    padding: 20px; /* Padding para que el modal no toque los bordes en pantallas pequeñas */
+    box-sizing: border-box; /* Incluye padding en el tamaño */
 }
 
 .modal-content {
@@ -392,15 +402,22 @@
     padding: 30px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-hover);
-    max-width: 450px; /* Un poco más grande para el detalle */
-    width: 90%;
+    max-width: 500px; /* Aumentado el max-width para el contenido de texto */
+    width: 90%; /* Ancho flexible */
     position: relative;
+    /* Asegura que el contenido interno no desborde horizontalmente */
+    overflow-x: hidden; 
+    word-break: break-word; /* Permite que las palabras largas se rompan */
+    box-sizing: border-box; /* Incluye padding en el tamaño */
+    /* Añadido para que el modal se pueda desplazar si su contenido es muy largo */
+    max-height: 90vh; /* Limita la altura del modal al 90% del viewport height */
+    overflow-y: auto; /* Permite el scroll vertical si el contenido es largo */
 }
 
 .modal-content h3 {
     margin-top: 0;
     color: var(--primary-dark);
-    font-size: 1.6rem; /* Un poco más grande */
+    font-size: 1.6rem; 
     margin-bottom: 15px;
     text-align: center;
 }
@@ -416,6 +433,8 @@
     font-size: 1rem;
     margin: 8px 0;
     color: var(--text);
+    /* Asegura que el texto se ajuste dentro del párrafo */
+    word-break: break-word; 
 }
 .modal-content p strong {
     color: var(--text-dark);
@@ -423,9 +442,11 @@
 
 .modal-actions {
     display: flex;
-    justify-content: flex-end; /* Alinea los botones a la derecha */
+    justify-content: flex-end; 
     margin-top: 25px;
     gap: 10px;
+    /* Asegura que los botones no desborden */
+    flex-wrap: wrap; 
 }
 
 .btn { /* Estilos base para todos los botones que usan 'btn' */
@@ -478,7 +499,7 @@
         grid-template-columns: 1fr; /* Una columna en móviles */
     }
     .perfil-form-edit input, .perfil-form-edit textarea {
-        max-width: 100%; /* Asegura que los inputs no desborden */
+        max-width: 100%; 
     }
     .perfil-actions-edit {
         flex-direction: column;
@@ -487,6 +508,13 @@
         width: 100%;
     }
     .modal-content {
-        padding: 20px;
+        padding: 15px; /* Reducir padding en móviles */
+        max-width: 95%; /* Asegurar que no exceda el ancho en móviles */
+    }
+    .modal-content h3 {
+        font-size: 1.4rem;
+    }
+    .modal-content p {
+        font-size: 0.9rem;
     }
 }

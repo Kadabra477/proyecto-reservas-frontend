@@ -191,34 +191,54 @@ function DashboardUsuario() {
         }
     };
 
-    const formatReservaEstado = (estado, pagada, metodoPago) => {
-        if (!estado) return 'Desconocido';
-        estado = estado.toLowerCase(); 
-        metodoPago = metodoPago ? metodoPago.toLowerCase() : ''; 
+    // NUEVA FUNCIÓN: Combina estado y método de pago en una sola línea de texto con icono opcional
+    const getCombinedStatusAndPaymentInfo = (estado, pagada, metodoPago) => {
+        estado = estado ? estado.toLowerCase() : 'desconocido';
+        metodoPago = metodoPago ? metodoPago.toLowerCase() : '';
+
+        let statusText = '';
+        let icon = null;
 
         if (pagada) {
-            return 'Pagada';
+            statusText = 'Pagada';
+            if (metodoPago === 'mercadopago') icon = <img src={mercadopagoSmallIcon} alt="MP" className="payment-icon-small" />;
+            else if (metodoPago === 'efectivo') icon = <img src={efectivoSmallIcon} alt="Efectivo" className="payment-icon-small" />;
+        } else {
+            switch (estado) {
+                case 'confirmada':
+                    statusText = 'Confirmada';
+                    break;
+                case 'pendiente_pago_efectivo':
+                    statusText = 'Pendiente (Efectivo)';
+                    icon = <img src={efectivoSmallIcon} alt="Efectivo" className="payment-icon-small" />;
+                    break;
+                case 'pendiente_pago_mp':
+                    statusText = 'Pendiente (Mercado Pago)';
+                    icon = <img src={mercadopagoSmallIcon} alt="MP" className="payment-icon-small" />;
+                    break;
+                case 'pendiente':
+                    statusText = 'Pendiente';
+                    break;
+                case 'rechazada_pago_mp':
+                    statusText = 'Rechazada (Mercado Pago)';
+                    break;
+                case 'cancelada':
+                    statusText = 'Cancelada';
+                    break;
+                default:
+                    statusText = estado.charAt(0).toUpperCase() + estado.slice(1);
+            }
         }
-
-        switch (estado) {
-            case 'confirmada': 
-                return 'Confirmada';
-            case 'pendiente_pago_efectivo': 
-                return 'Pendiente (Efectivo)'; 
-            case 'pendiente_pago_mp': 
-                return 'Pendiente (Mercado Pago)';
-            case 'pendiente': 
-                return 'Pendiente';
-            case 'rechazada_pago_mp': 
-                return 'Rechazada (Mercado Pago)';
-            case 'cancelada': 
-                return 'Cancelada';
-            default: return estado.charAt(0).toUpperCase() + estado.slice(1);
-        }
+        return (
+            <>
+                {statusText} {icon}
+            </>
+        );
     };
 
+    // Función para obtener la clase CSS del estado (colores)
     const getStatusClass = (estado, pagada, metodoPago) => {
-        estado = estado.toLowerCase();
+        estado = estado ? estado.toLowerCase() : 'desconocido';
         metodoPago = metodoPago ? metodoPago.toLowerCase() : '';
 
         if (pagada) return 'status-pagada';
@@ -354,7 +374,7 @@ function DashboardUsuario() {
                                     <p><strong>{proximaReserva.complejoNombre}</strong></p>
                                     <p>{proximaReserva.tipoCanchaReservada} - {formatLocalDateTime(proximaReserva.fechaHora)}</p>
                                     <span className={`reserva-status-badge ${getStatusClass(proximaReserva.estado, proximaReserva.pagada, proximaReserva.metodoPago)}`}>
-                                        {formatReservaEstado(proximaReserva.estado, proximaReserva.pagada, proximaReserva.metodoPago)}
+                                        {getCombinedStatusAndPaymentInfo(proximaReserva.estado, proximaReserva.pagada, proximaReserva.metodoPago)}
                                     </span>
                                 </div>
                             </div>
@@ -380,20 +400,20 @@ function DashboardUsuario() {
                                 <div className="reserva-card-header">
                                     <h3 className="reserva-card-title">{reserva.complejoNombre || 'Complejo Desconocido'}</h3>
                                     <span className={`reserva-status-badge ${getStatusClass(reserva.estado, reserva.pagada, reserva.metodoPago)}`}>
-                                        {formatReservaEstado(reserva.estado, reserva.pagada, reserva.metodoPago)}
+                                        {getCombinedStatusAndPaymentInfo(reserva.estado, reserva.pagada, reserva.metodoPago)}
                                     </span>
                                 </div>
                                 <p className="reserva-card-detail"><strong>Cancha:</strong> {reserva.tipoCanchaReservada || 'N/A'}</p>
                                 <p className="reserva-card-detail"><strong>Fecha y Hora:</strong> {formatLocalDateTime(reserva.fechaHora)}</p>
                                 <p className="reserva-card-detail"><strong>Precio:</strong> ${reserva.precioTotal ? reserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                                {reserva.metodoPago && (
+                                {/* REMOVIDO: Este párrafo ya no es necesario, el estado combinado lo maneja */}
+                                {/* {reserva.metodoPago && (
                                     <p className="reserva-card-detail payment-info">
                                         <strong>Pago:</strong> {reserva.pagada ? `Pagada (${capitalizeFirstLetter(reserva.metodoPago || '?')})` : 'Pendiente'}
-                                        {/* CAMBIO CLAVE: Usa las variables importadas para las imágenes */}
                                         {reserva.metodoPago.toLowerCase() === 'mercadopago' && <img src={mercadopagoSmallIcon} alt="MP" className="payment-icon-small" />}
                                         {reserva.metodoPago.toLowerCase() === 'efectivo' && <img src={efectivoSmallIcon} alt="Efectivo" className="payment-icon-small" />}
                                     </p>
-                                )}
+                                )} */}
                             </div>
                         ))}
                     </div>
@@ -413,8 +433,7 @@ function DashboardUsuario() {
                         <p><strong>Cancha Asignada:</strong> {modalReserva.nombreCanchaAsignada || 'N/A'}</p>
                         <p><strong>Fecha y Hora:</strong> {formatLocalDateTime(modalReserva.fechaHora)}</p>
                         <p><strong>Precio Total:</strong> ${modalReserva.precioTotal ? modalReserva.precioTotal.toLocaleString('es-AR') : 'N/A'}</p>
-                        <p><strong>Estado:</strong> {formatReservaEstado(modalReserva.estado, modalReserva.pagada, modalReserva.metodoPago)}</p>
-                        <p><strong>Pago:</strong> {modalReserva.pagada ? `Pagada (${capitalizeFirstLetter(modalReserva.metodoPago || '?')})` : 'Pendiente de Pago'}</p>
+                        <p><strong>Estado y Pago:</strong> {getCombinedStatusAndPaymentInfo(modalReserva.estado, modalReserva.pagada, modalReserva.metodoPago)}</p> {/* UNIFICADO */}
                         <p><strong>Reservado a nombre de:</strong> {modalReserva.cliente}</p>
                         <p><strong>DNI:</strong> {modalReserva.dni || '-'}</p>
                         <p><strong>Teléfono de contacto:</strong> {modalReserva.telefono || '-'}</p>
