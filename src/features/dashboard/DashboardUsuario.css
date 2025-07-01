@@ -165,19 +165,21 @@
 
 .btn-guardar {
     background-color: var(--primary);
-    color: white;
+    color: white; /* Asegurarse de que el texto es blanco */
     border: none;
 }
 .btn-guardar:hover {
     background-color: var(--primary-dark);
+    color: white; /* Añadido: asegurar texto blanco en hover */
 }
 .btn-cancelar {
     background-color: var(--gray-dark);
-    color: white;
+    color: white; /* Asegurarse de que el texto es blanco */
     border: none;
 }
 .btn-cancelar:hover {
     background-color: var(--secondary-dark);
+    color: white; /* Añadido: asegurar texto blanco en hover */
 }
 
 .perfil-data-view {
@@ -277,11 +279,25 @@
     cursor: pointer;
 }
 
-.btn-primary { background-color: var(--primary); color: white; }
-.btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
+.btn-primary { 
+    background-color: var(--primary); 
+    color: white; /* Añadido: asegurar texto blanco */
+}
+.btn-primary:hover { 
+    background-color: var(--primary-dark); 
+    color: white; /* Añadido: asegurar texto blanco en hover */
+    transform: translateY(-2px); 
+}
 
-.btn-secondary { background-color: var(--secondary); color: white; }
-.btn-secondary:hover { background-color: var(--secondary-dark); transform: translateY(-2px); }
+.btn-secondary { 
+    background-color: var(--secondary); 
+    color: white; /* Añadido: asegurar texto blanco */
+}
+.btn-secondary:hover { 
+    background-color: var(--secondary-dark); 
+    color: white; /* Añadido: asegurar texto blanco en hover */
+    transform: translateY(-2px); 
+}
 
 /* SECCIÓN DE TODAS LAS RESERVAS */
 .all-reservations-card {
@@ -310,6 +326,28 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+/* NUEVAS CLASES PARA DISTINGUIR ESTADOS EN LA CUADRÍCULA */
+.reserva-item-card.status-past {
+    opacity: 0.7; 
+    border-color: var(--gray);
+    box-shadow: none;
+}
+.reserva-item-card.status-past:hover {
+    transform: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.reserva-item-card.status-cancelled {
+    background-color: #fcebeb; 
+    border-color: var(--danger);
+    opacity: 0.8;
+}
+.reserva-item-card.status-cancelled:hover {
+    transform: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+
 .reserva-card-header {
     display: flex;
     justify-content: space-between;
@@ -330,24 +368,24 @@
     margin: 5px 0;
     font-size: 0.95rem;
     color: var(--text);
-    /* Añadido para manejar el texto largo y evitar desbordamiento */
     word-break: break-word; 
 }
 .reserva-card-detail strong {
     color: var(--text-dark);
-    /* Se añadió este estilo para que el "strong" no fuerce un ancho fijo */
-    display: inline; /* Asegura que no se convierta en un bloque y fuerce una nueva línea */
-    word-break: break-all; /* Permite que el texto se rompa dentro del strong si es muy largo */
+    display: inline; 
+    word-break: break-all; 
 }
 
-.payment-info {
+/* El estilo .payment-info ya no es necesario, pero lo dejo por si lo usas en otro lado */
+/* .payment-info {
     display: flex;
     align-items: center;
     gap: 8px;
-}
+} */
 .payment-icon-small {
     height: 18px;
     vertical-align: middle;
+    margin-left: 5px; 
 }
 
 
@@ -359,22 +397,25 @@
     font-weight: 600;
     text-transform: uppercase;
     white-space: nowrap;
-    /* Añadido para asegurar que el texto del badge no se desborde con el zoom */
     word-break: break-all; 
     min-width: 80px; 
     text-align: center;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    gap: 5px; 
 }
 
 .status-pendiente {
     background-color: var(--warning);
     color: #856404;
 }
-.status-pagada { /* Agregado para pagada */
+.status-pagada { 
     background-color: var(--success);
     color: white;
 }
 .status-confirmada {
-    background-color: var(--info); /* Un verde más claro o un azul claro para confirmada */
+    background-color: var(--info); 
     color: white;
 }
 .status-cancelada, .status-rechazada {
@@ -408,18 +449,17 @@
     padding: 30px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-hover);
-    /* Ajustes clave aquí: */
-    width: 90%; /* flexible */
-    max-width: 480px; /* Ancho máximo un poco más conservador, ajusta si es necesario */
-    min-width: 300px; /* Evitar que sea demasiado pequeño */
+    width: 90%; 
+    max-width: 480px; 
+    min-width: 280px; 
     position: relative;
     overflow-x: hidden; 
-    word-break: break-word; /* Permite que las palabras largas se rompan en cualquier parte */
+    word-break: break-word; 
     box-sizing: border-box; 
     max-height: 90vh; 
     overflow-y: auto; 
-    display: flex; /* Para controlar el layout interno si es necesario */
-    flex-direction: column; /* Organiza el contenido verticalmente */
+    display: flex; 
+    flex-direction: column; 
 }
 
 .modal-content h3 {
@@ -442,13 +482,12 @@
     margin: 8px 0;
     color: var(--text);
     word-break: break-word; 
-    /* Si las líneas son muy largas y causan desbordamiento horizontal */
     overflow-wrap: break-word;
 }
 .modal-content p strong {
     color: var(--text-dark);
-    display: inline; /* Asegura que strong no fuerce una nueva línea si no es necesario */
-    word-break: break-all; /* Permite que el texto se rompa incluso dentro del strong */
+    display: inline; 
+    word-break: break-all; 
 }
 
 .modal-actions {
@@ -468,6 +507,7 @@
     border: 1px solid transparent;
 }
 
+/* Estilos específicos para botones del modal */
 .btn-info {
     background-color: var(--info);
     color: var(--white);
@@ -519,7 +559,7 @@
     .modal-content {
         padding: 15px; 
         max-width: 95%; 
-        min-width: unset; /* Eliminar min-width en móviles para mayor flexibilidad */
+        min-width: unset; 
     }
     .modal-content h3 {
         font-size: 1.4rem;
