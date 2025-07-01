@@ -30,10 +30,6 @@ function FAQPage() {
             answer: "Puedes intentar buscar en otros complejos cercanos o ajustar tus criterios de búsqueda. Nuestro sistema muestra la disponibilidad en tiempo real."
         },
         {
-            question: "¿Cómo se asignan los roles de usuario (ADMIN, COMPLEX_OWNER)?",
-            answer: "Los roles de usuario son asignados por los administradores del sistema. Si deseas convertirte en dueño de un complejo, contáctanos."
-        },
-        {
             question: "¿Necesito estar registrado para ver los complejos?",
             answer: "Sí, para poder ver los detalles completos de los complejos y realizar reservas, necesitas tener una cuenta y estar autenticado."
         }
