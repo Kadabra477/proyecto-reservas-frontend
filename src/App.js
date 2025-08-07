@@ -5,6 +5,7 @@ import {
     Route,
     Navigate,
     useLocation,
+    useNavigate // Importar useNavigate aquí
 } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import Navbar from './components/Navbar/NavBar';
@@ -32,7 +33,6 @@ function RedireccionSiAutenticado({ children, destino = "/dashboard" }) {
     const estaAutenticado = !!localStorage.getItem('jwtToken');
     const location = useLocation();
     if (estaAutenticado) {
-        // Asegúrate de que 'from' siempre tenga un valor seguro para evitar rutas no válidas
         const from = location.state?.from?.pathname && location.state.from.pathname !== '/' ? location.state.from.pathname : destino;
         return <Navigate to={from} replace />;
     }
@@ -57,7 +57,6 @@ function RutaProtegida({ children, rolesRequeridos }) {
 
     if (!hasRequiredRole) {
         console.warn(`Acceso denegado: Roles del usuario [${userRolesFromStorage.join(', ')}] no autorizados para ${location.pathname}. Roles requeridos: [${rolesRequeridos.join(', ')}]`);
-        // Redirige al dashboard si no tiene el rol, que es la acción por defecto para rutas no autorizadas
         return <Navigate to="/dashboard" replace />;
     }
 
@@ -65,6 +64,7 @@ function RutaProtegida({ children, rolesRequeridos }) {
 }
 
 function App() {
+    const navigate = useNavigate(); // Usar useNavigate en el componente principal
     const [estaAutenticado, setEstaAutenticado] = useState(false);
     const [nombreUsuario, setNombreUsuario] = useState('');
     const [userRoleArray, setUserRoleArray] = useState([]); 
@@ -80,6 +80,7 @@ function App() {
         setUserRoleArray([]); 
     }, []);
 
+    // MODIFICADO: onLoginSuccess ahora también hace la redirección
     const handleLoginSuccess = useCallback((token, usernameFromJwt, nombreCompletoFromJwt, roleOrRolesFromJwt) => {
         let rolesToStore = [];
         if (Array.isArray(roleOrRolesFromJwt)) {
@@ -99,7 +100,10 @@ function App() {
         setEstaAutenticado(true);
         setNombreUsuario(nombreCompletoFromJwt);
         setUserRoleArray(rolesToStore); 
-    }, []);
+        
+        // ¡La redirección ahora se hace aquí!
+        navigate('/dashboard', { replace: true });
+    }, [navigate]);
 
     useEffect(() => {
         const verificarToken = async () => {
@@ -116,12 +120,7 @@ function App() {
             }
 
             try {
-                // Se elimina la validación explícita del token aquí porque el interceptor de Axios
-                // y el backend (SecurityConfig) manejan los 401s y la expiración de forma centralizada.
-                // Si el token es inválido/expirado, Axios lo detectará y redirigirá.
-
                 const decodedToken = jwtDecode(token);
-                // Obtener la hora actual de Argentina para verificar la expiración del token
                 const nowArgentina = new Date().toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires', hour12: false });
                 const currentTimeArgentinaSeconds = Math.floor(new Date(nowArgentina).getTime() / 1000);
                 
@@ -134,7 +133,7 @@ function App() {
                 setUserRoleArray(rolesFromStorage); 
             } catch (error) {
                 console.log("Token inválido o expirado:", error);
-                handleLogout(); // Forzar logout si el token no es válido o está expirado
+                handleLogout();
             } finally {
                 setIsLoadingAuth(false);
             }
@@ -183,6 +182,7 @@ function App() {
                     <Route path="/register" element={<RedireccionSiAutenticado><Register /></RedireccionSiAutenticado>} />
                     <Route path="/forgot-password" element={<ForgotPasswordRequest />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    {/* MODIFICADO: OAuth2Success ya no necesita navigate, se pasa una prop que lo controla */}
                     <Route path="/oauth2/redirect" element={<OAuth2Success onLoginSuccess={handleLoginSuccess} />} />
 
                     <Route path="/complejos" element={<Complejos />} /> 
@@ -208,7 +208,6 @@ function App() {
 
                     <Route path="/faq" element={<FAQPage />} />
 
-                    {/* Ruta catch-all para cualquier otra cosa que no coincida */}
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </>
