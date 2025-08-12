@@ -39,11 +39,11 @@ function Register() {
         setIsLoading(true);
 
         try {
-            await api.post('/auth/register', {
-                nombreCompleto: nombreCompleto.trim(),
-                username: email.trim(),
-                password: password,
-            });
+                await api.post('/auth/register', {
+                    nombreCompleto: nombreCompleto.trim(),
+                    email: email.trim(),
+                    password: password,
+                });
 
             // Redirige al login con un mensaje de éxito para que sea visible
             navigate('/login?validated=true'); // Reutilizamos el parámetro 'validated' para indicar éxito en el registro
