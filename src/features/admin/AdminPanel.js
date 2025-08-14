@@ -342,40 +342,40 @@ function AdminPanel() {
         setSelectedPhotoFile(null); // Asegurarse de limpiar el archivo seleccionado
         document.getElementById('photoFile').value = ''; // Limpiar el input file visualmente
     };
-    const handleConfirmReserva = (id) => {
-        setModalConfig({
-            title: 'Confirmar Reserva',
-            message: `¿Estás seguro de que quieres confirmar la reserva con ID: ${id}?`,
-            onConfirm: async () => {
-                setMensaje({ text: '', type: '' });
-                try {
-                    // Envía la petición PUT para confirmar la reserva
-                    const res = await api.put(`/reservas/${id}/confirmar`);
-                    const reservaActualizada = res.data;
+const handleConfirmarReserva = (id) => {
+    setModalConfig({
+        title: 'Confirmar Reserva',
+        message: `¿Estás seguro de que quieres confirmar la reserva con ID: ${id}?`,
+        onConfirm: async () => {
+            setMensaje({ text: '', type: '' });
+            try {
+                // Envía la petición PUT para confirmar la reserva
+                const res = await api.put(`/reservas/${id}/confirmar`);
+                const reservaActualizada = res.data;
 
-                    // ⭐⭐⭐ PASO CLAVE: Actualizar el estado de reservas con la información que vino del backend
-                    setReservas(prevReservas => 
-                        prevReservas.map(r => 
-                            r.id === reservaActualizada.id ? reservaActualizada : r
-                        )
-                    );
-                    // ⭐⭐⭐ Fin del cambio
+                // ⭐⭐⭐ PASO CLAVE: Actualiza el estado de reservas con la información actualizada del backend
+                setReservas(prevReservas => 
+                    prevReservas.map(r => 
+                        r.id === reservaActualizada.id ? reservaActualizada : r
+                    )
+                );
+                // ⭐⭐⭐ Fin del cambio
 
-                    setMensaje({ text: 'Reserva confirmada correctamente.', type: 'success' });
-                } catch (err) {
-                    console.error('Error al confirmar la reserva:', err);
-                    const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al confirmar la reserva.';
-                    setMensaje({ text: errorMsg, type: 'error' });
-                } finally {
-                    setIsModalOpen(false);
-                }
-            },
-            confirmButtonText: 'Sí, Confirmar',
-            cancelButtonText: 'No, Cancelar',
-            type: 'success'
-        });
-        setIsModalOpen(true);
-    };
+                setMensaje({ text: 'Reserva confirmada correctamente.', type: 'success' });
+            } catch (err) {
+                console.error('Error al confirmar la reserva:', err);
+                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al confirmar la reserva.';
+                setMensaje({ text: errorMsg, type: 'error' });
+            } finally {
+                setIsModalOpen(false);
+            }
+        },
+        confirmButtonText: 'Sí, Confirmar',
+        cancelButtonText: 'No, Cancelar',
+        type: 'success'
+    });
+    setIsModalOpen(true);
+};
     const handleDeleteReserva = (id) => {
         setModalConfig({
             title: 'Eliminar Reserva',
