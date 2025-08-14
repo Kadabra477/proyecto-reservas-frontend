@@ -342,7 +342,7 @@ function AdminPanel() {
         setSelectedPhotoFile(null); // Asegurarse de limpiar el archivo seleccionado
         document.getElementById('photoFile').value = ''; // Limpiar el input file visualmente
     };
-    const handleConfirmarReserva = (id) => {
+    const handleConfirmReserva = (id) => {
         setModalConfig({
             title: 'Confirmar Reserva',
             message: `¿Estás seguro de que quieres confirmar la reserva con ID: ${id}?`,
