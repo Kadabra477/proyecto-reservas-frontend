@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axiosConfig';
 import AdminEstadisticas from './AdminEstadisticas';
-import ComplejoForm from './ComplejoForm'; 
-import ConfirmationModal from '../../components/Common/ConfirmationModal/ConfirmationModal'; 
-import './AdminPanel.css'; 
+import ComplejoForm from './ComplejoForm';
+import ConfirmationModal from '../../components/Common/ConfirmationModal/ConfirmationModal';
+import './AdminPanel.css';
 
 // Estado inicial para un formulario de COMPLEJO nuevo
 const estadoInicialComplejoAdmin = {
@@ -13,10 +13,10 @@ const estadoInicialComplejoAdmin = {
     descripcion: '',
     ubicacion: '',
     telefono: '',
-    fotoUrl: '', // Mantenemos fotoUrl para mostrar la imagen existente si estamos editando
+    fotoUrl: '',
     horarioApertura: '10:00',
     horarioCierre: '23:00',
-    emailPropietario: '', 
+    emailPropietario: '',
     canchas: [{ tipoCancha: '', cantidad: '', precioHora: '', superficie: '', iluminacion: false, techo: false }]
 };
 
@@ -97,7 +97,7 @@ function AdminPanel() {
                 fotoUrl: editingComplejo.fotoUrl || '', // Mantener la fotoUrl existente para visualización
                 horarioApertura: editingComplejo.horarioApertura || '10:00',
                 horarioCierre: editingComplejo.horarioCierre || '23:00',
-                emailPropietario: editingComplejo.propietario?.username || '', 
+                emailPropietario: editingComplejo.propietario?.username || '',
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
             // NOTA: selectedPhotoFile se resetea a null en ComplejoForm a través de su useEffect
@@ -138,7 +138,7 @@ function AdminPanel() {
         setIsLoadingData(true);
         setMensaje({ text: '', type: '' });
         try {
-            const endpoint = isAdmin ? '/reservas/admin/todas' : '/reservas/complejo/mis-reservas'; 
+            const endpoint = isAdmin ? '/reservas/admin/todas' : '/reservas/complejo/mis-reservas';
             const res = await api.get(endpoint);
             setReservas(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
@@ -181,7 +181,7 @@ function AdminPanel() {
             return;
         }
 
-        setEditingComplejo(null); 
+        setEditingComplejo(null);
         setManagingUserRoles(null);
 
         if (activeTab === 'complejos') {
@@ -289,7 +289,7 @@ function AdminPanel() {
             canchaTecho,
             // Si estamos editando y la fotoUrl del estado es '' (porque se hizo clic en "Eliminar Foto"),
             // enviamos fotoUrl: '' para que el backend sepa que debe eliminarla.
-            ...(editingComplejo?.id && fotoUrl === '' && { fotoUrl: '' }) 
+            ...(editingComplejo?.id && fotoUrl === '' && { fotoUrl: '' })
         };
 
         // Si es un nuevo complejo y es ADMIN, añadir el emailPropietario al objeto JSON
@@ -302,14 +302,14 @@ function AdminPanel() {
 
         try {
             let response;
-            if (editingComplejo?.id) { 
+            if (editingComplejo?.id) {
                 response = await api.put(`/complejos/${id}`, formData, {
                     headers: {
                         'Content-Type': undefined, // ¡CAMBIO AQUÍ! Deja que el navegador lo defina
                     },
                 });
                 setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
-            } else { 
+            } else {
                 response = await api.post('/complejos', formData, {
                     headers: {
                         'Content-Type': undefined, // ¡CAMBIO AQUÍ! Deja que el navegador lo defina
@@ -342,40 +342,42 @@ function AdminPanel() {
         setSelectedPhotoFile(null); // Asegurarse de limpiar el archivo seleccionado
         document.getElementById('photoFile').value = ''; // Limpiar el input file visualmente
     };
-const handleConfirmarReserva = (id) => {
-    setModalConfig({
-        title: 'Confirmar Reserva',
-        message: `¿Estás seguro de que quieres confirmar la reserva con ID: ${id}?`,
-        onConfirm: async () => {
-            setMensaje({ text: '', type: '' });
-            try {
-                // Envía la petición PUT para confirmar la reserva
-                const res = await api.put(`/reservas/${id}/confirmar`);
-                const reservaActualizada = res.data;
 
-                // ⭐⭐⭐ PASO CLAVE: Actualiza el estado de reservas con la información actualizada del backend
-                setReservas(prevReservas => 
-                    prevReservas.map(r => 
-                        r.id === reservaActualizada.id ? reservaActualizada : r
-                    )
-                );
-                // ⭐⭐⭐ Fin del cambio
+    // **MODIFICACIÓN CLAVE**: Esta función ahora llama al nuevo endpoint `/marcar-pagada`
+    const handleConfirmarReserva = (id) => {
+        setModalConfig({
+            title: 'Confirmar Pago en Efectivo',
+            message: `¿Estás seguro de que quieres marcar la reserva con ID: ${id} como pagada en efectivo?`,
+            onConfirm: async () => {
+                setMensaje({ text: '', type: '' });
+                try {
+                    // Envía la petición PUT para marcar la reserva como pagada en efectivo
+                    const res = await api.put(`/reservas/${id}/marcar-pagada?metodoPago=efectivo`);
+                    const reservaActualizada = res.data;
 
-                setMensaje({ text: 'Reserva confirmada correctamente.', type: 'success' });
-            } catch (err) {
-                console.error('Error al confirmar la reserva:', err);
-                const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al confirmar la reserva.';
-                setMensaje({ text: errorMsg, type: 'error' });
-            } finally {
-                setIsModalOpen(false);
-            }
-        },
-        confirmButtonText: 'Sí, Confirmar',
-        cancelButtonText: 'No, Cancelar',
-        type: 'success'
-    });
-    setIsModalOpen(true);
-};
+                    // Actualiza el estado de reservas con la información actualizada del backend
+                    setReservas(prevReservas =>
+                        prevReservas.map(r =>
+                            r.id === reservaActualizada.id ? reservaActualizada : r
+                        )
+                    );
+
+                    setMensaje({ text: 'Reserva marcada como pagada correctamente.', type: 'success' });
+                } catch (err) {
+                    console.error('Error al marcar la reserva como pagada:', err);
+                    const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al marcar la reserva como pagada.';
+                    setMensaje({ text: errorMsg, type: 'error' });
+                } finally {
+                    setIsModalOpen(false);
+                }
+            },
+            confirmButtonText: 'Sí, Marcar como Pagada',
+            cancelButtonText: 'No, Cancelar',
+            type: 'success'
+        });
+        setIsModalOpen(true);
+    };
+
     const handleDeleteReserva = (id) => {
         setModalConfig({
             title: 'Eliminar Reserva',
@@ -412,9 +414,13 @@ const handleConfirmarReserva = (id) => {
         }
     };
 
-    const formatReservaEstado = (estado) => {
+    // Modificado para mostrar 'Pagada' cuando corresponda.
+    const formatReservaEstado = (estado, pagada) => {
         if (!estado) return 'Desconocido';
         estado = estado.toLowerCase();
+        if (pagada) {
+            return 'Pagada';
+        }
         switch (estado) {
             case 'pendiente': return 'Pendiente';
             case 'confirmada': return 'Confirmada';
@@ -448,19 +454,19 @@ const handleConfirmarReserva = (id) => {
         const { value, checked } = e.target;
         setSelectedRoles(prevRoles => {
             if (value === 'ADMIN' && checked) {
-                return ['ADMIN', 'USER']; 
+                return ['ADMIN', 'USER'];
             } else if (value === 'COMPLEX_OWNER' && checked) {
-                return ['COMPLEX_OWNER', 'USER']; 
+                return ['COMPLEX_OWNER', 'USER'];
             } else if (value === 'USER') {
                 if (checked) {
                     return [...new Set([...prevRoles, 'USER'])];
                 } else {
                     if (prevRoles.includes('ADMIN') || prevRoles.includes('COMPLEX_OWNER')) {
-                        return prevRoles.filter(role => role !== 'USER'); 
+                        return prevRoles.filter(role => role !== 'USER');
                     }
                     return prevRoles.filter(role => role !== 'USER');
                 }
-            } else { 
+            } else {
                 return checked ? [...prevRoles, value] : prevRoles.filter(role => role !== value);
             }
         }).filter(Boolean);
@@ -478,10 +484,10 @@ const handleConfirmarReserva = (id) => {
                     let rolesToActualSend = [];
                     if (selectedRoles.includes('ADMIN')) {
                         rolesToActualSend = ['ROLE_ADMIN', 'ROLE_USER'];
-                    } 
+                    }
                     else if (selectedRoles.includes('COMPLEX_OWNER')) {
                         rolesToActualSend = ['ROLE_COMPLEX_OWNER', 'ROLE_USER'];
-                    } 
+                    }
                     else if (selectedRoles.includes('USER') || selectedRoles.length === 0) {
                         rolesToActualSend = ['ROLE_USER'];
                     }
@@ -592,7 +598,7 @@ const handleConfirmarReserva = (id) => {
                         Gestionar Usuarios
                     </button>
                 )}
-                {isComplexOwner && ( 
+                {isComplexOwner && (
                     <button
                         className={`admin-tab-button ${activeTab === 'estadisticas' ? 'active' : ''}`}
                         onClick={() => setActiveTab('estadisticas')}
@@ -607,30 +613,30 @@ const handleConfirmarReserva = (id) => {
                 <div className="admin-tab-content">
                     <h2>{editingComplejo?.id ? `Editando Complejo: ${editingComplejo.nombre}` : 'Agregar Nuevo Complejo'}</h2>
 
-                    {isAdmin && !editingComplejo?.id && ( 
+                    {isAdmin && !editingComplejo?.id && (
                         <p className="info-message">Como **Administrador General**, puedes crear y editar cualquier complejo. Puedes asignarlos a un propietario existente.</p>
                     )}
-                    {isComplexOwner && !editingComplejo?.id && complejos.length > 0 && ( 
+                    {isComplexOwner && !editingComplejo?.id && complejos.length > 0 && (
                         <p className="info-message">Selecciona un complejo de la lista para gestionarlo. Para crear nuevos complejos, contacta a un Administrador.</p>
                     )}
-                    {isComplexOwner && !editingComplejo?.id && complejos.length === 0 && ( 
+                    {isComplexOwner && !editingComplejo?.id && complejos.length === 0 && (
                         <p className="info-message">No tienes complejos registrados. Contacta a un administrador para agregar el tuyo.</p>
                     )}
 
-                    {(isAdmin || (isComplexOwner && editingComplejo?.id)) && ( 
+                    {(isAdmin || (isComplexOwner && editingComplejo?.id)) && (
                         <ComplejoForm
                             nuevoComplejoAdmin={nuevoComplejoAdmin}
                             handleComplejoFormChange={handleComplejoFormChange}
                             handleCanchaChange={handleCanchaChange}
                             handleAddCancha={handleAddCancha}
                             handleRemoveCancha={handleRemoveCancha}
-                            handleSaveComplejo={handleSaveComplejo} 
+                            handleSaveComplejo={handleSaveComplejo}
                             editingComplejo={editingComplejo}
                             cancelEditingComplejo={cancelEditingComplejo}
                             isAdmin={isAdmin}
                             // Pasamos el estado de la foto y su setter
-                            selectedPhotoFile={selectedPhotoFile} 
-                            setSelectedPhotoFile={setSelectedPhotoFile} 
+                            selectedPhotoFile={selectedPhotoFile}
+                            setSelectedPhotoFile={setSelectedPhotoFile}
                             setMensaje={setMensaje} // Pasamos setMensaje para errores específicos de foto
                         />
                     )}
@@ -656,7 +662,7 @@ const handleConfirmarReserva = (id) => {
                                             <tr key={c.id}>
                                                 <td data-label="ID">{c.id}</td>
                                                 <td data-label="Nombre">{c.nombre}</td>
-                                                <td data-label="Propietario">{c.propietario?.username || 'N/A'}</td> 
+                                                <td data-label="Propietario">{c.propietario?.username || 'N/A'}</td>
                                                 <td data-label="Ubicación">{c.ubicacion || 'N/A'}</td>
                                                 <td data-label="Horario">{c.horarioApertura || 'N/A'} - {c.horarioCierre || 'N/A'}</td>
                                                 <td data-label="Canchas">
@@ -718,14 +724,15 @@ const handleConfirmarReserva = (id) => {
                                             <td data-label="Precio Total">${r.precioTotal ? r.precioTotal.toLocaleString('es-AR') : 'N/A'}</td>
                                             <td data-label="Método Pago">{capitalizeFirstLetter(r.metodoPago || 'N/A')}</td>
                                             <td data-label="Estado">
-                                                <span className={`admin-badge ${r.estado === 'pagada' ? 'paid' : (r.estado === 'confirmada' ? 'confirmed' : 'pending')}`}>
-                                                    {formatReservaEstado(r.estado)}
+                                                <span className={`admin-badge ${r.pagada ? 'paid' : (r.estado === 'confirmada' ? 'confirmed' : 'pending')}`}>
+                                                    {formatReservaEstado(r.estado, r.pagada)}
                                                 </span>
                                             </td>
                                             <td data-label="Acciones">
-                                                {(r.estado === 'pendiente_pago_efectivo' || r.estado === 'pendiente_pago_mp') && (
-                                                    <button className="admin-btn-confirm" onClick={() => handleConfirmReserva(r.id)}>
-                                                        Confirmar
+                                                {/* Botón de "Confirmar Pago" solo para reservas pendientes en efectivo */}
+                                                {(r.estado === 'pendiente_pago_efectivo') && (
+                                                    <button className="admin-btn-confirm" onClick={() => handleConfirmarReserva(r.id)}>
+                                                        Confirmar Pago
                                                     </button>
                                                 )}
                                                 <button className="admin-btn-delete" onClick={() => handleDeleteReserva(r.id)}>
@@ -779,8 +786,8 @@ const handleConfirmarReserva = (id) => {
                                                             Gestionar Roles
                                                         </button>
                                                         {!u.enabled && (
-                                                            <button 
-                                                                className="admin-btn-activate" 
+                                                            <button
+                                                                className="admin-btn-activate"
                                                                 onClick={() => handleActivateUser(u.id, u.username)}
                                                             >
                                                                 Activar
@@ -805,29 +812,29 @@ const handleConfirmarReserva = (id) => {
                             <h3>Gestionar Roles para: {managingUserRoles.username}</h3>
                             <div className="form-group checkbox-group">
                                 <label>
-                                    <input 
-                                        type="checkbox" 
-                                        value="USER" 
-                                        checked={selectedRoles.includes('USER')} 
-                                        onChange={handleRoleChange} 
+                                    <input
+                                        type="checkbox"
+                                        value="USER"
+                                        checked={selectedRoles.includes('USER')}
+                                        onChange={handleRoleChange}
                                     />
                                     Usuario Estándar
                                 </label>
                                 <label>
-                                    <input 
-                                        type="checkbox" 
-                                        value="COMPLEX_OWNER" 
-                                        checked={selectedRoles.includes('COMPLEX_OWNER')} 
-                                        onChange={handleRoleChange} 
+                                    <input
+                                        type="checkbox"
+                                        value="COMPLEX_OWNER"
+                                        checked={selectedRoles.includes('COMPLEX_OWNER')}
+                                        onChange={handleRoleChange}
                                     />
                                     Dueño de Complejo
                                 </label>
                                 <label>
-                                    <input 
-                                        type="checkbox" 
-                                        value="ADMIN" 
-                                        checked={selectedRoles.includes('ADMIN')} 
-                                        onChange={handleRoleChange} 
+                                    <input
+                                        type="checkbox"
+                                        value="ADMIN"
+                                        checked={selectedRoles.includes('ADMIN')}
+                                        onChange={handleRoleChange}
                                     />
                                     Administrador General
                                 </label>
@@ -847,7 +854,7 @@ const handleConfirmarReserva = (id) => {
                 <AdminEstadisticas userRole={roleForStats} />
             )}
 
-            <ConfirmationModal 
+            <ConfirmationModal
                 isOpen={isModalOpen}
                 title={modalConfig.title}
                 message={modalConfig.message}
