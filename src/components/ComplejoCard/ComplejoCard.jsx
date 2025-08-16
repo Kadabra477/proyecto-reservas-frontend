@@ -7,7 +7,7 @@ import "slick-carousel/slick/slick-theme.css";
 import './ComplejoCard.css'; 
 
 // Importa una imagen local para el placeholder
-import placeholderImage from '../../../assets/default-complejo.png';
+const placeholderImage = '/imagenes/default-complejo.png';
 
 function ComplejoCard({ complejo }) {
     const navigate = useNavigate();
