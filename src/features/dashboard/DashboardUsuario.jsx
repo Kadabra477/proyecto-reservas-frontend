@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosConfig'; 
 import './DashboardUsuario.css'; 
+import ConfirmationModal from '../../components/Common/ConfirmationModal/ConfirmationModal';
 
 // Importa directamente las imágenes desde la carpeta assets (Asegúrate de que estas rutas sean correctas)
 import mercadopagoSmallIcon from '../../assets/mercadopago-small.png'; 
@@ -20,6 +21,10 @@ function DashboardUsuario() {
     const [modalReserva, setModalReserva] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Nuevo estado para el modal de confirmación
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [reservaToCancel, setReservaToCancel] = useState(null);
 
     const recargarReservas = async () => {
         setLoading(true);
@@ -139,6 +144,29 @@ function DashboardUsuario() {
 
     const handleOpenModal = (reserva) => { setModalReserva(reserva); };
     const handleCloseModal = () => { setModalReserva(null); };
+
+    // **NUEVA FUNCIÓN:** para manejar la cancelación de reservas
+    const handleCancelarReserva = async (reservaId) => {
+        setReservaToCancel(reservaId);
+        setIsCancelModalOpen(true);
+    };
+
+    const confirmCancelacion = async () => {
+        try {
+            await api.put(`/reservas/${reservaToCancel}/cancelar`); // Nuevo endpoint en el backend
+            alert("Reserva cancelada exitosamente.");
+            recargarReservas();
+            setModalReserva(null);
+        } catch (err) {
+            console.error("Error al cancelar la reserva:", err);
+            const msg = err.response?.data?.message || "Ocurrió un error al cancelar la reserva. Intenta de nuevo.";
+            alert(`Error: ${msg}`);
+        } finally {
+            setIsCancelModalOpen(false);
+            setReservaToCancel(null);
+        }
+    };
+
 
     const handleDescargarPdf = async (reservaId) => {
         try {
@@ -500,7 +528,7 @@ function DashboardUsuario() {
                         
                         {/* El botón PDF solo se mostrará si la reserva es futura o activa/pendiente (no histórica) */}
                         {(new Date(modalReserva.fechaHora).getTime() > nowArgentinaClient.getTime()) && 
-                         modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_efectivo' && (
+                          modalReserva.metodoPago === 'efectivo' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_efectivo' && (
                             <button
                                 className="btn btn-info btn-mostrar-boleto"
                                 onClick={() => handleDescargarPdf(modalReserva.id)}
@@ -510,7 +538,7 @@ function DashboardUsuario() {
                         )}
 
                         {(new Date(modalReserva.fechaHora).getTime() > nowArgentinaClient.getTime()) && 
-                         modalReserva.metodoPago === 'mercadopago' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_mp' && (
+                          modalReserva.metodoPago === 'mercadopago' && !modalReserva.pagada && modalReserva.estado === 'pendiente_pago_mp' && (
                             <button
                                 className="btn btn-success btn-pagar-mp"
                                 onClick={async () => {
@@ -551,7 +579,14 @@ function DashboardUsuario() {
                         {modalReserva.estado === 'cancelada' && (
                             <p className="text-danger">Esta reserva ha sido cancelada.</p>
                         )}
-
+                        
+                        {/* BOTÓN DE CANCELAR RESERVA */}
+                        {((modalReserva.estado === 'pendiente' || modalReserva.estado === 'pendiente_pago_efectivo' || modalReserva.estado === 'pendiente_pago_mp' || modalReserva.estado === 'confirmada') &&
+                        new Date(modalReserva.fechaHora).getTime() > nowArgentinaClient.getTime()) && (
+                            <button className="btn btn-danger" onClick={() => handleCancelarReserva(modalReserva.id)}>
+                                Cancelar Reserva
+                            </button>
+                        )}
 
                         <div className="modal-actions">
                             <button className="btn btn-outline-primary" onClick={handleCloseModal}>Cerrar</button>
@@ -559,6 +594,18 @@ function DashboardUsuario() {
                     </div>
                 </div>
             )}
+
+            {/* Modal de confirmación para cancelar */}
+            <ConfirmationModal
+                isOpen={isCancelModalOpen}
+                title="Confirmar Cancelación"
+                message="¿Estás seguro de que quieres cancelar esta reserva? Esta acción no se puede deshacer y podría tener penalizaciones."
+                onConfirm={confirmCancelacion}
+                onCancel={() => setIsCancelModalOpen(false)}
+                confirmButtonText="Sí, Cancelar"
+                cancelButtonText="No, Mantener"
+                type="danger"
+            />
         </div>
     );
 }
