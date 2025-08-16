@@ -99,7 +99,7 @@ const ComplejoForm = ({
                 <div className="admin-form-group">
                     <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
                     <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo?.id && isAdmin} placeholder='dueño@ejemplo.com' />
-                    <p className="small-info">El usuario con este email será asignado como propietario del complejo y se le otorgará el rol "COMPLEX_OWNER" si no lo tiene.</p>
+                    <p className="small-info">El usuario con este email será asignado como 'COMPLEX_OWNER'.</p>
                 </div>
             )}
             
