@@ -35,7 +35,7 @@ const ComplejoForm = ({
 
     // Manejar la selección de archivos de foto por el usuario
     const handlePhotoFileChange = (e) => {
-        const files = Array.from(e.target.files);
+        const files = Array.from(e.files);
         if (files.length > 0) {
             // --- VALIDACIONES DE IMAGEN EN EL FRONTEND ---
             const MAX_FILE_SIZE_MB = 5;
@@ -99,7 +99,7 @@ const ComplejoForm = ({
                 <div className="admin-form-group">
                     <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
                     <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo?.id && isAdmin} placeholder='dueño@ejemplo.com' />
-                    <p className="small-info">El usuario con este email será asignado como 'COMPLEX_OWNER'.</p>
+                    <p className="small-info">El usuario con este email será asignado como &quot;COMPLEX_OWNER&quot;.</p>
                 </div>
             )}
             
@@ -116,20 +116,18 @@ const ComplejoForm = ({
                 <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
             </div>
             
-            {/* ¡CAMBIO CLAVE: Input de tipo 'file' para múltiples fotos! */}
             <div className="admin-form-group">
                 <label htmlFor="photoFile">Fotos del Complejo:</label>
                 <input
                     type="file"
                     id="photoFile"
-                    name="photos" // El 'name' debe coincidir con el @RequestPart del backend (ej. "photos")
+                    name="photos"
                     accept="image/*"
-                    multiple // Permite seleccionar varios archivos
+                    multiple
                     onChange={handlePhotoFileChange}
                 />
                 <p className="small-info">Tamaño máximo de archivo: 5MB cada uno. Formatos permitidos: JPG, PNG, GIF o WebP.</p>
 
-                {/* Mostrar la previsualización de las fotos */}
                 {(previewPhotoUrls && previewPhotoUrls.length > 0) ? (
                     <div className="image-preview-container">
                         <p>Previsualización de las fotos:</p>
