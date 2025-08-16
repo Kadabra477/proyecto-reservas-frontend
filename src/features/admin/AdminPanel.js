@@ -13,7 +13,7 @@ const estadoInicialComplejoAdmin = {
     descripcion: '',
     ubicacion: '',
     telefono: '',
-    fotoUrl: '',
+    fotoUrls: [], // **MODIFICADO**: Ahora es una lista de URLs
     horarioApertura: '10:00',
     horarioCierre: '23:00',
     emailPropietario: '',
@@ -30,8 +30,8 @@ function AdminPanel() {
     const [editingComplejo, setEditingComplejo] = useState(null);
     const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin);
 
-    // ¡NUEVO ESTADO! Para el archivo de la foto seleccionado por el usuario
-    const [selectedPhotoFile, setSelectedPhotoFile] = useState(null);
+    // **MODIFICADO**: Ahora es un array de archivos seleccionados
+    const [selectedPhotoFiles, setSelectedPhotoFiles] = useState([]);
 
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
@@ -84,8 +84,6 @@ function AdminPanel() {
         return canchasArray;
     }, []);
 
-    // Este useEffect ahora solo configura el estado nuevoComplejoAdmin
-    // El estado selectedPhotoFile es gestionado por ComplejoForm y sus handlers
     useEffect(() => {
         if (editingComplejo && editingComplejo.id) {
             setNuevoComplejoAdmin({
@@ -94,16 +92,18 @@ function AdminPanel() {
                 descripcion: editingComplejo.descripcion || '',
                 ubicacion: editingComplejo.ubicacion || '',
                 telefono: editingComplejo.telefono || '',
-                fotoUrl: editingComplejo.fotoUrl || '', // Mantener la fotoUrl existente para visualización
+                fotoUrls: editingComplejo.fotoUrls || [], // **MODIFICADO**: Usar fotoUrls
                 horarioApertura: editingComplejo.horarioApertura || '10:00',
                 horarioCierre: editingComplejo.horarioCierre || '23:00',
                 emailPropietario: editingComplejo.propietario?.username || '',
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
-            // NOTA: selectedPhotoFile se resetea a null en ComplejoForm a través de su useEffect
+            // **MODIFICADO**: Limpiar el estado de los archivos al editar
+            setSelectedPhotoFiles([]); 
         } else {
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            // NOTA: selectedPhotoFile se resetea a null en ComplejoForm a través de su useEffect
+            // **MODIFICADO**: Limpiar el estado de los archivos al crear uno nuevo
+            setSelectedPhotoFiles([]); 
         }
     }, [editingComplejo, mapComplejoToFormCanchas]);
 
@@ -224,15 +224,14 @@ function AdminPanel() {
         setNuevoComplejoAdmin(prev => ({ ...prev, canchas: newCanchas }));
     };
 
-    // ¡handleSaveComplejo ahora recibe el archivo de la foto desde el formulario!
-    const handleSaveComplejo = async (e, photoFile) => {
+    // **MODIFICADO**: Ahora recibe un array de archivos `photoFiles`
+    const handleSaveComplejo = async (e, photoFiles) => {
         e.preventDefault();
         setMensaje({ text: '', type: '' });
 
         const { id, nombre, emailPropietario, canchas, descripcion, ubicacion, telefono, horarioApertura, horarioCierre } = nuevoComplejoAdmin;
-        let { fotoUrl } = nuevoComplejoAdmin; // Obtenemos fotoUrl del estado para determinar si se eliminó
+        let { fotoUrls } = nuevoComplejoAdmin; // **MODIFICADO**: Obtenemos la lista de URLs
 
-        // Validaciones básicas que aún se hacen aquí
         if (!nombre?.trim()) { setMensaje({ text: 'El nombre del complejo es obligatorio.', type: 'error' }); return; }
         if (!ubicacion?.trim()) { setMensaje({ text: 'La ubicación del complejo es obligatoria.', type: 'error' }); return; }
         if (!horarioApertura || !horarioCierre) { setMensaje({ text: 'Los horarios de apertura y cierre son obligatorios.', type: 'error' }); return; }
@@ -258,22 +257,19 @@ function AdminPanel() {
             canchaTecho[cancha.tipoCancha] = cancha.techo;
         });
 
-        // ¡PREPARAR FormData para enviar archivos y JSON!
         const formData = new FormData();
 
-        // 1. Añadir el archivo de foto si fue seleccionado
-        if (photoFile) {
-            formData.append('photo', photoFile); // 'photo' debe coincidir con el @RequestPart("photo") del backend
-        } else if (editingComplejo?.id && fotoUrl === '') {
-            // 2. Si estamos editando Y no hay archivo nuevo Y la fotoUrl del estado se vació (indicando que se quiere eliminar la existente)
-            // Se envía un Blob vacío con el nombre 'photo' para indicar al backend que se debe eliminar la foto.
-            // Si el backend espera 'photo' como required=false, un Blob vacío es la forma de indicar "quitar foto".
-            // Nota: En el backend se manejará si fotoUrl es null/vacío y photoFile es nulo/vacío para mantener la foto existente.
-            formData.append('photo', new Blob(), 'empty-photo'); // 'empty-photo' es el nombre del archivo vacío
+        // **MODIFICADO**: Añadir cada archivo del array `photoFiles`
+        if (photoFiles && photoFiles.length > 0) {
+            photoFiles.forEach(file => {
+                formData.append('photos', file); // 'photos' debe coincidir con el backend
+            });
+        } else if (editingComplejo?.id && fotoUrls?.length === 0) {
+             // Si no hay archivos nuevos y la lista de fotos existente se vació, se envía un blob vacío
+             formData.append('photos', new Blob(), 'empty-photo');
         }
 
 
-        // 3. Construir el objeto JSON con los datos del complejo (sin fotoUrl aquí)
         const complejoData = {
             id,
             nombre,
@@ -287,41 +283,36 @@ function AdminPanel() {
             canchaSurfaces,
             canchaIluminacion,
             canchaTecho,
-            // Si estamos editando y la fotoUrl del estado es '' (porque se hizo clic en "Eliminar Foto"),
-            // enviamos fotoUrl: '' para que el backend sepa que debe eliminarla.
-            ...(editingComplejo?.id && fotoUrl === '' && { fotoUrl: '' })
+            ...(editingComplejo?.id && fotoUrls?.length === 0 && { fotoUrls: [] }) // **MODIFICADO**: Enviar lista vacía
         };
 
-        // Si es un nuevo complejo y es ADMIN, añadir el emailPropietario al objeto JSON
         if (!id && isAdmin && emailPropietario) {
             complejoData.propietarioUsername = emailPropietario;
         }
 
-        // 4. Añadir el JSON del complejo como un Blob a FormData
-        formData.append('complejo', new Blob([JSON.stringify(complejoData)], { type: 'application/json' })); // 'complejo' debe coincidir con el @RequestPart("complejo") del backend
+        formData.append('complejo', new Blob([JSON.stringify(complejoData)], { type: 'application/json' }));
 
         try {
             let response;
             if (editingComplejo?.id) {
                 response = await api.put(`/complejos/${id}`, formData, {
                     headers: {
-                        'Content-Type': undefined, // ¡CAMBIO AQUÍ! Deja que el navegador lo defina
+                        'Content-Type': undefined,
                     },
                 });
                 setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
             } else {
                 response = await api.post('/complejos', formData, {
                     headers: {
-                        'Content-Type': undefined, // ¡CAMBIO AQUÍ! Deja que el navegador lo defina
+                        'Content-Type': undefined,
                     },
                 });
                 setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
             }
-            // Si la operación fue exitosa, limpiar estados y recargar datos
             setEditingComplejo(null);
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            setSelectedPhotoFile(null); // Limpiar el archivo seleccionado del input
-            fetchComplejos(); // Recargar la lista de complejos
+            setSelectedPhotoFiles([]);
+            fetchComplejos();
 
         } catch (err) {
             console.error('Error al guardar complejo (Frontend):', err);
@@ -332,18 +323,17 @@ function AdminPanel() {
     
     const startEditingComplejo = (complejoParaEditar) => {
         setEditingComplejo(complejoParaEditar);
-        // La inicialización de nuevoComplejoAdmin y selectedPhotoFile se maneja en useEffect
+        setSelectedPhotoFiles([]); 
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const cancelEditingComplejo = () => {
         setEditingComplejo(null);
         setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-        setSelectedPhotoFile(null); // Asegurarse de limpiar el archivo seleccionado
-        document.getElementById('photoFile').value = ''; // Limpiar el input file visualmente
+        setSelectedPhotoFiles([]);
+        document.getElementById('photoFile').value = '';
     };
 
-    // **MODIFICACIÓN CLAVE**: Esta función ahora llama al nuevo endpoint `/marcar-pagada`
     const handleConfirmarReserva = (id) => {
         setModalConfig({
             title: 'Confirmar Pago en Efectivo',
@@ -351,17 +341,13 @@ function AdminPanel() {
             onConfirm: async () => {
                 setMensaje({ text: '', type: '' });
                 try {
-                    // Envía la petición PUT para marcar la reserva como pagada en efectivo
                     const res = await api.put(`/reservas/${id}/marcar-pagada?metodoPago=efectivo`);
                     const reservaActualizada = res.data;
-
-                    // Actualiza el estado de reservas con la información actualizada del backend
                     setReservas(prevReservas =>
                         prevReservas.map(r =>
                             r.id === reservaActualizada.id ? reservaActualizada : r
                         )
                     );
-
                     setMensaje({ text: 'Reserva marcada como pagada correctamente.', type: 'success' });
                 } catch (err) {
                     console.error('Error al marcar la reserva como pagada:', err);
@@ -414,7 +400,6 @@ function AdminPanel() {
         }
     };
 
-    // Modificado para mostrar 'Pagada' cuando corresponda.
     const formatReservaEstado = (estado, pagada) => {
         if (!estado) return 'Desconocido';
         estado = estado.toLowerCase();
@@ -551,7 +536,7 @@ function AdminPanel() {
                     fetchComplejos();
                     setEditingComplejo(null);
                     setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-                    setSelectedPhotoFile(null); // Asegurarse de limpiar el archivo seleccionado
+                    setSelectedPhotoFiles([]);
                 } catch (err) {
                     console.error('Error al eliminar el complejo:', err);
                     const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el complejo.';
@@ -634,10 +619,10 @@ function AdminPanel() {
                             editingComplejo={editingComplejo}
                             cancelEditingComplejo={cancelEditingComplejo}
                             isAdmin={isAdmin}
-                            // Pasamos el estado de la foto y su setter
-                            selectedPhotoFile={selectedPhotoFile}
-                            setSelectedPhotoFile={setSelectedPhotoFile}
-                            setMensaje={setMensaje} // Pasamos setMensaje para errores específicos de foto
+                            // **MODIFICADO**: Ahora pasamos un array de archivos
+                            selectedPhotoFiles={selectedPhotoFiles}
+                            setSelectedPhotoFiles={setSelectedPhotoFiles}
+                            setMensaje={setMensaje}
                         />
                     )}
                     
@@ -729,7 +714,6 @@ function AdminPanel() {
                                                 </span>
                                             </td>
                                             <td data-label="Acciones">
-                                                {/* Botón de "Confirmar Pago" solo para reservas pendientes en efectivo */}
                                                 {(r.estado === 'pendiente_pago_efectivo') && (
                                                     <button className="admin-btn-confirm" onClick={() => handleConfirmarReserva(r.id)}>
                                                         Confirmar Pago
