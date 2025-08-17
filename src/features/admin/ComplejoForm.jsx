@@ -35,7 +35,7 @@ const ComplejoForm = ({
 
     // Manejar la selección de archivos de foto por el usuario
     const handlePhotoFileChange = (e) => {
-        const files = Array.from(e.files);
+        const files = Array.from(e.target.files);
         if (files.length > 0) {
             // --- VALIDACIONES DE IMAGEN EN EL FRONTEND ---
             const MAX_FILE_SIZE_MB = 5;
