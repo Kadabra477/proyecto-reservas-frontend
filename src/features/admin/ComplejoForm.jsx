@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './ComplejoForm.css';
 
+// Importa una imagen local para el placeholder
 const placeholderImage = '/imagenes/default-complejo.png';
 
 const ComplejoForm = ({
@@ -79,8 +80,6 @@ const ComplejoForm = ({
         setSelectedPhotoFiles([]);
         setPreviewPhotoUrls([]);
         
-        // Si estamos editando y había fotos existentes, 
-        // vaciamos `fotoUrls` para indicarle al backend que debe eliminarlas.
         if (editingComplejo) {
             handleComplejoFormChange({ target: { name: 'fotoUrls', value: [] } });
         }

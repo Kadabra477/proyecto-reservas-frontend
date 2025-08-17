@@ -1,13 +1,11 @@
 // frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Slider from 'react-slick'; // Importado para el carrusel
-import api from '../../../api/axiosConfig';
+import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import './ComplejoDetalle.css'; 
 
-// Importa una imagen local para el placeholder
 const placeholderImage = '/imagenes/default-complejo.png';
 
 function ComplejoDetalle() {
@@ -57,7 +55,6 @@ function ComplejoDetalle() {
         return <div className="complejo-detalle-container no-data-message">Complejo no encontrado.</div>;
     }
     
-    // Configuración para el carrusel
     const settings = {
         dots: true,
         infinite: true,
@@ -69,7 +66,6 @@ function ComplejoDetalle() {
         arrows: true
     };
     
-    // Muestra todas las fotos del complejo, o una por defecto si no hay ninguna.
     const images = (complejo.fotoUrls && complejo.fotoUrls.length > 0)
         ? complejo.fotoUrls
         : [complejo.fotoUrl || placeholderImage];
@@ -82,7 +78,6 @@ function ComplejoDetalle() {
             </button>
             <h1 className="complejo-detalle-title">{complejo.nombre}</h1>
             
-            {/* Carrusel de imágenes */}
             <div className="complejo-detalle-header">
                 {images.length > 1 ? (
                     <Slider {...settings} className="complejo-detalle-slider">

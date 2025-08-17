@@ -1,12 +1,11 @@
 // frontend/src/components/Complejos/ComplejoCard/ComplejoCard.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Slider from 'react-slick'; // Importado para el carrusel
+import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import './ComplejoCard.css'; 
 
-// Importa una imagen local para el placeholder
 const placeholderImage = '/imagenes/default-complejo.png';
 
 function ComplejoCard({ complejo }) {
@@ -20,7 +19,6 @@ function ComplejoCard({ complejo }) {
         navigate('/reservar', { state: { preselectedComplejoId: complejo.id } });
     };
 
-    // Configuración para el carrusel
     const settings = {
         dots: true,
         infinite: true,
@@ -29,10 +27,9 @@ function ComplejoCard({ complejo }) {
         slidesToScroll: 1,
         autoplay: true,
         autoplaySpeed: 3000,
-        arrows: false // Flechas de navegación desactivadas en la vista de tarjeta para una apariencia más limpia
+        arrows: true // <-- Se activa la navegación con flechas
     };
     
-    // Muestra todas las fotos del complejo, o una por defecto si no hay ninguna.
     const images = (complejo.fotoUrls && complejo.fotoUrls.length > 0)
         ? complejo.fotoUrls
         : [complejo.fotoUrl || placeholderImage];

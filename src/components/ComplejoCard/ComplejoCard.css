@@ -4,27 +4,26 @@
     background-color: var(--white, #ffffff);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Sombra más sutil */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
-    width: 300px; /* Ancho fijo para las tarjetas, ajusta según el diseño de tu grid */
-    min-height: auto; /* IMPORTANTE: Eliminar o establecer en auto para no forzar una altura mínima grande */
-    margin: 15px; /* Espacio alrededor de cada tarjeta cuando están en un contenedor flex/grid */
-    cursor: pointer; /* Indica que la tarjeta es clickable */
+    width: 300px;
+    min-height: auto;
+    margin: 15px;
+    cursor: pointer;
 }
 
 .complejo-card-item:hover {
-    transform: translateY(-5px); /* Efecto de "levantar" más suave */
+    transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Nuevo contenedor para la imagen para controlar mejor su tamaño */
 .complejo-card-image-container {
     width: 100%;
-    height: 180px; /* Altura fija para la imagen */
-    overflow: hidden; /* Recorta la imagen si es necesario */
-    display: flex; /* Para centrar la imagen dentro del contenedor */
+    height: 180px;
+    overflow: hidden;
+    display: flex;
     justify-content: center;
     align-items: center;
     border-bottom: 1px solid var(--gray-light, #eee);
@@ -32,27 +31,45 @@
 
 .complejo-card-img {
     width: 100%;
-    height: 100%; /* La imagen ocupará el 100% del contenedor */
-    object-fit: cover; /* Recorta la imagen para que cubra el espacio sin distorsionarse */
+    height: 100%;
+    object-fit: cover;
     object-position: center;
-    display: block; /* Elimina el espacio extra debajo de la imagen */
+    display: block;
+}
+
+/* Estilos para el carrusel */
+.slick-slider .slick-prev,
+.slick-slider .slick-next {
+    z-index: 1000;
+}
+.slick-prev:before, .slick-next:before {
+    font-size: 30px;
+    color: #fff;
+    opacity: 0.8;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+.slick-prev {
+    left: 10px;
+}
+.slick-next {
+    right: 10px;
 }
 
 .complejo-card-content {
-    padding: 15px; /* Reducir el padding para hacerla más compacta */
+    padding: 15px;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
 }
 
 .complejo-card-title {
-    font-size: 1.5em; /* Tamaño de título más pequeño */
+    font-size: 1.5em;
     color: var(--primary-dark, #0056b3);
-    margin-bottom: 8px; /* Menos margen */
+    margin-bottom: 8px;
     font-weight: 700;
-    white-space: nowrap; /* Evita que el nombre se rompa en varias líneas */
-    overflow: hidden; /* Oculta el texto que se desborda */
-    text-overflow: ellipsis; /* Añade puntos suspensivos */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .complejo-card-location {
@@ -68,50 +85,44 @@
     color: var(--primary, #007bff);
 }
 
-.complejo-card-description-short { /* Nuevo estilo para la descripción acortada */
-    font-size: 0.85em; /* Tamaño de fuente más pequeño */
+.complejo-card-description-short {
+    font-size: 0.85em;
     color: var(--text-light, #666);
     line-height: 1.4;
-    margin-bottom: 12px; /* Menos margen */
+    margin-bottom: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* Muestra solo 2 líneas de descripción */
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     line-clamp: 2;
 }
 
-.complejo-card-canchas-summary { /* Estilo para el resumen de canchas */
+.complejo-card-canchas-summary {
     font-size: 0.9em;
     color: var(--text-dark, #444);
     font-weight: 500;
     margin-bottom: 15px;
 }
 
-/* El resto de los estilos relacionados con .complejo-details-grid, h4,
-   .complejo-card-cancha-types, .cancha-type-item, .feature-chip
-   se pueden eliminar de este CSS o mantener si los quieres usar en la página de detalles
-   y compartirlos, pero no serán usados por ComplejoCard.jsx. */
-
-/* Ajustes para el contenedor de botones */
 .complejo-card-buttons-container {
     display: flex;
-    flex-direction: column; /* Botones apilados verticalmente */
-    gap: 8px; /* Espacio entre botones */
-    margin-top: auto; /* Empuja los botones hacia abajo */
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
     width: 100%;
-    padding-top: 10px; /* Un poco de espacio antes de los botones */
+    padding-top: 10px;
 }
 
 .complejo-card-button {
-    padding: 10px 15px; /* Padding más pequeño */
-    font-size: 0.9em; /* Fuente más pequeña */
+    padding: 10px 15px;
+    font-size: 0.9em;
     font-weight: bold;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease;
-    width: 100%; /* Botones ocupan todo el ancho disponible */
+    width: 100%;
 }
 
 .complejo-card-button.primary {
@@ -131,20 +142,17 @@
 }
 
 .complejo-card-button.secondary:hover {
-    background-color: var(--primary, #007bff); /* Invierte los colores en hover para secondary */
+    background-color: var(--primary, #007bff);
     color: white;
     transform: translateY(-1px);
 }
 
-/* Media Queries para ComplejoCard */
 @media (min-width: 768px) {
-    /* Si estás usando un grid para listar los complejos, este media query podría ir en el padre */
-    /* .complejo-card-item { width: calc(33.333% - 30px); } */ /* Ejemplo para 3 columnas con margen */
 }
 @media (max-width: 480px) {
     .complejo-card-item {
-        width: 100%; /* En pantallas muy pequeñas, que ocupe el ancho completo */
-        margin: 10px 0; /* Menos margen horizontal, más vertical */
+        width: 100%;
+        margin: 10px 0;
     }
     .complejo-card-title {
         font-size: 1.4em;
@@ -153,6 +161,6 @@
         padding: 12px;
     }
     .complejo-card-buttons-container {
-        flex-direction: column; /* Asegura que los botones siempre estén apilados en móviles */
+        flex-direction: column;
     }
 }

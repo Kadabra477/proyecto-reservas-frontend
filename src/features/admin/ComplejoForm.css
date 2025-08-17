@@ -1,4 +1,4 @@
-/* frontend/src/components/AdminPanel/ComplejoForm.css */
+/* frontend/src/features/admin/ComplejoForm.css */
 
 .admin-complejo-form {
     background-color: var(--white, #ffffff);
@@ -44,7 +44,7 @@
     border: 1px solid var(--gray);
     border-radius: 8px;
     font-size: 1em;
-    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+    box-sizing: border-box;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -73,25 +73,52 @@
     line-height: 1.4;
 }
 
+/* Nuevos estilos para la previsualización de imágenes */
 .image-preview-container {
     margin-top: 15px;
     text-align: center;
+    border: 1px dashed var(--gray-light);
+    border-radius: 8px;
+    padding: 15px;
+    background-color: var(--background-light);
 }
 
 .image-preview-container p {
     font-size: 0.9em;
     color: var(--text-dark);
     margin-bottom: 10px;
+    font-style: italic;
 }
 
-.image-preview {
-    max-width: 100%;
-    height: 150px;
-    object-fit: contain;
-    border: 1px solid var(--gray-light);
-    border-radius: 8px;
-    background-color: var(--background-light);
-    padding: 5px;
+.image-preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.image-preview-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--gray);
+}
+
+.remove-photo-btn {
+    margin-top: 15px;
+    background-color: var(--danger);
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.remove-photo-btn:hover {
+    background-color: #c82333;
 }
 
 /* Checkbox specific styles */
@@ -103,10 +130,10 @@
 }
 
 .admin-form-group.checkbox input[type="checkbox"] {
-    width: auto; /* Ancho automático para checkboxes */
+    width: auto;
     margin-right: 10px;
-    transform: scale(1.2); /* Aumenta un poco el tamaño del checkbox */
-    accent-color: var(--primary); /* Cambia el color del checkbox nativo */
+    transform: scale(1.2);
+    accent-color: var(--primary);
 }
 
 .admin-form-group.checkbox label {
@@ -119,7 +146,7 @@
     padding: 20px;
     border-radius: 10px;
     margin-top: 20px;
-    background-color: rgba(0, 123, 255, 0.03); /* Fondo muy suave */
+    background-color: rgba(0, 123, 255, 0.03);
 }
 
 .cancha-item-form {
@@ -155,7 +182,7 @@
 }
 
 .remove-cancha-btn:hover {
-    background-color: #c82333; /* Un rojo más oscuro */
+    background-color: #c82333;
 }
 
 .admin-btn-add {
@@ -172,12 +199,12 @@
 }
 
 .admin-btn-add:hover {
-    background-color: #218838; /* Un verde más oscuro */
+    background-color: #218838;
 }
 
 .admin-form-buttons {
     display: flex;
-    justify-content: flex-end; /* Alinea los botones a la derecha */
+    justify-content: flex-end;
     gap: 15px;
     margin-top: 30px;
     padding-top: 20px;
@@ -214,7 +241,6 @@
     transform: translateY(-2px);
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .admin-complejo-form {
         padding: 20px;
