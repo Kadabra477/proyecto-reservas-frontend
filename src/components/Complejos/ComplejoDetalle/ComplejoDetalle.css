@@ -1,5 +1,6 @@
 /* frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.css */
 
+/* Variables de color y tipografía */
 :root {
     --primary: #007bff;
     --primary-dark: #0056b3;
@@ -10,233 +11,295 @@
     --danger: #dc3545;
     --warning: #ffc107;
     --white: #ffffff;
-    --text: #343a40;
-    --text-light: #6c757d;
-    --background-light: #f8f9fa;
-    --gray-light: #e9ecef;
+    --background-color: #f4f7f6;
+    --card-background: #ffffff;
+    --text-color: #495057;
+    --text-muted: #868e96;
+    --border-color: #e9ecef;
+    --font-family-sans: 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: var(--font-family-sans);
 }
 
 .complejo-detalle-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    padding: 0;
+    max-width: 100%;
 }
 
-/* Sección de cabecera con imagen de fondo */
-.complejo-hero-section {
+.loading-container, .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+}
+
+.loading-container p, .error-container p {
+    font-size: 1.2em;
+    color: var(--text-muted);
+}
+
+.spinner {
+    border: 5px solid var(--border-color);
+    border-top: 5px solid var(--primary);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* --- HERO BANNER --- */
+.hero-banner {
     position: relative;
     height: 400px;
     background-size: cover;
     background-position: center;
-    background-color: #333;
-    border-radius: 15px;
-    margin-bottom: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    background-color: var(--secondary);
     display: flex;
     align-items: flex-end;
-    overflow: hidden;
-}
-
-.hero-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 20px 40px;
-    width: 100%;
     color: white;
+    box-shadow: inset 0 -100px 100px -50px rgba(0, 0, 0, 0.7);
+    animation: fadeIn 1s ease-in-out;
 }
 
-.complejo-title-hero {
-    font-size: 3.5em;
-    font-weight: 900;
+.hero-content {
+    position: relative;
+    z-index: 10;
+    padding: 2rem;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
     margin: 0;
     text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
 }
 
-.complejo-location-hero {
-    font-size: 1.5em;
-    font-weight: 300;
-    margin: 5px 0 0;
+.hero-subtitle {
+    font-size: 1.2rem;
+    font-weight: 400;
+    margin-top: 0.5rem;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
 }
 
-/* Botón para volver */
 .back-button {
-    background: transparent;
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    background: rgba(255, 255, 255, 0.2);
     border: 2px solid white;
     color: white;
-    padding: 10px 20px;
+    padding: 0.5rem 1.5rem;
     border-radius: 50px;
-    cursor: pointer;
-    font-size: 1em;
+    font-size: 1rem;
     font-weight: bold;
-    position: absolute;
-    top: 30px;
-    left: 30px;
-    z-index: 10;
+    cursor: pointer;
     transition: all 0.3s ease;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
 }
 
 .back-button:hover {
-    background-color: white;
+    background: white;
     color: var(--primary-dark);
+    transform: scale(1.05);
 }
 
-/* Contenido principal en cuadrícula de 2 columnas */
-.complejo-main-content-grid {
-    display: grid;
-    grid-template-columns: 1fr 2fr; /* Columna izquierda para info, derecha para canchas */
-    gap: 30px;
-    align-items: start;
+/* --- CONTENIDO PRINCIPAL --- */
+.main-content {
+    max-width: 1200px;
+    margin: -50px auto 3rem; /* superpone el contenido sobre el banner */
+    position: relative;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 }
 
-@media (max-width: 992px) {
-    .complejo-main-content-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.detalle-card {
-    background-color: var(--white);
-    padding: 30px;
+.info-card, .canchas-section {
+    background-color: var(--card-background);
+    padding: 2rem;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.detalle-card h2 {
-    font-size: 2em;
+.info-card h2, .canchas-section h2 {
+    font-size: 2rem;
     font-weight: 700;
     color: var(--primary-dark);
-    margin-bottom: 15px;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
 }
 
-.detalle-card p {
-    font-size: 1.1em;
-    color: var(--text-light);
+.info-card p {
+    font-size: 1.1rem;
     line-height: 1.6;
+    color: var(--text-color);
 }
 
-.descripcion-card {
-    position: sticky;
-    top: 20px;
-    z-index: 5;
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
 }
 
-.contact-info {
-    margin-top: 20px;
-}
-.contact-info p {
-    margin: 5px 0;
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    background: var(--background-color);
+    padding: 1rem;
+    border-radius: 8px;
 }
 
-/* Botón de reserva flotante para móviles */
-.reserve-button-sticky {
-    width: 100%;
-    padding: 15px;
-    font-size: 1.2em;
-    font-weight: bold;
+.info-icon {
+    color: var(--primary);
+    font-size: 1.5rem;
+}
+
+/* --- CANCHAS --- */
+.cancha-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.cancha-card {
+    background-color: var(--secondary-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cancha-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.cancha-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.cancha-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+}
+
+.cancha-type {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.cancha-count {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-left: auto;
+}
+
+.price-tag {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+}
+
+.price-tag small {
+    font-size: 0.6em;
+    color: var(--text-muted);
+    font-weight: normal;
+}
+
+.cancha-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.cancha-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.feature-icon {
+    color: var(--primary);
+}
+
+/* --- BOTÓN DE RESERVA AL PIE DE PÁGINA --- */
+.reserve-button-container {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.reserve-button {
     background-color: var(--success);
     color: white;
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    font-weight: bold;
     border: none;
-    border-radius: 8px;
+    border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-top: 20px;
 }
-.reserve-button-sticky:hover {
+
+.reserve-button:hover {
     background-color: #218838;
     transform: translateY(-3px);
 }
 
-/* Diseño de la grilla de canchas */
-.cancha-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-}
-
-.cancha-item-card {
-    background-color: var(--background-light);
-    border: 1px solid var(--gray-light);
-    border-radius: 12px;
-    padding: 20px;
-    text-align: left;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease;
-}
-
-.cancha-item-card:hover {
-    transform: translateY(-5px);
-}
-
-.cancha-item-card h3 {
-    font-size: 1.5em;
-    color: var(--primary);
-    margin-top: 0;
-    margin-bottom: 5px;
-}
-
-.cancha-count {
-    font-size: 0.9em;
-    color: var(--text-light);
-    font-style: italic;
-    margin-bottom: 15px;
-}
-
-.cancha-price-tag {
-    font-size: 1.8em;
-    font-weight: 800;
-    color: var(--primary-dark);
-    margin-bottom: 15px;
-}
-
-.cancha-price-tag small {
-    font-size: 0.6em;
-    font-weight: normal;
-    color: var(--text-light);
-}
-
-.cancha-features-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.badge-chip {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: 600;
-    color: white;
-    background-color: var(--secondary);
-}
-
-.badge-chip.primary {
-    background-color: var(--primary);
-}
-.badge-chip.secondary {
-    background-color: #6c757d;
-}
-
-.no-canchas-info {
-    font-style: italic;
-    color: var(--text-light);
-    font-size: 1.1em;
-    text-align: center;
-}
-
+/* --- MEDIA QUERIES --- */
 @media (max-width: 768px) {
-    .complejo-detalle-container {
-        padding: 15px;
+    .hero-banner {
+        height: 300px;
     }
-    .complejo-title-hero {
-        font-size: 2.5em;
+    .hero-title {
+        font-size: 2.5rem;
     }
-    .complejo-location-hero {
-        font-size: 1.2em;
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    .main-content {
+        margin-top: -30px;
     }
     .back-button {
-        top: 15px;
-        left: 15px;
+        top: 1rem;
+        left: 1rem;
+    }
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    .canchas-section {
+        padding: 1.5rem;
     }
 }

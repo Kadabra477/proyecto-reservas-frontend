@@ -1,13 +1,13 @@
-// frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../api/axiosConfig';
-import './ComplejoDetalle.css';
+import './ComplejoDetalle.css'; 
+import { FaPhone, FaMapMarkerAlt, FaClock, FaFutbol, FaSnowflake, FaSun, FaCloud, FaRulerCombined } from 'react-icons/fa';
 
 const placeholderImage = '/imagenes/default-complejo.png';
 
 function ComplejoDetalle() {
-    const { id } = useParams();
+    const { id } = useParams(); 
     const navigate = useNavigate();
     const [complejo, setComplejo] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -42,84 +42,104 @@ function ComplejoDetalle() {
     };
 
     if (loading) {
-        return <div className="complejo-detalle-container loading-message">Cargando detalles del complejo...</div>;
+        return <div className="loading-container"><div className="spinner"></div><p>Cargando detalles del complejo...</p></div>;
     }
 
     if (error) {
-        return <div className="complejo-detalle-container error-message">{error}</div>;
+        return <div className="error-container"><p>{error}</p><button className="retry-button" onClick={() => navigate('/complejos')}>Volver</button></div>;
     }
 
     if (!complejo) {
-        return <div className="complejo-detalle-container no-data-message">Complejo no encontrado.</div>;
+        return <div className="error-container"><p>Complejo no encontrado.</p><button className="retry-button" onClick={() => navigate('/complejos')}>Volver</button></div>;
     }
     
     const imageSrc = (complejo.fotoUrls && complejo.fotoUrls.length > 0)
         ? complejo.fotoUrls[0]
         : placeholderImage;
-
+        
     return (
         <div className="complejo-detalle-container">
-            <button className="back-button" onClick={() => navigate(-1)}>
-                ← Volver a Complejos
-            </button>
-            
             {/* Sección de Cabecera (Hero) */}
-            <div className="complejo-hero-section" style={{ backgroundImage: `url(${imageSrc})` }}>
-                <div className="hero-overlay">
-                    <h1 className="complejo-title-hero">{complejo.nombre}</h1>
-                    <p className="complejo-location-hero">📍 {complejo.ubicacion || 'Ubicación no disponible'}</p>
+            <div className="hero-banner" style={{ backgroundImage: `url(${imageSrc})` }}>
+                <div className="hero-content">
+                    <button className="back-button" onClick={() => navigate(-1)}>
+                        ← Volver a Complejos
+                    </button>
+                    <h1 className="hero-title">{complejo.nombre}</h1>
+                    <p className="hero-subtitle"><FaMapMarkerAlt /> {complejo.ubicacion || 'Ubicación no disponible'}</p>
                 </div>
             </div>
 
-            <div className="complejo-main-content-grid">
-                {/* Columna de la izquierda: Descripción y Horario */}
-                <div className="left-column">
-                    <section className="detalle-card descripcion-card">
-                        <h2>Acerca de nosotros</h2>
-                        <p>{complejo.descripcion || 'No hay descripción disponible.'}</p>
-                        <hr />
-                        <div className="contact-info">
-                            <p><strong>Teléfono:</strong> {complejo.telefono || 'No disponible'}</p>
-                            <p><strong>Horario:</strong> {complejo.horarioApertura ? complejo.horarioApertura.substring(0, 5) : 'N/A'} - {complejo.horarioCierre ? complejo.horarioCierre.substring(0, 5) : 'N/A'}</p>
-                        </div>
-                    </section>
+            <div className="main-content">
+                {/* Sección de Información Principal */}
+                <section className="info-card">
+                    <h2>Descripción</h2>
+                    <p>{complejo.descripcion || 'No hay descripción disponible.'}</p>
                     
-                    {/* Botón de Reservar - Flota en el diseño */}
+                    <div className="info-grid">
+                        <div className="info-item">
+                            <FaPhone className="info-icon" />
+                            <span>{complejo.telefono || 'No disponible'}</span>
+                        </div>
+                        <div className="info-item">
+                            <FaClock className="info-icon" />
+                            <span>{complejo.horarioApertura ? complejo.horarioApertura.substring(0, 5) : 'N/A'} - {complejo.horarioCierre ? complejo.horarioCierre.substring(0, 5) : 'N/A'}</span>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Sección de Canchas Disponibles */}
+                <section className="canchas-section">
+                    <h2>Canchas Disponibles</h2>
+                    {Object.keys(complejo.canchaCounts || {}).length > 0 ? (
+                        <div className="cancha-grid-container">
+                            {Object.keys(complejo.canchaCounts).map(tipo => (
+                                <div key={tipo} className="cancha-card">
+                                    <div className="cancha-header">
+                                        <FaFutbol className="cancha-icon" />
+                                        <h3 className="cancha-type">{tipo}</h3>
+                                        <span className="cancha-count">({complejo.canchaCounts[tipo]})</span>
+                                    </div>
+                                    <div className="cancha-body">
+                                        <div className="price-tag">
+                                            <span>${formatPrice(complejo.canchaPrices[tipo])}</span>
+                                            <small>/ hora</small>
+                                        </div>
+                                        <ul className="cancha-features">
+                                            <li>
+                                                <FaRulerCombined className="feature-icon" />
+                                                <span>Superficie: <strong>{complejo.canchaSurfaces[tipo]}</strong></span>
+                                            </li>
+                                            {complejo.canchaIluminacion[tipo] && (
+                                                <li>
+                                                    <FaSun className="feature-icon" />
+                                                    <span>Con Iluminación</span>
+                                                </li>
+                                            )}
+                                            {complejo.canchaTecho[tipo] && (
+                                                <li>
+                                                    <FaCloud className="feature-icon" />
+                                                    <span>Con Techo</span>
+                                                </li>
+                                            )}
+                                        </ul>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="no-canchas-info">Este complejo no tiene canchas configuradas aún.</p>
+                    )}
+                </section>
+
+                {/* Botón de Reserva al pie de la página */}
+                <div className="reserve-button-container">
                     <button
                         onClick={() => navigate('/reservar', { state: { preselectedComplejoId: complejo.id } })}
-                        className="reserve-button-sticky"
+                        className="reserve-button"
                     >
-                        ¡Reservar en este Complejo!
+                        Reservar en este Complejo
                     </button>
-                </div>
-
-                {/* Columna de la derecha: Canchas disponibles (en formato de tarjetas) */}
-                <div className="right-column">
-                    <section className="detalle-card canchas-card">
-                        <h2>Canchas Disponibles</h2>
-                        {Object.keys(complejo.canchaCounts || {}).length > 0 ? (
-                            <div className="cancha-grid">
-                                {Object.keys(complejo.canchaCounts).map(tipo => (
-                                    <div key={tipo} className="cancha-item-card">
-                                        <h3>{tipo}</h3>
-                                        <p className="cancha-count">
-                                            ({complejo.canchaCounts[tipo]} {complejo.canchaCounts[tipo] > 1 ? 'canchas' : 'cancha'})
-                                        </p>
-                                        <div className="cancha-price-tag">
-                                            ${formatPrice(complejo.canchaPrices[tipo])} <small>/ hora</small>
-                                        </div>
-                                        <div className="cancha-features-badges">
-                                            <span className="badge-chip">{complejo.canchaSurfaces[tipo]}</span>
-                                            {complejo.canchaIluminacion[tipo] && <span className="badge-chip primary">💡 Iluminación</span>}
-                                            {complejo.canchaTecho[tipo] && <span className="badge-chip secondary">☂️ Techo</span>}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="no-canchas-info">Este complejo no tiene canchas configuradas aún.</p>
-                        )}
-                    </section>
                 </div>
             </div>
         </div>
