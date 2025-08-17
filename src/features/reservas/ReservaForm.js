@@ -7,6 +7,9 @@ import './ReservaForm.css';
 import mercadopagoIcon from '../../assets/mercadopago.png';
 import efectivoIcon from '../../assets/efectivo.png';
 
+// Usa la ruta a la imagen local en lugar de una URL externa
+const placeholderImage = '/imagenes/default-complejo.png';
+
 function ReservaForm() {
     const navigate = useNavigate();
     const location = useLocation();
@@ -109,28 +112,26 @@ function ReservaForm() {
 
                     let currentTimeInMinutes = aperturaTotalMinutos;
 
-                    const now = new Date(); // Hora local del cliente
+                    const now = new Date();
                     const currentClientHour = now.getHours();
                     const currentClientMinute = now.getMinutes();
-                    const isToday = formulario.fecha === getMinDate(); // Comparar con la fecha mínima (hoy)
+                    const isToday = formulario.fecha === getMinDate();
 
                     while (currentTimeInMinutes < cierreTotalMinutos) {
                         const hour = Math.floor(currentTimeInMinutes / 60) % 24; 
                         const minute = currentTimeInMinutes % 60;
                         const formattedHour = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                         
-                        // FILTRADO DE HORAS PASADAS EN EL FRONTEND (AJUSTADO)
-                        if (!isToday || // Si no es hoy, se incluyen todas las horas
-                            hour > currentClientHour || // Si la hora es mayor a la actual, se incluye
-                            (hour === currentClientHour && minute >= currentClientMinute)) { // Si es la misma hora, solo si los minutos son iguales o mayores
-                             generatedHours.push(formattedHour);
+                        if (!isToday ||
+                            hour > currentClientHour ||
+                            (hour === currentClientHour && minute >= currentClientMinute)) {
+                            generatedHours.push(formattedHour);
                         }
-                       
+                        
                         currentTimeInMinutes += 60; 
                     }
 
                     setHoursOptions(generatedHours);
-                    console.log("Horas generadas (frontend):", generatedHours); 
                 } else {
                     setHoursOptions([]);
                     setMensaje({ type: 'error', text: 'Horarios de apertura y cierre no configurados para el complejo.' });
@@ -154,8 +155,6 @@ function ReservaForm() {
             return;
         }
 
-        // Esta validación del lado del cliente (frontend) es un respaldo visual,
-        // la validación estricta de "pasado" ocurre en el backend con la zona horaria correcta.
         const selectedDateTimeFront = new Date(`${fecha}T${hora}:00`);
         const nowFront = new Date();
         const currentClientDateTime = new Date(nowFront.getFullYear(), nowFront.getMonth(), nowFront.getDate(), nowFront.getHours(), nowFront.getMinutes());
@@ -189,7 +188,6 @@ function ReservaForm() {
         }
     }, [formulario.fecha, formulario.hora, complejo, selectedTipoCancha]);
 
-
     useEffect(() => {
         if (complejo && formulario.fecha && formulario.hora && selectedTipoCancha) {
             checkAvailability();
@@ -198,7 +196,6 @@ function ReservaForm() {
             setAvailabilityMessage('');
         }
     }, [formulario.fecha, formulario.hora, selectedTipoCancha, complejo, checkAvailability]);
-
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -213,7 +210,6 @@ function ReservaForm() {
             setAvailabilityMessage('');
         }
         if (name === 'fecha') { 
-            // Si la fecha cambia, también limpiar la hora seleccionada
             setFormulario(prevForm => ({ ...prevForm, hora: '' })); 
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
@@ -240,7 +236,6 @@ function ReservaForm() {
         if (!/^\d+$/.test(telefono.trim())) { setMensaje({ type: 'error', text: 'El teléfono debe contener solo números.' }); return; }
         if (!/^\d{7,8}$/.test(dni)) { setMensaje({ type: 'error', text: 'El DNI debe contener 7 u 8 dígitos numéricos.' }); return; }
 
-        // Validacion de tiempo pasado final (redundante con backend, pero buena práctica)
         const selectedDateTimeFinal = new Date(`${fecha}T${hora}:00`);
         const nowFinal = new Date();
         const currentClientDateTimeFinal = new Date(nowFinal.getFullYear(), nowFinal.getMonth(), nowFinal.getDate(), nowFinal.getHours(), nowFinal.getMinutes());
@@ -350,6 +345,11 @@ function ReservaForm() {
 
     if (isLoadingInitialData) return <p className="loading-message">Cargando complejo...</p>;
     if (!complejo && !isLoadingInitialData) return <p className="error-message">No se pudo cargar el complejo o no se especificó uno para reservar. Por favor, asegúrate de acceder a la reserva desde la tarjeta de un complejo válido.</p>;
+    
+    // **Modificación clave:** Usa el primer elemento de fotoUrls o el placeholder
+    const imageToDisplay = (complejo.fotoUrls && complejo.fotoUrls.length > 0)
+        ? complejo.fotoUrls[0]
+        : placeholderImage;
 
     return (
         <div className="reserva-form-container">
@@ -357,7 +357,12 @@ function ReservaForm() {
 
             {complejo && (
                 <div className="reserva-cancha-details">
-                    <img src={complejo.fotoUrl || 'https://via.placeholder.com/400x200?text=Complejo+Deportivo'} alt={`Foto de ${complejo.nombre}`} className="reserva-cancha-img" />
+                    <img 
+                        src={imageToDisplay} 
+                        alt={`Foto de ${complejo.nombre}`} 
+                        className="reserva-cancha-img" 
+                        onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
+                    />
                     <h3>{complejo.nombre}</h3>
                     <p><strong>Ubicación:</strong> {complejo.ubicacion}</p>
                     <p><strong>Teléfono:</strong> {complejo.telefono}</p>

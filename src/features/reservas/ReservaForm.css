@@ -8,7 +8,7 @@
     background-color: var(--white);
     border-radius: 16px;
     box-shadow: var(--shadow);
-    font-family: 'Poppins', sans-serif; /* Usar Poppins para consistencia global */
+    font-family: 'Poppins', sans-serif;
     border: 1px solid var(--gray-light); 
 }
 
@@ -135,12 +135,10 @@
 
 /* **NUEVO** Estilo para el input de complejo deshabilitado */
 .reserva-formulario .blocked-input {
-    background-color: #e9ecef; /* Un color de fondo para indicar que está deshabilitado */
-    cursor: not-allowed; /* Cambia el cursor */
+    background-color: #e9ecef;
+    cursor: not-allowed;
     border: 1px solid #ced4da;
     color: #495057;
-    /* Puedes añadir más estilos si quieres que se vea aún más distinto, por ejemplo: */
-    /* font-weight: bold; */
 }
 
 
@@ -338,5 +336,13 @@
     .payment-icon {
         width: 24px;
         height: 24px;
+        margin-right: 10px;
+        vertical-align: middle;
+        object-fit: contain;
+        flex-shrink: 0;
+    }
+    .back-button {
+        padding: 10px 20px;
+        font-size: 1em;
     }
 }

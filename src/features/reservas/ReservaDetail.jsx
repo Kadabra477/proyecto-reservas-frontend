@@ -1,3 +1,4 @@
+// frontend/src/features/reservas/ReservaDetail.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
@@ -47,7 +48,6 @@ const ReservaDetail = () => {
             return;
         }
         try {
-            // Usamos reserva.cliente que ya debería venir formateado (Nombre Apellido)
             const nombreCliente = reserva.cliente || 'Cliente Desconocido';
             const preferenciaResponse = await api.post(
                 `/pagos/crear-preferencia/${reserva.id}`,
@@ -72,7 +72,7 @@ const ReservaDetail = () => {
 
     const handlePagarEnEfectivo = () => {
         alert('Has seleccionado pagar en efectivo. Por favor, realiza el pago al llegar al complejo.');
-        navigate('/dashboard'); // Redirige al dashboard después de seleccionar efectivo
+        navigate('/dashboard');
     };
 
     const formatLocalDateTime = (dateTimeString) => {
