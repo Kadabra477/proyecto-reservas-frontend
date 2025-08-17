@@ -3,6 +3,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './ReservaForm.css';
+import mercadopagoLogo from '../../assets/mercadopago.png';
+import efectivoLogo from '../../assets/efectivo.png';
 
 // Importamos íconos para darle un estilo más moderno
 import { FaCalendarAlt, FaClock, FaUser, FaPhone, FaEnvelope, FaIdCard, FaCreditCard, FaMoneyBillWave } from 'react-icons/fa';
@@ -488,7 +490,7 @@ function ReservaForm() {
                             disabled={isSubmitting || isLoadingInitialData}
                         />
                         Pagar con Mercado Pago
-                        <img src={mercadopagoIcon} alt="Mercado Pago" className="payment-icon" />
+                        <img src={mercadopagoLogo} alt="Mercado Pago" className="payment-icon" />
                     </label>
                     <label>
                         <input
@@ -500,7 +502,7 @@ function ReservaForm() {
                             disabled={isSubmitting || isLoadingInitialData}
                         />
                         Pagar en Efectivo (al llegar al complejo)
-                        <img src={efectivoIcon} alt="Efectivo" className="payment-icon" />
+                        <img src={efectivoLogo} alt="Efectivo" className="payment-icon" />
                     </label>
                 </div>
 
