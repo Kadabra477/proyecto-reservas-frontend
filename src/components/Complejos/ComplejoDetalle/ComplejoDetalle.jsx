@@ -5,6 +5,7 @@ import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import './ComplejoDetalle.css'; 
+import api from '../../../api/axiosConfig';
 
 const placeholderImage = '/imagenes/default-complejo.png';
 
