@@ -1,11 +1,7 @@
-// frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Slider from 'react-slick';
-import "slick-carousel/slick/slick.css"; 
-import "slick-carousel/slick/slick-theme.css";
-import './ComplejoDetalle.css'; 
 import api from '../../../api/axiosConfig';
+import './ComplejoDetalle.css'; 
 
 const placeholderImage = '/imagenes/default-complejo.png';
 
@@ -56,22 +52,11 @@ function ComplejoDetalle() {
         return <div className="complejo-detalle-container no-data-message">Complejo no encontrado.</div>;
     }
     
-    const settings = {
-        dots: true,
-        infinite: true,
-        speed: 500,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 3000,
-        arrows: true
-    };
-    
-    const images = (complejo.fotoUrls && complejo.fotoUrls.length > 0)
-        ? complejo.fotoUrls
-        : [complejo.fotoUrl || placeholderImage];
+    // Se extrae la primera imagen de la lista o se usa la de placeholder.
+    const imageSrc = (complejo.fotoUrls && complejo.fotoUrls.length > 0)
+        ? complejo.fotoUrls[0]
+        : placeholderImage;
         
-
     return (
         <div className="complejo-detalle-container">
             <button className="back-button" onClick={() => navigate(-1)}>
@@ -80,29 +65,12 @@ function ComplejoDetalle() {
             <h1 className="complejo-detalle-title">{complejo.nombre}</h1>
             
             <div className="complejo-detalle-header">
-                {images.length > 1 ? (
-                    <Slider {...settings} className="complejo-detalle-slider">
-                        {images.map((img, index) => (
-                            <div key={index}>
-                                <img
-                                    src={img}
-                                    alt={`Complejo ${complejo.nombre} - Foto ${index + 1}`}
-                                    className="complejo-detalle-img"
-                                    onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
-                                />
-                            </div>
-                        ))}
-                    </Slider>
-                ) : (
-                    <div className="complejo-detalle-single-image">
-                        <img
-                            src={images[0]}
-                            alt={`Complejo ${complejo.nombre}`}
-                            className="complejo-detalle-img"
-                            onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
-                        />
-                    </div>
-                )}
+                <img
+                    src={imageSrc}
+                    alt={`Complejo ${complejo.nombre}`}
+                    className="complejo-detalle-single-img" // Nueva clase para los estilos
+                    onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
+                />
             </div>
             
             <div className="complejo-detalle-info">

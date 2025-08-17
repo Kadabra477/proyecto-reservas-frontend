@@ -1,5 +1,3 @@
-/* frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.css */
-
 .complejo-detalle-container {
     max-width: 900px;
     margin: 50px auto;
@@ -40,56 +38,16 @@
 
 .complejo-detalle-header {
     margin-bottom: 30px;
-    position: relative;
 }
 
-.complejo-detalle-single-image {
+/* Estilo para la imagen única, similar al de la tarjeta */
+.complejo-detalle-single-img {
     width: 100%;
-    height: 450px;
-    overflow: hidden;
-    border-radius: 10px;
-}
-
-.complejo-detalle-slider {
-    width: 100%;
-    height: 450px;
-}
-.complejo-detalle-slider .slick-list,
-.complejo-detalle-slider .slick-track {
-    height: 100%;
-}
-
-.complejo-detalle-slider .slick-slide div {
-    height: 100%;
-}
-
-.complejo-detalle-slider img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    max-height: 250px; /* Tamaño de la imagen adecuado para evitar que se vea muy grande */
+    object-fit: contain; /* Se ajusta para que la imagen se vea completa */
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilos para las flechas de navegación del carrusel */
-.complejo-detalle-slider .slick-prev,
-.complejo-detalle-slider .slick-next {
-    z-index: 1000;
-    width: 40px;
-    height: 40px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-}
-.slick-prev:before, .slick-next:before {
-    font-size: 20px;
-    color: white;
-    line-height: 1;
-}
-.slick-prev {
-    left: 15px;
-}
-.slick-next {
-    right: 15px;
+    background-color: #f1f1f1; /* Fondo para que se vea bien si la imagen no tiene fondo */
 }
 
 
