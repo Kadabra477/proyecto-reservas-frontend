@@ -1,11 +1,11 @@
 // frontend/src/features/reservas/ReservaForm.jsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom'; 
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import './ReservaForm.css';
 
-import mercadopagoIcon from '../../assets/mercadopago.png';
-import efectivoIcon from '../../assets/efectivo.png';
+// Importamos íconos para darle un estilo más moderno
+import { FaCalendarAlt, FaClock, FaUser, FaPhone, FaEnvelope, FaIdCard, FaCreditCard, FaMoneyBillWave } from 'react-icons/fa';
 
 // Usa la ruta a la imagen local en lugar de una URL externa
 const placeholderImage = '/imagenes/default-complejo.png';
@@ -14,9 +14,9 @@ function ReservaForm() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [complejo, setComplejo] = useState(null); 
-    const [tiposCanchaDisponiblesDelComplejo, setTiposCanchaDisponiblesDelComplejo] = useState([]); 
-    const [selectedTipoCancha, setSelectedTipoCancha] = useState(''); 
+    const [complejo, setComplejo] = useState(null);
+    const [tiposCanchaDisponiblesDelComplejo, setTiposCanchaDisponiblesDelComplejo] = useState([]);
+    const [selectedTipoCancha, setSelectedTipoCancha] = useState('');
 
     const [formulario, setFormulario] = useState({
         nombre: '',
@@ -37,7 +37,7 @@ function ReservaForm() {
     const [availableCanchasCount, setAvailableCanchasCount] = useState(null);
     const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
     const [availabilityMessage, setAvailabilityMessage] = useState('');
-    const [hoursOptions, setHoursOptions] = useState([]); 
+    const [hoursOptions, setHoursOptions] = useState([]);
 
     const getMinDate = () => {
         const today = new Date();
@@ -56,11 +56,11 @@ function ReservaForm() {
                     const userProfile = response.data;
                     setFormulario(prevForm => ({
                         ...prevForm,
-                        nombre: userProfile.nombreCompleto || '', 
-                        apellido: '', 
+                        nombre: userProfile.nombreCompleto.split(' ')[0] || '',
+                        apellido: userProfile.nombreCompleto.split(' ')[1] || '',
                         email: userProfile.username || '',
                         telefono: userProfile.telefono || '',
-                        dni: userProfile.dni || '' 
+                        dni: userProfile.dni || ''
                     }));
                 }
             } catch (error) {
@@ -90,7 +90,7 @@ function ReservaForm() {
                     const types = Object.keys(fetchedComplejo.canchaCounts);
                     setTiposCanchaDisponiblesDelComplejo(types);
                     if (types.length > 0) {
-                        setSelectedTipoCancha(types[0]); 
+                        setSelectedTipoCancha(types[0]);
                     }
                 } else {
                     setTiposCanchaDisponiblesDelComplejo([]);
@@ -107,7 +107,7 @@ function ReservaForm() {
                     let cierreTotalMinutos = cierreHoras * 60 + cierreMinutos;
 
                     if (cierreTotalMinutos <= aperturaTotalMinutos) {
-                        cierreTotalMinutos += (24 * 60); 
+                        cierreTotalMinutos += (24 * 60);
                     }
 
                     let currentTimeInMinutes = aperturaTotalMinutos;
@@ -118,7 +118,7 @@ function ReservaForm() {
                     const isToday = formulario.fecha === getMinDate();
 
                     while (currentTimeInMinutes < cierreTotalMinutos) {
-                        const hour = Math.floor(currentTimeInMinutes / 60) % 24; 
+                        const hour = Math.floor(currentTimeInMinutes / 60) % 24;
                         const minute = currentTimeInMinutes % 60;
                         const formattedHour = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
                         
@@ -128,7 +128,7 @@ function ReservaForm() {
                             generatedHours.push(formattedHour);
                         }
                         
-                        currentTimeInMinutes += 60; 
+                        currentTimeInMinutes += 60;
                     }
 
                     setHoursOptions(generatedHours);
@@ -145,7 +145,7 @@ function ReservaForm() {
             }
         };
         loadPreselectedComplejo();
-    }, [location.state, formulario.fecha]); 
+    }, [location.state, formulario.fecha]);
 
     const checkAvailability = useCallback(async () => {
         const { fecha, hora } = formulario;
@@ -173,7 +173,7 @@ function ReservaForm() {
             setAvailableCanchasCount(count);
             if (count > 0) {
                 setAvailabilityMessage(`¡Hay ${count} canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}!`);
-                setMensaje({ text: '', type: '' }); 
+                setMensaje({ text: '', type: '' });
             } else {
                 setAvailabilityMessage(`No hay canchas de ${selectedTipoCancha} disponibles a las ${hora.substring(0, 5)}. Elige otro horario.`);
                 setMensaje({ type: 'error', text: 'Horario no disponible.' });
@@ -209,8 +209,8 @@ function ReservaForm() {
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
         }
-        if (name === 'fecha') { 
-            setFormulario(prevForm => ({ ...prevForm, hora: '' })); 
+        if (name === 'fecha') {
+            setFormulario(prevForm => ({ ...prevForm, hora: '' }));
             setAvailableCanchasCount(null);
             setAvailabilityMessage('');
         }
@@ -253,7 +253,7 @@ function ReservaForm() {
         setIsSubmitting(true);
 
         const reservaData = {
-            complejoId: complejo.id, 
+            complejoId: complejo.id,
             tipoCancha: selectedTipoCancha,
             nombre: nombre.trim(),
             apellido: apellido.trim(),
