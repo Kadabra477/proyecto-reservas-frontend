@@ -78,7 +78,6 @@ body {
     z-index: 10;
     padding: 2rem;
     width: 100%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
     text-align: center;
 }
 
