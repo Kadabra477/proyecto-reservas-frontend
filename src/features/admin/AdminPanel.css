@@ -1,7 +1,7 @@
 /* frontend/src/features/admin/AdminPanel.css */
 
 /* Importa las variables globales desde el archivo centralizado */
-@import url("../../../App.css"); /* Asegúrate de que esta ruta sea correcta */
+@import url("../../App.css"); /* Asegúrate de que esta ruta sea correcta */
 
 .admin-panel {
     font-family: 'Poppins', sans-serif; /* Usar Poppins para consistencia global */
