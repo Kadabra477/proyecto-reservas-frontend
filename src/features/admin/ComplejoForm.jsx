@@ -11,26 +11,32 @@ const ComplejoForm = ({
     handleCanchaChange,
     handleAddCancha,
     handleRemoveCancha,
-    handleSaveComplejo,
+    handleSaveComplejo, // Esta prop ahora recibirá `selectedPhotoFiles` y `photosExplicitlyRemoved`
     editingComplejo,
-    cancelEditingComplejo,
     isAdmin,
-    // ¡PROPS MODIFICADAS! Ahora aceptan un array de archivos
     selectedPhotoFiles,
     setSelectedPhotoFiles,
     setMensaje
 }) => {
     // Estado interno para la URL de previsualización de las fotos
     const [previewPhotoUrls, setPreviewPhotoUrls] = useState([]);
+    // Nuevo estado para indicar si el usuario ha eliminado explícitamente las fotos
+    const [photosExplicitlyRemoved, setPhotosExplicitlyRemoved] = useState(false);
 
     // useEffect para inicializar la previsualización y los archivos seleccionados
     useEffect(() => {
-        if (editingComplejo && editingComplejo.fotoUrls && editingComplejo.fotoUrls.length > 0) {
-            setPreviewPhotoUrls(editingComplejo.fotoUrls);
+        // Al cargar un complejo para edición, si tiene fotos, las previsualizamos.
+        // Asumimos que editingComplejo.fotoUrlsPorResolucion es un Map<String, String>
+        if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && Object.keys(editingComplejo.fotoUrlsPorResolucion).length > 0) {
+            // Preferimos mostrar la miniatura si está disponible para la previsualización en el formulario
+            const urlsToPreview = Object.values(editingComplejo.fotoUrlsPorResolucion);
+            setPreviewPhotoUrls(urlsToPreview);
             setSelectedPhotoFiles([]); // No hay un archivo nuevo seleccionado al cargar un complejo existente
+            setPhotosExplicitlyRemoved(false); // Resetear el estado de eliminación al cargar
         } else {
             setPreviewPhotoUrls([]);
             setSelectedPhotoFiles([]);
+            setPhotosExplicitlyRemoved(false); // Resetear el estado de eliminación
         }
     }, [editingComplejo, setSelectedPhotoFiles]);
 
@@ -41,7 +47,7 @@ const ComplejoForm = ({
             // --- VALIDACIONES DE IMAGEN EN EL FRONTEND ---
             const MAX_FILE_SIZE_MB = 5;
             const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            
+
             let allFilesValid = true;
             for (const file of files) {
                 if (!ALLOWED_TYPES.includes(file.type)) {
@@ -57,37 +63,42 @@ const ComplejoForm = ({
             }
 
             if (!allFilesValid) {
-                e.target.value = null;
+                e.target.value = null; // Limpiar el input de archivo
                 setPreviewPhotoUrls([]);
                 setSelectedPhotoFiles([]);
+                setPhotosExplicitlyRemoved(false); // Si hay un error, no se considera eliminado
                 return;
             }
 
             setSelectedPhotoFiles(files);
             const newPreviewUrls = files.map(file => URL.createObjectURL(file));
             setPreviewPhotoUrls(newPreviewUrls);
-            setMensaje({ text: '', type: '' });
+            setPhotosExplicitlyRemoved(false); // Si se seleccionan nuevas fotos, no se consideran eliminadas
+            setMensaje({ text: '', type: '' }); // Limpiar mensaje de error si la selección es válida
         } else {
             setSelectedPhotoFiles([]);
-            setPreviewPhotoUrls(editingComplejo?.fotoUrls || []);
+            // Si no se seleccionan archivos, volvemos a mostrar las fotos existentes o nada
+            if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && Object.keys(editingComplejo.fotoUrlsPorResolucion).length > 0) {
+                setPreviewPhotoUrls(Object.values(editingComplejo.fotoUrlsPorResolucion));
+            } else {
+                setPreviewPhotoUrls([]);
+            }
+            setPhotosExplicitlyRemoved(false); // Resetear el estado de eliminación
             setMensaje({ text: '', type: '' });
         }
     };
-    
+
     // Manejar la eliminación de las fotos
     const handleRemovePhotos = () => {
         setMensaje({ text: '', type: '' });
-        setSelectedPhotoFiles([]);
-        setPreviewPhotoUrls([]);
-        
-        if (editingComplejo) {
-            handleComplejoFormChange({ target: { name: 'fotoUrls', value: [] } });
-        }
-        document.getElementById('photoFile').value = '';
+        setSelectedPhotoFiles([]); // Limpiar archivos nuevos seleccionados
+        setPreviewPhotoUrls([]); // Limpiar previsualizaciones
+        setPhotosExplicitlyRemoved(true); // Indicar que las fotos existentes han sido eliminadas
+        document.getElementById('photoFile').value = ''; // Limpiar el input de archivo
     };
 
     return (
-        <form className="admin-complejo-form" onSubmit={(e) => handleSaveComplejo(e, selectedPhotoFiles)}>
+        <form className="admin-complejo-form" onSubmit={(e) => handleSaveComplejo(e, selectedPhotoFiles, photosExplicitlyRemoved)}>
             <h3>Datos Generales del Complejo</h3>
             <div className="admin-form-group">
                 <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
@@ -101,7 +112,7 @@ const ComplejoForm = ({
                     <p className="small-info">El usuario con este email será asignado como &quot;COMPLEX_OWNER&quot;.</p>
                 </div>
             )}
-            
+
             <div className="admin-form-group">
                 <label htmlFor="descripcion">Descripción:</label>
                 <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
@@ -114,7 +125,7 @@ const ComplejoForm = ({
                 <label htmlFor="telefono">Teléfono:</label>
                 <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
             </div>
-            
+
             <div className="admin-form-group">
                 <label htmlFor="photoFile">Fotos del Complejo:</label>
                 <input
@@ -161,7 +172,7 @@ const ComplejoForm = ({
                 <label htmlFor="horarioCierre">Horario Cierre: <span className="obligatorio">*</span></label>
                 <input type="time" id="horarioCierre" name="horarioCierre" value={nuevoComplejoAdmin.horarioCierre} onChange={handleComplejoFormChange} required />
             </div>
-            
+
             <h3>Detalles de Canchas</h3>
             <div className="canchas-dinamicas-container">
                 {nuevoComplejoAdmin.canchas.map((cancha, index) => (

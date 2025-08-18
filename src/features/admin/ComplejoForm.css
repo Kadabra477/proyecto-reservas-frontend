@@ -1,7 +1,11 @@
 /* frontend/src/features/admin/ComplejoForm.css */
 
+/* Importa las variables globales desde el archivo centralizado */
+@import url("../../../App.css"); /* Asegúrate de que esta ruta sea correcta */
+
+
 .admin-complejo-form {
-    background-color: var(--white, #ffffff);
+    background-color: var(--white); /* Usando la variable global */
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
@@ -10,11 +14,11 @@
 
 .admin-complejo-form h3 {
     font-size: 1.8em;
-    color: var(--primary-dark, #0056b3);
+    color: var(--primary-dark); /* Usando la variable global */
     margin-bottom: 25px;
     text-align: center;
     font-weight: 700;
-    border-bottom: 2px solid var(--gray-light);
+    border-bottom: 2px solid var(--gray-light); /* Usando la variable global */
     padding-bottom: 10px;
 }
 
@@ -27,7 +31,7 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: var(--text-dark, #333);
+    color: var(--text-dark); /* Usando la variable global */
     font-size: 0.95em;
 }
 
@@ -41,7 +45,7 @@
 .admin-form-group select {
     width: calc(100% - 20px);
     padding: 12px 10px;
-    border: 1px solid var(--gray);
+    border: 1px solid var(--gray); /* Usando la variable global */
     border-radius: 8px;
     font-size: 1em;
     box-sizing: border-box;
@@ -51,7 +55,7 @@
 .admin-form-group input:focus,
 .admin-form-group textarea:focus,
 .admin-form-group select:focus {
-    border-color: var(--primary);
+    border-color: var(--primary); /* Usando la variable global */
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
     outline: none;
 }
@@ -62,13 +66,13 @@
 }
 
 .admin-form-group .obligatorio {
-    color: var(--danger);
+    color: var(--danger); /* Usando la variable global */
     font-weight: bold;
 }
 
 .small-info {
     font-size: 0.85em;
-    color: var(--text-light, #777);
+    color: var(--text-light); /* Usando la variable global */
     margin-top: 5px;
     line-height: 1.4;
 }
@@ -77,15 +81,15 @@
 .image-preview-container {
     margin-top: 15px;
     text-align: center;
-    border: 1px dashed var(--gray-light);
+    border: 1px dashed var(--gray-light); /* Usando la variable global */
     border-radius: 8px;
     padding: 15px;
-    background-color: var(--background-light);
+    background-color: var(--background-light); /* Usando la variable global */
 }
 
 .image-preview-container p {
     font-size: 0.9em;
-    color: var(--text-dark);
+    color: var(--text-dark); /* Usando la variable global */
     margin-bottom: 10px;
     font-style: italic;
 }
@@ -102,12 +106,12 @@
     height: 100px;
     object-fit: cover;
     border-radius: 6px;
-    border: 1px solid var(--gray);
+    border: 1px solid var(--gray); /* Usando la variable global */
 }
 
 .remove-photo-btn {
     margin-top: 15px;
-    background-color: var(--danger);
+    background-color: var(--danger); /* Usando la variable global */
     color: white;
     padding: 8px 15px;
     border: none;
@@ -118,7 +122,7 @@
 }
 
 .remove-photo-btn:hover {
-    background-color: #c82333;
+    background-color: var(--danger-dark); /* Usando la variable global */
 }
 
 /* Checkbox specific styles */
@@ -133,7 +137,7 @@
     width: auto;
     margin-right: 10px;
     transform: scale(1.2);
-    accent-color: var(--primary);
+    accent-color: var(--primary); /* Usando la variable global */
 }
 
 .admin-form-group.checkbox label {
@@ -142,7 +146,7 @@
 }
 
 .canchas-dinamicas-container {
-    border: 1px dashed var(--primary-dark);
+    border: 1px dashed var(--primary-dark); /* Usando la variable global */
     padding: 20px;
     border-radius: 10px;
     margin-top: 20px;
@@ -150,8 +154,8 @@
 }
 
 .cancha-item-form {
-    background-color: var(--white);
-    border: 1px solid var(--gray-light);
+    background-color: var(--white); /* Usando la variable global */
+    border: 1px solid var(--gray-light); /* Usando la variable global */
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
@@ -161,16 +165,16 @@
 
 .cancha-item-form h4 {
     font-size: 1.3em;
-    color: var(--primary);
+    color: var(--primary); /* Usando la variable global */
     margin-top: 0;
     margin-bottom: 15px;
     text-align: left;
-    border-bottom: 1px dashed var(--gray-light);
+    border-bottom: 1px dashed var(--gray-light); /* Usando la variable global */
     padding-bottom: 5px;
 }
 
 .remove-cancha-btn {
-    background-color: var(--danger);
+    background-color: var(--danger); /* Usando la variable global */
     color: white;
     padding: 8px 15px;
     border: none;
@@ -182,11 +186,11 @@
 }
 
 .remove-cancha-btn:hover {
-    background-color: #c82333;
+    background-color: var(--danger-dark); /* Usando la variable global */
 }
 
 .admin-btn-add {
-    background-color: var(--success);
+    background-color: var(--success); /* Usando la variable global */
     color: white;
     padding: 12px 20px;
     border: none;
@@ -199,7 +203,7 @@
 }
 
 .admin-btn-add:hover {
-    background-color: #218838;
+    background-color: var(--success-dark); /* Usando la variable global */
 }
 
 .admin-form-buttons {
@@ -208,7 +212,7 @@
     gap: 15px;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid var(--gray-light);
+    border-top: 1px solid var(--gray-light); /* Usando la variable global */
 }
 
 .admin-btn-save, .admin-btn-cancel {
@@ -222,18 +226,18 @@
 }
 
 .admin-btn-save {
-    background-color: var(--primary);
+    background-color: var(--primary); /* Usando la variable global */
     color: white;
 }
 
 .admin-btn-save:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--primary-dark); /* Usando la variable global */
     transform: translateY(-2px);
 }
 
 .admin-btn-cancel {
-    background-color: var(--gray);
-    color: var(--text-dark);
+    background-color: var(--gray); /* Usando la variable global */
+    color: var(--text-dark); /* Usando la variable global */
 }
 
 .admin-btn-cancel:hover {
