@@ -1,4 +1,9 @@
 /* src/components/Navbar/NavBar.css */
+
+/* Importa las variables globales desde el archivo centralizado */
+@import url("../../App.css"); /* Asegúrate de que esta ruta sea correcta */
+
+
 .navbar {
     background-color: var(--white);
     border-bottom: 1px solid var(--gray-light);
@@ -15,8 +20,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* Ajuste para que el logo y el menú no se peguen en el borde en móviles */
-    padding: 0 10px;
+    padding: 0 10px; /* Ajuste para que el logo y el menú no se peguen en el borde en móviles */
 }
 
 .navbar-logo {
@@ -159,16 +163,36 @@
 
 @media (max-width: 480px) {
     .navbar {
-        padding: 10px 15px;
+        padding: 10px 15px; /* Reducir padding vertical en móviles para hacerla más compacta */
     }
     .navbar-logo {
         font-size: 1.5rem;
     }
     .navbar-link, .btn-navbar-primary, .btn-navbar-secondary, .btn-navbar-logout {
-        font-size: 0.95rem; /* Ligeramente más pequeño para móviles muy estrechos */
-        padding: 8px; /* Reducir padding en botones para móviles */
+        font-size: 0.9rem; /* Ligeramente más pequeño para móviles muy estrechos */
+        padding: 8px 10px; /* Reducir padding en botones para móviles */
     }
     .navbar-greeting {
-        font-size: 0.9rem; /* Reducir el tamaño del texto de saludo */
+        font-size: 0.85rem; /* Reducir el tamaño del texto de saludo */
+        margin-bottom: 5px; /* Reducir margen inferior */
+    }
+    .navbar-user-section {
+        gap: 5px; /* Reducir el espacio entre elementos de la sección de usuario */
+    }
+}
+
+@media (max-width: 360px) { /* Media query adicional para pantallas muy pequeñas */
+    .navbar {
+        padding: 8px 10px; /* Aún más compacto en pantallas ultra-pequeñas */
+    }
+    .navbar-logo {
+        font-size: 1.3rem;
+    }
+    .navbar-link, .btn-navbar-primary, .btn-navbar-secondary, .btn-navbar-logout {
+        font-size: 0.85rem; /* Asegurar que el texto quepa */
+        padding: 6px 8px;
+    }
+    .navbar-greeting {
+        font-size: 0.8rem;
     }
 }

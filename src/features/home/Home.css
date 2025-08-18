@@ -1,11 +1,7 @@
 /* frontend/src/features/home/Home.css */
 
-/*
-   ¡IMPORTANTE!
-   Ahora las variables globales y los estilos base se importan desde App.css.
-   Asegúrate de que esta ruta sea correcta según la ubicación de tu App.css.
-*/
-@import url("../../App.css"); /* Ajusta esta ruta si es necesario */
+/* Importa las variables globales desde el archivo centralizado */
+@import url("../../../App.css"); /* Asegúrate de que esta ruta sea correcta */
 
 
 /* Hero Section */
