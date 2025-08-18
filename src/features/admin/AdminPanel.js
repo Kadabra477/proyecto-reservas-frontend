@@ -13,7 +13,7 @@ const estadoInicialComplejoAdmin = {
     descripcion: '',
     ubicacion: '',
     telefono: '',
-    fotoUrls: [], // **MODIFICADO**: Ahora es una lista de URLs
+    fotoUrlsPorResolucion: {}, // MODIFICADO: Ahora es un objeto/mapa para las URLs de fotos
     horarioApertura: '10:00',
     horarioCierre: '23:00',
     emailPropietario: '',
@@ -30,7 +30,7 @@ function AdminPanel() {
     const [editingComplejo, setEditingComplejo] = useState(null);
     const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin);
 
-    // **MODIFICADO**: Ahora es un array de archivos seleccionados
+    // MODIFICADO: Ahora es un array de archivos seleccionados
     const [selectedPhotoFiles, setSelectedPhotoFiles] = useState([]);
 
     const [managingUserRoles, setManagingUserRoles] = useState(null);
@@ -55,7 +55,7 @@ function AdminPanel() {
     const mapComplejoToFormCanchas = useCallback((complejo) => {
         const canchasArray = [];
         const tiposExistentes = new Set();
-        
+
         const allCanchaTypes = new Set([
             ...Object.keys(complejo.canchaCounts || {}),
             ...Object.keys(complejo.canchaPrices || {}),
@@ -77,7 +77,7 @@ function AdminPanel() {
                 tiposExistentes.add(tipoCancha);
             }
         });
-        
+
         if (canchasArray.length === 0) {
             canchasArray.push({ tipoCancha: '', cantidad: '', precioHora: '', superficie: '', iluminacion: false, techo: false });
         }
@@ -92,18 +92,19 @@ function AdminPanel() {
                 descripcion: editingComplejo.descripcion || '',
                 ubicacion: editingComplejo.ubicacion || '',
                 telefono: editingComplejo.telefono || '',
-                fotoUrls: editingComplejo.fotoUrls || [], // **MODIFICADO**: Usar fotoUrls
+                // MODIFICADO: Usar fotoUrlsPorResolucion
+                fotoUrlsPorResolucion: editingComplejo.fotoUrlsPorResolucion || {},
                 horarioApertura: editingComplejo.horarioApertura || '10:00',
                 horarioCierre: editingComplejo.horarioCierre || '23:00',
                 emailPropietario: editingComplejo.propietario?.username || '',
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
-            // **MODIFICADO**: Limpiar el estado de los archivos al editar
-            setSelectedPhotoFiles([]); 
+            // MODIFICADO: Limpiar el estado de los archivos al editar
+            setSelectedPhotoFiles([]);
         } else {
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            // **MODIFICADO**: Limpiar el estado de los archivos al crear uno nuevo
-            setSelectedPhotoFiles([]); 
+            // MODIFICADO: Limpiar el estado de los archivos al crear uno nuevo
+            setSelectedPhotoFiles([]);
         }
     }, [editingComplejo, mapComplejoToFormCanchas]);
 
@@ -224,13 +225,12 @@ function AdminPanel() {
         setNuevoComplejoAdmin(prev => ({ ...prev, canchas: newCanchas }));
     };
 
-    // **MODIFICADO**: Ahora recibe un array de archivos `photoFiles`
-    const handleSaveComplejo = async (e, photoFiles) => {
+    // MODIFICADO: Ahora recibe un array de archivos `photoFiles` y el flag `photosExplicitlyRemoved`
+    const handleSaveComplejo = async (e, photoFiles, photosExplicitlyRemoved) => {
         e.preventDefault();
         setMensaje({ text: '', type: '' });
 
         const { id, nombre, emailPropietario, canchas, descripcion, ubicacion, telefono, horarioApertura, horarioCierre } = nuevoComplejoAdmin;
-        let { fotoUrls } = nuevoComplejoAdmin; // **MODIFICADO**: Obtenemos la lista de URLs
 
         if (!nombre?.trim()) { setMensaje({ text: 'El nombre del complejo es obligatorio.', type: 'error' }); return; }
         if (!ubicacion?.trim()) { setMensaje({ text: 'La ubicación del complejo es obligatoria.', type: 'error' }); return; }
@@ -259,14 +259,30 @@ function AdminPanel() {
 
         const formData = new FormData();
 
-        // **MODIFICADO**: Añadir cada archivo del array `photoFiles`
+        // MODIFICADO: Añadir cada archivo del array `photoFiles`
         if (photoFiles && photoFiles.length > 0) {
             photoFiles.forEach(file => {
                 formData.append('photos', file); // 'photos' debe coincidir con el backend
             });
-        } else if (editingComplejo?.id && fotoUrls?.length === 0) {
-             // Si no hay archivos nuevos y la lista de fotos existente se vació, se envía un blob vacío
-             formData.append('photos', new Blob(), 'empty-photo');
+        }
+
+        // Determinar qué enviar para fotoUrlsPorResolucion
+        let fotoUrlsPorResolucionToSend = {};
+        if (editingComplejo?.id) { // Si estamos editando un complejo existente
+            if (photosExplicitlyRemoved) {
+                // Si el usuario hizo clic en "Eliminar Fotos", enviamos un objeto vacío
+                fotoUrlsPorResolucionToSend = {};
+            } else if (photoFiles && photoFiles.length > 0) {
+                // Si se subieron nuevas fotos, el backend las procesará y reemplazará
+                // No necesitamos enviar las URLs antiguas aquí, ya que el backend las manejará.
+            } else {
+                // Si no se subieron nuevas fotos y no se eliminaron explícitamente,
+                // mantenemos las URLs existentes del complejo original.
+                fotoUrlsPorResolucionToSend = editingComplejo.fotoUrlsPorResolucion || {};
+            }
+        } else { // Si estamos creando un nuevo complejo
+            // Si no se subieron fotos, el backend manejará un array vacío para 'photos'
+            fotoUrlsPorResolucionToSend = {}; // Siempre vacío al crear si no hay archivos
         }
 
 
@@ -283,7 +299,7 @@ function AdminPanel() {
             canchaSurfaces,
             canchaIluminacion,
             canchaTecho,
-            ...(editingComplejo?.id && fotoUrls?.length === 0 && { fotoUrls: [] }) // **MODIFICADO**: Enviar lista vacía
+            fotoUrlsPorResolucion: fotoUrlsPorResolucionToSend // Usar el nuevo campo
         };
 
         if (!id && isAdmin && emailPropietario) {
@@ -297,14 +313,14 @@ function AdminPanel() {
             if (editingComplejo?.id) {
                 response = await api.put(`/complejos/${id}`, formData, {
                     headers: {
-                        'Content-Type': undefined,
+                        'Content-Type': undefined, // Permite que Axios/navegador establezca el Content-Type correcto para FormData
                     },
                 });
                 setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
             } else {
                 response = await api.post('/complejos', formData, {
                     headers: {
-                        'Content-Type': undefined,
+                        'Content-Type': undefined, // Permite que Axios/navegador establezca el Content-Type correcto para FormData
                     },
                 });
                 setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
@@ -320,10 +336,10 @@ function AdminPanel() {
             setMensaje({ text: errorMsg, type: 'error' });
         }
     };
-    
+
     const startEditingComplejo = (complejoParaEditar) => {
         setEditingComplejo(complejoParaEditar);
-        setSelectedPhotoFiles([]); 
+        setSelectedPhotoFiles([]);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -477,9 +493,9 @@ function AdminPanel() {
                         rolesToActualSend = ['ROLE_USER'];
                     }
                     rolesToActualSend = [...new Set(rolesToActualSend)];
-                    
+
                     await api.put(`/users/${managingUserRoles.id}/roles`, rolesToActualSend);
-                    
+
                     setMensaje({ text: `Roles de ${managingUserRoles.username} actualizados correctamente.`, type: 'success' });
                     fetchUsuarios();
                     setManagingUserRoles(null);
@@ -615,17 +631,18 @@ function AdminPanel() {
                             handleCanchaChange={handleCanchaChange}
                             handleAddCancha={handleAddCancha}
                             handleRemoveCancha={handleRemoveCancha}
+                            // MODIFICADO: Pasar la función handleSaveComplejo con los nuevos parámetros
                             handleSaveComplejo={handleSaveComplejo}
                             editingComplejo={editingComplejo}
                             cancelEditingComplejo={cancelEditingComplejo}
                             isAdmin={isAdmin}
-                            // **MODIFICADO**: Ahora pasamos un array de archivos
+                            // MODIFICADO: Pasar el estado de los archivos seleccionados
                             selectedPhotoFiles={selectedPhotoFiles}
                             setSelectedPhotoFiles={setSelectedPhotoFiles}
                             setMensaje={setMensaje}
                         />
                     )}
-                    
+
                     <div className="admin-list-container">
                         <h3>{isAdmin ? 'Todos los Complejos' : 'Mis Complejos'}</h3>
                         {isLoadingData ? <p>Cargando complejos...</p> : (
@@ -651,6 +668,7 @@ function AdminPanel() {
                                                 <td data-label="Ubicación">{c.ubicacion || 'N/A'}</td>
                                                 <td data-label="Horario">{c.horarioApertura || 'N/A'} - {c.horarioCierre || 'N/A'}</td>
                                                 <td data-label="Canchas">
+                                                    {/* MODIFICADO: Acceder a los tipos de cancha desde el mapa canchaCounts */}
                                                     {Object.keys(c.canchaCounts || {}).map(tipo => (
                                                         <span key={tipo} className="cancha-type-badge">
                                                             {c.canchaCounts[tipo]}x {tipo} (${c.canchaPrices[tipo]?.toLocaleString('es-AR') || 'N/A'})

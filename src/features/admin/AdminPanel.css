@@ -1,47 +1,50 @@
 /* frontend/src/features/admin/AdminPanel.css */
 
+/* Importa las variables globales desde el archivo centralizado */
+@import url("../../../App.css"); /* Asegúrate de que esta ruta sea correcta */
+
 .admin-panel {
     font-family: 'Poppins', sans-serif; /* Usar Poppins para consistencia global */
-    max-width: 1400px; 
+    max-width: 1400px;
     margin: 30px auto;
     padding: 30px 40px;
     background-color: var(--white);
     border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .admin-panel h1 {
     text-align: center;
     color: var(--primary);
-    font-size: 2.5rem; 
+    font-size: 2.5rem;
     margin-bottom: 35px;
-    border-bottom: 3px solid var(--primary); 
+    border-bottom: 3px solid var(--primary);
     padding-bottom: 15px;
 }
 
 /* Estilo de Mensajes (Éxito/Error/Información) */
 .admin-mensaje {
     padding: 14px 20px;
-    margin: 25px auto; 
+    margin: 25px auto;
     border-radius: 8px;
     text-align: center;
     font-weight: 600;
     border-left: 5px solid;
-    max-width: 800px; 
-    opacity: 1; 
+    max-width: 800px;
+    opacity: 1;
 }
 .admin-mensaje.success {
     background-color: rgba(46, 204, 113, 0.1);
-    color: #218838; 
-    border-left-color: #2ecc71; 
+    color: #218838;
+    border-left-color: #2ecc71;
 }
 .admin-mensaje.error {
     background-color: rgba(231, 76, 60, 0.1);
-    color: #c82333; 
-    border-left-color: #e74c3c; 
+    color: #c82333;
+    border-left-color: #e74c3c;
 }
-.info-message, .info-message-no-complejos { 
-    background-color: rgba(52, 152, 219, 0.1); 
+.info-message, .info-message-no-complejos {
+    background-color: rgba(52, 152, 219, 0.1);
     color: #007bff;
     border-left: 5px solid #007bff;
     padding: 14px 20px;
@@ -50,7 +53,7 @@
     font-weight: 500;
     max-width: 800px;
 }
-.small-info { 
+.small-info {
     font-size: 0.85rem;
     color: var(--gray);
     margin-top: 5px;
@@ -69,8 +72,8 @@
     justify-content: center;
     margin-bottom: 30px;
     border-bottom: 1px solid var(--gray-light);
-    flex-wrap: wrap; 
-    gap: 5px; 
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .admin-tab-button {
@@ -83,19 +86,19 @@
     font-weight: 600;
     transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
     border-bottom: 3px solid transparent;
-    margin-bottom: -1px; 
+    margin-bottom: -1px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    white-space: nowrap; 
+    white-space: nowrap;
 }
 
 .admin-tab-button:hover:not(.active) {
-    color: var(--primary-dark); 
-    background-color: rgba(0, 123, 255, 0.05); 
+    color: var(--primary-dark);
+    background-color: rgba(0, 123, 255, 0.05);
 }
 .admin-tab-button.active {
-    color: var(--primary); 
-    border-bottom-color: var(--primary); 
+    color: var(--primary);
+    border-bottom-color: var(--primary);
 }
 .admin-tab-button:disabled {
     opacity: 0.6;
@@ -109,32 +112,32 @@
 
 .admin-tab-content h2 {
     color: var(--primary-dark);
-    font-size: 2rem; 
+    font-size: 2rem;
     margin-bottom: 30px;
     padding-bottom: 15px;
     border-bottom: 1px solid var(--gray-light);
-    text-align: center; 
+    text-align: center;
 }
 
 /* Formularios de Complejos y Tipos de Cancha */
 .admin-complejo-form,
-.admin-tipo-cancha-form { 
+.admin-tipo-cancha-form {
     background-color: var(--gray-lightest);
     padding: 30px 35px;
     border-radius: 12px;
     box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
     margin-bottom: 40px;
-    max-width: 800px; 
+    max-width: 800px;
     margin-left: auto;
     margin-right: auto;
 }
-.admin-tipo-cancha-gestion { 
-    background-color: var(--white); 
+.admin-tipo-cancha-gestion {
+    background-color: var(--white);
     padding: 25px 30px;
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     margin-top: 30px;
-    max-width: 900px; 
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -146,14 +149,14 @@
     border-bottom: 1px solid var(--gray-light);
     padding-bottom: 10px;
 }
-.admin-tipo-cancha-form h4 { 
+.admin-tipo-cancha-form h4 {
     font-size: 1.3rem;
     color: var(--text);
     margin-bottom: 20px;
-    text-align: left; 
-    border-bottom: 1px dashed var(--gray-light); 
+    text-align: left;
+    border-bottom: 1px dashed var(--gray-light);
     padding-bottom: 10px;
-    margin-left: -5px; 
+    margin-left: -5px;
     margin-right: -5px;
 }
 
@@ -172,7 +175,7 @@
 }
 
 .obligatorio {
-    color: var(--danger); 
+    color: var(--danger);
     font-weight: 700;
     margin-left: 4px;
 }
@@ -181,8 +184,8 @@
 .admin-form-group input[type="number"],
 .admin-form-group input[type="url"],
 .admin-form-group input[type="tel"],
-.admin-form-group input[type="email"], 
-.admin-form-group input[type="time"], 
+.admin-form-group input[type="email"],
+.admin-form-group input[type="time"],
 .admin-form-group textarea,
 .admin-form-group select {
     padding: 12px 15px;
@@ -193,8 +196,8 @@
     width: 100%;
     box-sizing: border-box;
     font-family: inherit;
-    color: var(--text); 
-    background-color: var(--white); 
+    color: var(--text);
+    background-color: var(--white);
 }
 .admin-form-group input:focus,
 .admin-form-group textarea:focus,
@@ -203,7 +206,7 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
 }
-.admin-form-group select:disabled { 
+.admin-form-group select:disabled {
     background-color: var(--gray-lightest);
     cursor: not-allowed;
 }
@@ -217,7 +220,7 @@
 .admin-form-group.checkbox {
     flex-direction: row;
     align-items: center;
-    gap: 10px; 
+    gap: 10px;
 }
 .admin-form-group.checkbox label {
     margin-bottom: 0;
@@ -235,7 +238,7 @@
 .canchas-dinamicas-container {
     display: flex;
     flex-direction: column;
-    gap: 25px; 
+    gap: 25px;
     margin-bottom: 20px;
 }
 
@@ -271,7 +274,7 @@
     gap: 15px;
     margin-top: 25px;
     flex-wrap: wrap;
-    justify-content: center; 
+    justify-content: center;
 }
 
 /* Estilo Base de Botones en Admin Panel */
@@ -283,11 +286,11 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.95rem;
-    white-space: nowrap; 
+    white-space: nowrap;
 }
 .admin-panel button:hover:not(:disabled) {
     filter: brightness(90%);
-    transform: translateY(-2px); 
+    transform: translateY(-2px);
 }
 .admin-panel button:disabled {
     cursor: not-allowed;
@@ -311,7 +314,7 @@
 .admin-btn-confirm:hover { background-color: #0056b3; }
 
 .admin-btn-pdf { /* Estilo para el botón de PDF */
-    background-color: #dc3545; 
+    background-color: #dc3545;
     color: white;
 }
 .admin-btn-pdf:hover {
@@ -320,7 +323,7 @@
 
 /* NUEVO: Botón de activar cuenta */
 .admin-btn-activate {
-    background-color: #20c997; 
+    background-color: #20c997;
     color: white;
 }
 
@@ -331,30 +334,30 @@
 
 /* Estilo de Tablas */
 .admin-complejo-list h3,
-.admin-list-tipos-cancha h4, 
+.admin-list-tipos-cancha h4,
 .admin-reserva-list h3,
-.admin-usuario-list h3 { 
+.admin-usuario-list h3 {
     margin-top: 30px;
     margin-bottom: 20px;
     color: var(--primary-dark);
-    font-size: 1.6rem; 
+    font-size: 1.6rem;
     text-align: center;
 }
 
 .admin-table-container {
     display: block;
     width: 100%;
-    overflow-x: auto; 
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     border: 1px solid var(--gray-light);
     border-radius: 8px;
     margin-top: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08); 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
 .admin-table-container table {
     width: 100%;
-    min-width: 900px; 
+    /* REMOVIDO: min-width: 900px; */ /* Eliminado para permitir que la tabla se encoja */
     border-collapse: collapse;
     background: white;
     margin-top: 0;
@@ -364,12 +367,12 @@
 }
 
 th, td {
-    padding: 15px 18px; 
+    padding: 15px 18px;
     text-align: left;
     border-bottom: 1px solid var(--gray-light);
     font-size: 0.95rem;
     vertical-align: middle;
-    white-space: nowrap; 
+    white-space: nowrap;
 }
 
 /* Permitir que algunas celdas se envuelvan si es necesario */
@@ -378,18 +381,18 @@ td[data-label="Ubicación"],
 td[data-label="Cliente"],
 td[data-label="Fecha y Hora"],
 td[data-label="Tipos de Cancha"],
-td[data-label="Roles"] { 
-    white-space: normal; 
+td[data-label="Roles"] {
+    white-space: normal;
 }
 
 th {
-    background-color: var(--primary-lightest); 
+    background-color: var(--primary-lightest);
     font-weight: 700;
     color: var(--primary-dark);
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.5px;
-    position: sticky; 
+    position: sticky;
     top: 0;
     z-index: 1;
 }
@@ -406,20 +409,20 @@ td button {
     padding: 7px 14px;
     font-size: 0.85rem;
     margin-right: 6px;
-    margin-bottom: 6px; 
+    margin-bottom: 6px;
     border-radius: 6px;
 }
 td button:last-child {
     margin-right: 0;
 }
-td a.admin-btn-pdf { 
+td a.admin-btn-pdf {
     display: inline-block;
     padding: 7px 14px;
     font-size: 0.85rem;
     margin-right: 6px;
     margin-bottom: 6px;
     border-radius: 6px;
-    text-decoration: none; 
+    text-decoration: none;
     text-align: center;
 }
 
@@ -429,22 +432,22 @@ td a.admin-btn-pdf {
     display: inline-block;
     padding: 6px 12px;
     border-radius: 20px;
-    font-size: 0.75rem; 
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
 }
-.admin-badge.available, .admin-badge.confirmed, .admin-badge.paid { 
-    background-color: rgba(40, 167, 69, 0.15); 
+.admin-badge.available, .admin-badge.confirmed, .admin-badge.paid {
+    background-color: rgba(40, 167, 69, 0.15);
     color: #28a745;
 }
 .admin-badge.unavailable, .admin-badge.pending {
-    background-color: rgba(255, 193, 7, 0.15); 
+    background-color: rgba(255, 193, 7, 0.15);
     color: #ffc107;
 }
-.admin-badge.canceled, .admin-badge.rejected { 
-    background-color: rgba(220, 53, 69, 0.15); 
+.admin-badge.canceled, .admin-badge.rejected {
+    background-color: rgba(220, 53, 69, 0.15);
     color: #dc3545;
 }
 
@@ -458,7 +461,7 @@ td a.admin-btn-pdf {
     font-size: 0.75em;
     margin: 2px;
     border: 1px solid var(--primary);
-    white-space: normal; 
+    white-space: normal;
 }
 
 /* Mensaje para cuando no hay datos en la tabla */
@@ -478,7 +481,7 @@ td a.admin-btn-pdf {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     margin-top: 40px;
-    max-width: 600px; 
+    max-width: 600px;
     margin-left: auto;
     margin-right: auto;
     border: 1px solid var(--gray-light);
@@ -503,7 +506,7 @@ td a.admin-btn-pdf {
 }
 .admin-user-role-form-modal .checkbox-group input[type="checkbox"] {
     margin-right: 10px;
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 .admin-user-role-form-modal .info-text {
     font-style: italic;
@@ -520,10 +523,11 @@ td a.admin-btn-pdf {
         padding: 25px 25px;
     }
     .admin-form-buttons {
-        justify-content: flex-start; 
+        justify-content: flex-start;
     }
     .admin-table-container table {
-        min-width: 700px; 
+        /* min-width: 700px; */ /* REMOVIDO: Ya no es necesario con el enfoque de tabla apilada */
+        min-width: unset; /* Asegura que no haya un mínimo ancho implícito */
     }
 }
 
@@ -535,14 +539,14 @@ td a.admin-btn-pdf {
         font-size: 2rem;
     }
     .admin-tabs {
-        flex-direction: column; 
-        align-items: stretch; 
+        flex-direction: column;
+        align-items: stretch;
     }
     .admin-tab-button {
         font-size: 0.95rem;
         padding: 12px 20px;
-        text-align: center; 
-        border-bottom: 1px solid var(--gray-light); 
+        text-align: center;
+        border-bottom: 1px solid var(--gray-light);
         margin-bottom: 0;
     }
     .admin-tab-button.active {
@@ -568,14 +572,14 @@ td a.admin-btn-pdf {
         width: 100%;
     }
     .admin-table-container table {
-        min-width: unset; 
+        min-width: unset; /* Asegura que la tabla no tenga un ancho mínimo fijo */
     }
     .admin-table-container th,
     .admin-table-container td {
-        white-space: normal; 
-        text-align: right; 
+        white-space: normal;
+        text-align: right; /* Alinea el contenido a la derecha */
     }
-    .admin-table-container td::before { 
+    .admin-table-container td::before {
         content: attr(data-label);
         float: left;
         font-weight: bold;
@@ -584,7 +588,7 @@ td a.admin-btn-pdf {
         color: var(--primary-dark);
     }
     .admin-table-container thead {
-        display: none; 
+        display: none;
     }
     .admin-table-container tr {
         display: block;
@@ -604,13 +608,16 @@ td a.admin-btn-pdf {
     }
     .admin-table-container td button,
     .admin-table-container td a {
-        width: calc(50% - 3px); 
-        margin-right: 0 !important; 
-        display: inline-block; 
+        width: calc(50% - 3px);
+        margin-right: 0 !important;
+        display: inline-block;
+        /* Alineación y espaciado para botones apilados */
+        vertical-align: top; /* Asegura que los botones se alineen en la parte superior */
+        margin-bottom: 6px; /* Espacio entre botones apilados */
     }
     .admin-table-container td button:nth-child(odd),
     .admin-table-container td a:nth-child(odd) {
-        margin-right: 6px !important; 
+        margin-right: 6px !important; /* Espacio entre botones en la misma fila */
     }
 }
 
