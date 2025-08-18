@@ -1,7 +1,7 @@
 /* frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.css */
 
 /* Importa las variables globales desde el archivo centralizado */
-@import url("../../App.css");
+@import url("../../../App.css");
 
 body {
     background-color: var(--background); /* Usando la variable global */
