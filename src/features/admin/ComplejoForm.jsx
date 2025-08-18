@@ -11,8 +11,9 @@ const ComplejoForm = ({
     handleCanchaChange,
     handleAddCancha,
     handleRemoveCancha,
-    handleSaveComplejo, // Esta prop ahora recibirá `selectedPhotoFiles` y `photosExplicitlyRemoved`
+    handleSaveComplejo,
     editingComplejo,
+    cancelEditingComplejo, // <--- ¡AÑADIDO AQUÍ!
     isAdmin,
     selectedPhotoFiles,
     setSelectedPhotoFiles,
