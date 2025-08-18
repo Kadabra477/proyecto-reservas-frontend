@@ -1,26 +1,13 @@
 /* frontend/src/features/canchas/Complejos.css */
 
-:root {
-    --primary: #007bff;
-    --primary-dark: #0056b3;
-    --background-light: #f9f9f9;
-    --white: #ffffff;
-    --text: #333;
-    --text-light: #555;
-    --text-dark: #444;
-    --gray: #cccccc;
-    --gray-light: #eee;
-    --success: #28a745;
-    --danger: #dc3545;
-    --info: #17a2b8;
-    --warning: #ffc107;
-}
+/* Importa las variables globales desde el archivo centralizado */
+@import url("../../App.css");
 
 .complejos-container {
     max-width: 1200px;
     margin: 50px auto;
     padding: 30px 20px;
-    background-color: var(--background-light, #f9f9f9);
+    background-color: var(--background-light); /* Usando la variable global */
     border-radius: 15px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -29,7 +16,7 @@
 
 .complejos-title {
     font-size: 3.2em;
-    color: var(--primary-dark, #0056b3);
+    color: var(--primary-dark); /* Usando la variable global */
     margin-bottom: 10px;
     font-weight: 800;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
@@ -38,7 +25,7 @@
 
 .complejos-subtitle {
     font-size: 1.5em;
-    color: var(--text-light, #555);
+    color: var(--text-light); /* Usando la variable global */
     margin-bottom: 40px;
     font-weight: 400;
 }
@@ -54,11 +41,11 @@
 .no-complejos-section {
     grid-column: 1 / -1;
     font-size: 1.3em;
-    color: var(--text-light, #777);
+    color: var(--text-light); /* Usando la variable global */
     padding: 40px;
-    background-color: var(--white, #ffffff);
+    background-color: var(--white); /* Usando la variable global */
     border-radius: 10px;
-    border: 2px dashed var(--gray, #cccccc);
+    border: 2px dashed var(--gray); /* Usando la variable global */
     margin-top: 20px;
     display: flex;
     flex-direction: column;
@@ -75,7 +62,7 @@
 
 .no-complejos-message {
     font-size: 1.3em;
-    color: var(--text-light, #777);
+    color: var(--text-light); /* Usando la variable global */
     margin-bottom: 15px;
     line-height: 1.5;
 }
@@ -85,9 +72,9 @@
     text-align: center;
     font-size: 1.5em;
     padding: 40px;
-    color: var(--text, #333);
+    color: var(--text); /* Usando la variable global */
     font-weight: bold;
-    background-color: var(--white);
+    background-color: var(--white); /* Usando la variable global */
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     display: flex;
@@ -101,26 +88,26 @@
 
 .loading-message-box p, .error-message-box p {
     font-size: 0.9em;
-    color: var(--text-light);
+    color: var(--text-light); /* Usando la variable global */
     font-weight: normal;
     margin-top: 15px;
 }
 
 .error-message-box {
-    color: var(--danger, #dc3545);
+    color: var(--danger); /* Usando la variable global */
     background-color: rgba(220, 53, 69, 0.05);
-    border: 1px solid var(--danger, #dc3545);
+    border: 1px solid var(--danger); /* Usando la variable global */
 }
 
 .error-message-box h3 {
-    color: var(--danger, #dc3545);
+    color: var(--danger); /* Usando la variable global */
     margin-bottom: 10px;
 }
 
 /* Spinner de carga */
 .spinner {
     border: 4px solid rgba(0, 123, 255, 0.3);
-    border-top: 4px solid var(--primary);
+    border-top: 4px solid var(--primary); /* Usando la variable global */
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -134,7 +121,7 @@
 }
 
 .retry-button {
-    background-color: var(--primary);
+    background-color: var(--primary); /* Usando la variable global */
     color: white;
     padding: 10px 20px;
     border: none;
@@ -146,7 +133,7 @@
 }
 
 .retry-button:hover {
-    background-color: var(--primary-dark);
+    background-color: var(--primary-dark); /* Usando la variable global */
 }
 
 /* Estilos para el esqueleto de carga de ComplejoCard */

@@ -1,28 +1,12 @@
 /* frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.css */
 
-/* Variables de color y tipografía */
-:root {
-    --primary: #007bff;
-    --primary-dark: #0056b3;
-    --secondary: #6c757d;
-    --secondary-light: #f8f9fa;
-    --success: #28a745;
-    --info: #17a2b8;
-    --danger: #dc3545;
-    --warning: #ffc107;
-    --white: #ffffff;
-    --background-color: #f4f7f6;
-    --card-background: #ffffff;
-    --text-color: #495057;
-    --text-muted: #868e96;
-    --border-color: #e9ecef;
-    --font-family-sans: 'Helvetica Neue', Arial, sans-serif;
-}
+/* Importa las variables globales desde el archivo centralizado */
+@import url("../../App.css");
 
 body {
-    background-color: var(--background-color);
-    color: var(--text-color);
-    font-family: var(--font-family-sans);
+    background-color: var(--background); /* Usando la variable global */
+    color: var(--text); /* Usando la variable global */
+    font-family: 'Poppins', sans-serif; /* Usando la fuente global */
 }
 
 .complejo-detalle-container {
@@ -41,12 +25,12 @@ body {
 
 .loading-container p, .error-container p {
     font-size: 1.2em;
-    color: var(--text-muted);
+    color: var(--text-light); /* Usando la variable global */
 }
 
 .spinner {
-    border: 5px solid var(--border-color);
-    border-top: 5px solid var(--primary);
+    border: 5px solid var(--border-light); /* Usando la variable global */
+    border-top: 5px solid var(--primary); /* Usando la variable global */
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -63,7 +47,7 @@ body {
 .hero-banner {
     position: relative;
     height: 400px;
-    background-color: var(--secondary);
+    background-color: var(--secondary); /* Usando la variable global */
     display: flex;
     align-items: flex-end;
     color: white;
@@ -128,7 +112,7 @@ body {
 }
 
 .info-card, .canchas-section {
-    background-color: var(--card-background);
+    background-color: var(--white); /* Usando la variable global */
     padding: 2rem;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -137,16 +121,16 @@ body {
 .info-card h2, .canchas-section h2 {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--primary-dark);
+    color: var(--primary-dark); /* Usando la variable global */
     margin-bottom: 1rem;
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 2px solid var(--border-light); /* Usando la variable global */
     padding-bottom: 0.5rem;
 }
 
 .info-card p {
     font-size: 1.1rem;
     line-height: 1.6;
-    color: var(--text-color);
+    color: var(--text); /* Usando la variable global */
 }
 
 .info-grid {
@@ -161,14 +145,14 @@ body {
     align-items: center;
     gap: 0.8rem;
     font-size: 1.1rem;
-    color: var(--text-color);
-    background: var(--background-color);
+    color: var(--text); /* Usando la variable global */
+    background: var(--background-light); /* Usando la variable global */
     padding: 1rem;
     border-radius: 8px;
 }
 
 .info-icon {
-    color: var(--primary);
+    color: var(--primary); /* Usando la variable global */
     font-size: 1.5rem;
 }
 
@@ -184,7 +168,7 @@ body {
 }
 
 .cancha-card {
-    background-color: var(--secondary-light);
+    background-color: var(--secondary-light); /* Usando la variable global */
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
@@ -208,7 +192,7 @@ body {
 
 .cancha-icon {
     font-size: 2.5rem;
-    color: var(--primary);
+    color: var(--primary); /* Usando la variable global */
 }
 
 .cancha-type {
@@ -219,7 +203,7 @@ body {
 
 .cancha-count {
     font-size: 1.1rem;
-    color: var(--text-muted);
+    color: var(--text-light); /* Usando la variable global */
     font-style: italic;
     margin-left: auto;
 }
@@ -227,13 +211,13 @@ body {
 .price-tag {
     font-size: 2rem;
     font-weight: 800;
-    color: var(--primary-dark);
+    color: var(--primary-dark); /* Usando la variable global */
     margin-bottom: 1rem;
 }
 
 .price-tag small {
     font-size: 0.6em;
-    color: var(--text-muted);
+    color: var(--text-light); /* Usando la variable global */
     font-weight: normal;
 }
 
@@ -251,11 +235,11 @@ body {
     align-items: center;
     gap: 0.8rem;
     font-size: 1rem;
-    color: var(--text-color);
+    color: var(--text); /* Usando la variable global */
 }
 
 .feature-icon {
-    color: var(--primary);
+    color: var(--primary); /* Usando la variable global */
 }
 
 /* --- BOTÓN DE RESERVA AL PIE DE PÁGINA --- */
@@ -265,7 +249,7 @@ body {
 }
 
 .reserve-button {
-    background-color: var(--success);
+    background-color: var(--success); /* Usando la variable global */
     color: white;
     padding: 1rem 3rem;
     font-size: 1.2rem;
@@ -277,7 +261,7 @@ body {
 }
 
 .reserve-button:hover {
-    background-color: #218838;
+    background-color: var(--success-dark); /* Usando la variable global */
     transform: translateY(-3px);
 }
 

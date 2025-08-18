@@ -1,71 +1,47 @@
 /* frontend/src/features/dashboard/DashboardUsuario.css */
 
-/* Variables de color y tamaño (asegúrate de que estén definidas en algún archivo global o aquí) */
-:root {
-    --primary: #007bff; /* Azul primario */
-    --primary-dark: #0056b3; /* Azul oscuro */
-    --secondary: #6c757d; /* Gris secundario */
-    --secondary-light: #e2e6ea; /* Gris claro */
-    --secondary-dark: #343a40; /* Gris muy oscuro */
-    --white: #ffffff;
-    --background-light: #f9f9f9;
-    --gray-lightest: #f8f9fa;
-    --gray: #ced4da;
-    --gray-dark: #6c757d;
-    --text: #333;
-    --text-light: #555;
-    --text-dark: #212529;
-    --success: #28a745;
-    --info: #17a2b8;
-    --warning: #ffc107;
-    --danger: #dc3545;
-
-    --max-width: 1200px;
-    --radius: 8px;
-    --radius-lg: 15px;
-    --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
+/* Importa las variables globales desde el archivo centralizado */
+@import url("../../App.css");
 
 /* Contenedor principal del Dashboard */
 .dashboard-container {
-    max-width: var(--max-width);
+    max-width: var(--max-width); /* Usando la variable global */
     margin: 50px auto;
     padding: 30px 25px;
-    background: var(--background-light); 
-    border-radius: var(--radius-lg);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+    background: var(--background-light); /* Usando la variable global */
+    border-radius: var(--radius-lg); /* Usando la variable global */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    gap: 30px; 
+    gap: 30px;
 }
 
 /* Mensajes de carga y error */
 .loading-message, .error-message {
     text-align: center;
     font-size: 1.2rem;
-    color: var(--text-light);
+    color: var(--text-light); /* Usando la variable global */
     padding: 20px;
-    background-color: var(--gray-lightest);
-    border-radius: var(--radius);
-    border: 1px dashed var(--gray);
+    background-color: var(--gray-lightest); /* Usando la variable global */
+    border-radius: var(--radius); /* Usando la variable global */
+    border: 1px dashed var(--gray); /* Usando la variable global */
 }
 .error-message {
-    color: var(--danger);
-    background-color: rgba(var(--danger), 0.05);
-    border-color: var(--danger);
+    color: var(--danger); /* Usando la variable global */
+    background-color: rgba(var(--danger), 0.05); /* Usando la variable global */
+    border-color: var(--danger); /* Usando la variable global */
 }
 
 
 /* Tarjeta de Bienvenida */
 .welcome-card {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark)); 
-    color: var(--white);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)); /* Usando la variable global */
+    color: var(--white); /* Usando la variable global */
     padding: 40px;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-lg); /* Usando la variable global */
     text-align: center;
-    box-shadow: var(--shadow-hover);
-    margin-bottom: 20px; 
+    box-shadow: var(--shadow-hover); /* Usando la variable global */
+    margin-bottom: 20px;
 }
 
 .welcome-title {
@@ -88,7 +64,7 @@
     gap: 30px;
 }
 
-@media (min-width: 992px) { 
+@media (min-width: 992px) {
     .dashboard-content-grid {
         grid-template-columns: 1fr 2fr; /* Columna izquierda para perfil, derecha para resumen de reservas */
     }
@@ -96,34 +72,34 @@
 
 /* Sección general de dashboard (tarjetas de perfil y resumen) */
 .dashboard-section {
-    background-color: var(--white);
-    border-radius: var(--radius-lg);
+    background-color: var(--white); /* Usando la variable global */
+    border-radius: var(--radius-lg); /* Usando la variable global */
     padding: 25px 30px;
-    box-shadow: var(--shadow);
-    border-left: 5px solid var(--primary); 
+    box-shadow: var(--shadow); /* Usando la variable global */
+    border-left: 5px solid var(--primary); /* Usando la variable global */
     display: flex;
     flex-direction: column;
-    height: 100%; 
+    height: 100%;
 }
 
 .dashboard-section h2 {
-    color: var(--primary-dark);
+    color: var(--primary-dark); /* Usando la variable global */
     font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 25px;
-    border-bottom: 1px solid var(--gray);
+    border-bottom: 1px solid var(--gray); /* Usando la variable global */
     padding-bottom: 10px;
 }
 
 /* PERFIL - Detalles Personales */
 .perfil-detail-card {
-    border-color: var(--secondary); 
+    border-color: var(--secondary); /* Usando la variable global */
 }
 
 .perfil-form-edit label {
     display: block;
     font-weight: 600;
-    color: var(--text-dark);
+    color: var(--text-dark); /* Usando la variable global */
     margin-bottom: 5px;
     margin-top: 15px;
     font-size: 0.95rem;
@@ -132,16 +108,16 @@
 .perfil-input, .perfil-textarea {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid var(--gray);
-    border-radius: var(--radius);
+    border: 1px solid var(--gray); /* Usando la variable global */
+    border-radius: var(--radius); /* Usando la variable global */
     font-size: 1rem;
     margin-bottom: 15px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .perfil-input:focus, .perfil-textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(var(--primary), 0.25);
+    border-color: var(--primary); /* Usando la variable global */
+    box-shadow: 0 0 0 3px rgba(var(--primary), 0.25); /* Usando la variable global */
     outline: none;
 }
 
@@ -152,7 +128,7 @@
 
 .perfil-email-display {
     font-size: 1rem;
-    color: var(--text-light);
+    color: var(--text-light); /* Usando la variable global */
     margin-bottom: 20px;
 }
 
@@ -164,39 +140,39 @@
 }
 
 .btn-guardar {
-    background-color: var(--primary);
-    color: white; 
+    background-color: var(--primary); /* Usando la variable global */
+    color: white;
     border: none;
 }
 .btn-guardar:hover {
-    background-color: var(--primary-dark);
-    color: white; 
+    background-color: var(--primary-dark); /* Usando la variable global */
+    color: white;
 }
 .btn-cancelar {
-    background-color: var(--gray-dark);
-    color: white; 
+    background-color: var(--gray-dark); /* Usando la variable global */
+    color: white;
     border: none;
 }
 .btn-cancelar:hover {
-    background-color: var(--secondary-dark);
-    color: white; 
+    background-color: var(--secondary-dark); /* Usando la variable global */
+    color: white;
 }
 
 .perfil-data-view {
     font-size: 1rem;
-    color: var(--text);
+    color: var(--text); /* Usando la variable global */
 }
 
 .perfil-data-item {
     margin-bottom: 10px;
     padding-bottom: 5px;
-    border-bottom: 1px dotted var(--gray);
+    border-bottom: 1px dotted var(--gray); /* Usando la variable global */
 }
 .perfil-data-item:last-child {
     border-bottom: none;
 }
 .perfil-data-item strong {
-    color: var(--text-dark);
+    color: var(--text-dark); /* Usando la variable global */
     display: inline-block;
     min-width: 100px;
 }
@@ -205,30 +181,30 @@
 }
 .btn-editar {
     margin-top: 20px;
-    align-self: flex-start; 
+    align-self: flex-start;
 }
 
 
 /* RESUMEN DE RESERVAS */
 .reservations-summary-card {
-    border-color: var(--info); 
+    border-color: var(--info); /* Usando la variable global */
 }
 
 .next-reservation-highlight {
-    background-color: rgba(var(--info), 0.08); 
-    border: 1px solid rgba(var(--info), 0.2);
-    border-radius: var(--radius);
+    background-color: rgba(var(--info), 0.08); /* Usando la variable global */
+    border: 1px solid rgba(var(--info), 0.2); /* Usando la variable global */
+    border-radius: var(--radius); /* Usando la variable global */
     padding: 15px 20px;
     margin-bottom: 25px;
 }
 
 .next-reservation-highlight h3 {
     font-size: 1.2rem;
-    color: var(--info);
+    color: var(--info); /* Usando la variable global */
     margin-top: 0;
     margin-bottom: 15px;
     text-align: center;
-    border-bottom: 1px dashed var(--info);
+    border-bottom: 1px dashed var(--info); /* Usando la variable global */
     padding-bottom: 8px;
 }
 
@@ -239,31 +215,31 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
     padding: 10px;
-    border-radius: var(--radius);
+    border-radius: var(--radius); /* Usando la variable global */
 }
 .reserva-highlight-item:hover {
-    background-color: rgba(var(--info), 0.15);
+    background-color: rgba(var(--info), 0.15); /* Usando la variable global */
 }
 
 .reserva-highlight-icon {
-    font-size: 2.5rem; 
+    font-size: 2.5rem;
     line-height: 1;
 }
 
 .reserva-highlight-details p {
     margin: 3px 0;
     font-size: 1rem;
-    color: var(--text-dark);
+    color: var(--text-dark); /* Usando la variable global */
 }
 .reserva-highlight-details strong {
-    color: var(--primary-dark);
+    color: var(--primary-dark); /* Usando la variable global */
 }
 
 .action-buttons-group {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    margin-top: auto; 
+    margin-top: auto;
 }
 
 .btn-full-width {
@@ -272,36 +248,36 @@
     font-size: 1.1rem;
     font-weight: 600;
     text-align: center;
-    text-decoration: none; 
-    border-radius: var(--radius);
+    text-decoration: none;
+    border-radius: var(--radius); /* Usando la variable global */
     transition: background-color 0.3s ease, transform 0.2s ease;
     border: none;
     cursor: pointer;
 }
 
-.btn-primary { 
-    background-color: var(--primary); 
-    color: white; 
+.btn-primary {
+    background-color: var(--primary); /* Usando la variable global */
+    color: white;
 }
-.btn-primary:hover { 
-    background-color: var(--primary-dark); 
-    color: white; 
-    transform: translateY(-2px); 
+.btn-primary:hover {
+    background-color: var(--primary-dark); /* Usando la variable global */
+    color: white;
+    transform: translateY(-2px);
 }
 
-.btn-secondary { 
-    background-color: var(--secondary); 
-    color: white; 
+.btn-secondary {
+    background-color: var(--secondary); /* Usando la variable global */
+    color: white;
 }
-.btn-secondary:hover { 
-    background-color: var(--secondary-dark); 
-    color: white; 
-    transform: translateY(-2px); 
+.btn-secondary:hover {
+    background-color: var(--secondary-dark); /* Usando la variable global */
+    color: white;
+    transform: translateY(-2px);
 }
 
 /* SECCIÓN DE TODAS LAS RESERVAS (PRÓXIMAS, HISTORIAL, CANCELADAS) */
 .all-reservations-card {
-    border-color: var(--success); /* Un color predeterminado, los estilos de tarjeta individual sobrescribirán */
+    border-color: var(--success); /* Usando la variable global */
 }
 
 .reservas-grid {
@@ -312,14 +288,14 @@
 }
 
 .reserva-item-card {
-    background-color: var(--white);
-    border: 1px solid var(--gray-light);
-    border-radius: var(--radius);
+    background-color: var(--white); /* Usando la variable global */
+    border: 1px solid var(--gray-light); /* Usando la variable global */
+    border-radius: var(--radius); /* Usando la variable global */
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    cursor: pointer; /* Por defecto, son cliqueables */
+    cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border-left: 4px solid var(--secondary); 
+    border-left: 4px solid var(--secondary); /* Usando la variable global */
 }
 .reserva-item-card:hover {
     transform: translateY(-5px);
@@ -328,24 +304,24 @@
 
 /* NUEVAS CLASES PARA DISTINGUIR ESTADOS EN LA CUADRÍCULA */
 .reserva-item-card.status-past {
-    opacity: 0.7; /* Más tenue para reservas pasadas */
-    border-color: var(--gray);
+    opacity: 0.7;
+    border-color: var(--gray); /* Usando la variable global */
     box-shadow: none;
-    cursor: default; /* No cliqueable */
+    cursor: default;
 }
 .reserva-item-card.status-past:hover {
-    transform: none; /* Sin efecto hover */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08); /* Sombra muy sutil, sin levantamiento */
+    transform: none;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
 .reserva-item-card.status-cancelled {
-    background-color: #fcebeb; /* Fondo rojizo claro */
-    border-color: var(--danger);
+    background-color: #fcebeb;
+    border-color: var(--danger); /* Usando la variable global */
     opacity: 0.8;
-    cursor: default; /* No cliqueable */
+    cursor: default;
 }
 .reserva-item-card.status-cancelled:hover {
-    transform: none; /* Sin efecto hover */
+    transform: none;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
@@ -356,12 +332,12 @@
     align-items: center;
     margin-bottom: 10px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--gray-light);
+    border-bottom: 1px solid var(--gray-light); /* Usando la variable global */
 }
 
 .reserva-card-title {
     font-size: 1.3rem;
-    color: var(--primary-dark);
+    color: var(--primary-dark); /* Usando la variable global */
     margin: 0;
     font-weight: 600;
 }
@@ -369,58 +345,58 @@
 .reserva-card-detail {
     margin: 5px 0;
     font-size: 0.95rem;
-    color: var(--text);
-    word-break: break-word; 
+    color: var(--text); /* Usando la variable global */
+    word-break: break-word;
 }
 .reserva-card-detail strong {
-    color: var(--text-dark);
-    display: inline; 
-    word-break: break-all; 
+    color: var(--text-dark); /* Usando la variable global */
+    display: inline;
+    word-break: break-all;
 }
 
 .payment-icon-small {
     height: 18px;
     vertical-align: middle;
-    margin-left: 5px; 
+    margin-left: 5px;
 }
 
 
 /* BADGES DE ESTADO DE RESERVA */
 .reserva-status-badge {
     padding: 5px 10px;
-    border-radius: var(--radius);
+    border-radius: var(--radius); /* Usando la variable global */
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
     white-space: nowrap;
-    word-break: break-all; 
-    min-width: 80px; 
+    word-break: break-all;
+    min-width: 80px;
     text-align: center;
-    display: inline-flex; 
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px; 
+    gap: 5px;
 }
 
 .status-pendiente {
-    background-color: var(--warning);
+    background-color: var(--warning); /* Usando la variable global */
     color: #856404;
 }
-.status-pagada { 
-    background-color: var(--success);
+.status-pagada {
+    background-color: var(--success); /* Usando la variable global */
     color: white;
 }
 .status-confirmada {
-    background-color: var(--info); 
+    background-color: var(--info); /* Usando la variable global */
     color: white;
 }
 .status-cancelada, .status-rechazada {
-    background-color: var(--danger);
+    background-color: var(--danger); /* Usando la variable global */
     color: white;
 }
 .status-desconocido {
-    background-color: var(--gray);
-    color: var(--text-dark);
+    background-color: var(--gray); /* Usando la variable global */
+    color: var(--text-dark); /* Usando la variable global */
 }
 
 /* Modal de Detalle de Reserva (reutiliza estilos existentes) */
@@ -435,33 +411,33 @@
     justify-content: center;
     align-items: center;
     z-index: 999;
-    overflow-y: auto; 
-    padding: 20px; 
-    box-sizing: border-box; 
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .modal-content {
-    background: var(--white);
+    background: var(--white); /* Usando la variable global */
     padding: 30px;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-hover);
-    width: 90%; 
-    max-width: 480px; 
-    min-width: 280px; 
+    border-radius: var(--radius-lg); /* Usando la variable global */
+    box-shadow: var(--shadow-hover); /* Usando la variable global */
+    width: 90%;
+    max-width: 480px;
+    min-width: 280px;
     position: relative;
-    overflow-x: hidden; 
-    word-break: break-word; 
-    box-sizing: border-box; 
-    max-height: 90vh; 
-    overflow-y: auto; 
-    display: flex; 
-    flex-direction: column; 
+    overflow-x: hidden;
+    word-break: break-word;
+    box-sizing: border-box;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-content h3 {
     margin-top: 0;
-    color: var(--primary-dark);
-    font-size: 1.6rem; 
+    color: var(--primary-dark); /* Usando la variable global */
+    font-size: 1.6rem;
     margin-bottom: 15px;
     text-align: center;
 }
@@ -469,34 +445,34 @@
 .modal-content hr {
     border: 0;
     height: 1px;
-    background: var(--gray);
+    background: var(--gray); /* Usando la variable global */
     margin: 15px 0;
 }
 
 .modal-content p {
     font-size: 1rem;
     margin: 8px 0;
-    color: var(--text);
-    word-break: break-word; 
+    color: var(--text); /* Usando la variable global */
+    word-break: break-word;
     overflow-wrap: break-word;
 }
 .modal-content p strong {
-    color: var(--text-dark);
-    display: inline; 
-    word-break: break-all; 
+    color: var(--text-dark); /* Usando la variable global */
+    display: inline;
+    word-break: break-all;
 }
 
 .modal-actions {
     display: flex;
-    justify-content: flex-end; 
+    justify-content: flex-end;
     margin-top: 25px;
     gap: 10px;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
 }
 
-.btn { 
+.btn {
     padding: 10px 20px;
-    border-radius: var(--radius);
+    border-radius: var(--radius); /* Usando la variable global */
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
@@ -505,29 +481,29 @@
 
 /* Estilos específicos para botones del modal */
 .btn-info {
-    background-color: var(--info);
-    color: var(--white);
+    background-color: var(--info); /* Usando la variable global */
+    color: var(--white); /* Usando la variable global */
 }
 .btn-info:hover {
     background-color: #008cba;
     transform: translateY(-2px);
 }
 .btn-success {
-    background-color: var(--success);
-    color: var(--white);
+    background-color: var(--success); /* Usando la variable global */
+    color: var(--white); /* Usando la variable global */
 }
 .btn-success:hover {
-    background-color: #218838;
+    background-color: var(--success-dark); /* Usando la variable global */
     transform: translateY(-2px);
 }
 .btn-outline-primary {
     background-color: transparent;
-    color: var(--primary);
-    border-color: var(--primary);
+    color: var(--primary); /* Usando la variable global */
+    border-color: var(--primary); /* Usando la variable global */
 }
 .btn-outline-primary:hover {
-    background-color: var(--primary);
-    color: var(--white);
+    background-color: var(--primary); /* Usando la variable global */
+    color: var(--white); /* Usando la variable global */
     transform: translateY(-2px);
 }
 
@@ -541,10 +517,10 @@
     .welcome-subtitle { font-size: 1rem; }
     .dashboard-section h2 { font-size: 1.5rem; }
     .reservas-grid {
-        grid-template-columns: 1fr; 
+        grid-template-columns: 1fr;
     }
     .perfil-form-edit input, .perfil-form-edit textarea {
-        max-width: 100%; 
+        max-width: 100%;
     }
     .perfil-actions-edit {
         flex-direction: column;
@@ -553,9 +529,9 @@
         width: 100%;
     }
     .modal-content {
-        padding: 15px; 
-        max-width: 95%; 
-        min-width: unset; 
+        padding: 15px;
+        max-width: 95%;
+        min-width: unset;
     }
     .modal-content h3 {
         font-size: 1.4rem;
