@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// Importa App.css aquí si quieres que los estilos globales se apliquen primero
+// Importa App.css aquí para que los estilos globales se apliquen primero
 import './App.css';
-// Importa Font Awesome CSS *después* de tus estilos globales si App.css ya contiene la importación de las fuentes
-// o si quieres que App.css tenga precedencia en caso de conflictos.
-import '@fortawesome/fontawesome-free/css/all.min.css'; 
+// Importa Font Awesome CSS si lo necesitas y no está ya en tu HTML principal
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import App from './App';
 
