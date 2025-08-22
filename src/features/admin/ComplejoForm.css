@@ -108,6 +108,11 @@
     border: 1px solid var(--gray); /* Usando la variable global */
 }
 
+.cover-photo-preview {
+    width: 150px; /* Tamaño un poco más grande para la portada */
+    height: 100px;
+}
+
 .remove-photo-btn {
     margin-top: 15px;
     background-color: var(--danger); /* Usando la variable global */

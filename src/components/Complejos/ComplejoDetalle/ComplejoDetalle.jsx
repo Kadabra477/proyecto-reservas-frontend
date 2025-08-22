@@ -54,15 +54,15 @@ function ComplejoDetalle() {
         return <div className="error-container"><p>Complejo no encontrado.</p><button className="retry-button" onClick={() => navigate('/complejos')}>Volver</button></div>;
     }
     
-    // CORRECCIÓN: Obtener la imagen principal del mapa de URLs por resolución.
     const imageSrc = (complejo.fotoUrlsPorResolucion && complejo.fotoUrlsPorResolucion['original'])
-        ? complejo.fotoUrlsPorResolucion['original'] // Usar la versión original como imagen principal
+        ? complejo.fotoUrlsPorResolucion['original']
         : (complejo.fotoUrls && complejo.fotoUrls.length > 0)
-            ? complejo.fotoUrls[0] // Fallback a la lista antigua
+            ? complejo.fotoUrls[0]
             : placeholderImage;
         
     return (
         <div className="complejo-detalle-container">
+            {/* La imagen de fondo se maneja con CSS para ser más responsiva */}
             <div className="hero-banner" style={{ backgroundImage: `url(${imageSrc})` }}>
                 <div className="hero-content">
                     <button className="back-button" onClick={() => navigate(-1)}>

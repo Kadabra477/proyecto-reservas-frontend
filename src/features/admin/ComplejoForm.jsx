@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import './ComplejoForm.css';
 
-// Importa una imagen local para el placeholder
 const placeholderImage = '/imagenes/default-complejo.png';
 
 const ComplejoForm = ({
@@ -13,93 +12,170 @@ const ComplejoForm = ({
     handleRemoveCancha,
     handleSaveComplejo,
     editingComplejo,
-    cancelEditingComplejo, // <--- ¡AÑADIDO AQUÍ!
+    cancelEditingComplejo,
     isAdmin,
-    selectedPhotoFiles,
-    setSelectedPhotoFiles,
+    // selectedPhotoFiles, // Ya no se usa directamente aquí
+    // setSelectedPhotoFiles, // Ya no se usa directamente aquí
     setMensaje
 }) => {
-    // Estado interno para la URL de previsualización de las fotos
-    const [previewPhotoUrls, setPreviewPhotoUrls] = useState([]);
-    // Nuevo estado para indicar si el usuario ha eliminado explícitamente las fotos
-    const [photosExplicitlyRemoved, setPhotosExplicitlyRemoved] = useState(false);
+    // Estados para la imagen de portada
+    const [selectedCoverPhoto, setSelectedCoverPhoto] = useState(null);
+    const [previewCoverPhotoUrl, setPreviewCoverPhotoUrl] = useState(null);
+    const [coverPhotoExplicitlyRemoved, setCoverPhotoExplicitlyRemoved] = useState(false);
 
-    // useEffect para inicializar la previsualización y los archivos seleccionados
+    // Estados para las imágenes del carrusel
+    const [selectedCarouselPhotos, setSelectedCarouselPhotos] = useState([]);
+    const [previewCarouselPhotoUrls, setPreviewCarouselPhotoUrls] = useState([]);
+    const [carouselPhotosExplicitlyRemoved, setCarouselPhotosExplicitlyRemoved] = useState(false);
+
+    // useEffect para inicializar las previsualizaciones al cargar un complejo para edición
     useEffect(() => {
-        // Al cargar un complejo para edición, si tiene fotos, las previsualizamos.
-        // Asumimos que editingComplejo.fotoUrlsPorResolucion es un Map<String, String>
-        if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && Object.keys(editingComplejo.fotoUrlsPorResolucion).length > 0) {
-            // Preferimos mostrar la miniatura si está disponible para la previsualización en el formulario
-            const urlsToPreview = Object.values(editingComplejo.fotoUrlsPorResolucion);
-            setPreviewPhotoUrls(urlsToPreview);
-            setSelectedPhotoFiles([]); // No hay un archivo nuevo seleccionado al cargar un complejo existente
-            setPhotosExplicitlyRemoved(false); // Resetear el estado de eliminación al cargar
+        // Lógica para la imagen de portada
+        if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && editingComplejo.fotoUrlsPorResolucion['original']) {
+            setPreviewCoverPhotoUrl(editingComplejo.fotoUrlsPorResolucion['original']);
+            setSelectedCoverPhoto(null);
+            setCoverPhotoExplicitlyRemoved(false);
         } else {
-            setPreviewPhotoUrls([]);
-            setSelectedPhotoFiles([]);
-            setPhotosExplicitlyRemoved(false); // Resetear el estado de eliminación
+            setPreviewCoverPhotoUrl(null);
+            setSelectedCoverPhoto(null);
+            setCoverPhotoExplicitlyRemoved(false);
         }
-    }, [editingComplejo, setSelectedPhotoFiles]);
 
-    // Manejar la selección de archivos de foto por el usuario
-    const handlePhotoFileChange = (e) => {
+        // Lógica para las imágenes del carrusel (excluyendo la original si se usa como portada)
+        if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && Object.keys(editingComplejo.fotoUrlsPorResolucion).length > 0) {
+            const carouselUrls = Object.values(editingComplejo.fotoUrlsPorResolucion).filter(url => url !== editingComplejo.fotoUrlsPorResolucion['original']);
+            setPreviewCarouselPhotoUrls(carouselUrls);
+            setSelectedCarouselPhotos([]);
+            setCarouselPhotosExplicitlyRemoved(false);
+        } else {
+            setPreviewCarouselPhotoUrls([]);
+            setSelectedCarouselPhotos([]);
+            setCarouselPhotosExplicitlyRemoved(false);
+        }
+    }, [editingComplejo]);
+
+    // Manejar la selección de la imagen de portada
+    const handleCoverPhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const MAX_FILE_SIZE_MB = 5;
+            const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                setMensaje({ text: `Tipo de archivo no permitido para la portada: ${file.name}. Sube JPG, PNG, GIF o WebP.`, type: 'error' });
+                e.target.value = null;
+                setPreviewCoverPhotoUrl(null);
+                setSelectedCoverPhoto(null);
+                setCoverPhotoExplicitlyRemoved(false);
+                return;
+            }
+            if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+                setMensaje({ text: `La imagen de portada ${file.name} excede los ${MAX_FILE_SIZE_MB}MB.`, type: 'error' });
+                e.target.value = null;
+                setPreviewCoverPhotoUrl(null);
+                setSelectedCoverPhoto(null);
+                setCoverPhotoExplicitlyRemoved(false);
+                return;
+            }
+
+            setSelectedCoverPhoto(file);
+            setPreviewCoverPhotoUrl(URL.createObjectURL(file));
+            setCoverPhotoExplicitlyRemoved(false);
+            setMensaje({ text: '', type: '' });
+        } else {
+            setSelectedCoverPhoto(null);
+            // Si no se selecciona archivo, volvemos a mostrar la foto existente o nada
+            if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && editingComplejo.fotoUrlsPorResolucion['original']) {
+                setPreviewCoverPhotoUrl(editingComplejo.fotoUrlsPorResolucion['original']);
+            } else {
+                setPreviewCoverPhotoUrl(null);
+            }
+            setCoverPhotoExplicitlyRemoved(false);
+            setMensaje({ text: '', type: '' });
+        }
+    };
+
+    // Manejar la selección de las imágenes del carrusel
+    const handleCarouselPhotosChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length > 0) {
-            // --- VALIDACIONES DE IMAGEN EN EL FRONTEND ---
             const MAX_FILE_SIZE_MB = 5;
             const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
             let allFilesValid = true;
             for (const file of files) {
                 if (!ALLOWED_TYPES.includes(file.type)) {
-                    setMensaje({ text: `Tipo de archivo no permitido: ${file.name}. Sube JPG, PNG, GIF o WebP.`, type: 'error' });
+                    setMensaje({ text: `Tipo de archivo no permitido para el carrusel: ${file.name}. Sube JPG, PNG, GIF o WebP.`, type: 'error' });
                     allFilesValid = false;
                     break;
                 }
                 if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-                    setMensaje({ text: `La imagen ${file.name} excede los ${MAX_FILE_SIZE_MB}MB.`, type: 'error' });
+                    setMensaje({ text: `La imagen ${file.name} del carrusel excede los ${MAX_FILE_SIZE_MB}MB.`, type: 'error' });
                     allFilesValid = false;
                     break;
                 }
             }
 
             if (!allFilesValid) {
-                e.target.value = null; // Limpiar el input de archivo
-                setPreviewPhotoUrls([]);
-                setSelectedPhotoFiles([]);
-                setPhotosExplicitlyRemoved(false); // Si hay un error, no se considera eliminado
+                e.target.value = null;
+                setPreviewCarouselPhotoUrls([]);
+                setSelectedCarouselPhotos([]);
+                setCarouselPhotosExplicitlyRemoved(false);
                 return;
             }
 
-            setSelectedPhotoFiles(files);
+            setSelectedCarouselPhotos(files);
             const newPreviewUrls = files.map(file => URL.createObjectURL(file));
-            setPreviewPhotoUrls(newPreviewUrls);
-            setPhotosExplicitlyRemoved(false); // Si se seleccionan nuevas fotos, no se consideran eliminadas
-            setMensaje({ text: '', type: '' }); // Limpiar mensaje de error si la selección es válida
+            setPreviewCarouselPhotoUrls(newPreviewUrls);
+            setCarouselPhotosExplicitlyRemoved(false);
+            setMensaje({ text: '', type: '' });
         } else {
-            setSelectedPhotoFiles([]);
+            setSelectedCarouselPhotos([]);
             // Si no se seleccionan archivos, volvemos a mostrar las fotos existentes o nada
             if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && Object.keys(editingComplejo.fotoUrlsPorResolucion).length > 0) {
-                setPreviewPhotoUrls(Object.values(editingComplejo.fotoUrlsPorResolucion));
+                const carouselUrls = Object.values(editingComplejo.fotoUrlsPorResolucion).filter(url => url !== editingComplejo.fotoUrlsPorResolucion['original']);
+                setPreviewCarouselPhotoUrls(carouselUrls);
             } else {
-                setPreviewPhotoUrls([]);
+                setPreviewCarouselPhotoUrls([]);
             }
-            setPhotosExplicitlyRemoved(false); // Resetear el estado de eliminación
+            setCarouselPhotosExplicitlyRemoved(false);
             setMensaje({ text: '', type: '' });
         }
     };
 
-    // Manejar la eliminación de las fotos
-    const handleRemovePhotos = () => {
+    // Manejar la eliminación de la foto de portada
+    const handleRemoveCoverPhoto = () => {
         setMensaje({ text: '', type: '' });
-        setSelectedPhotoFiles([]); // Limpiar archivos nuevos seleccionados
-        setPreviewPhotoUrls([]); // Limpiar previsualizaciones
-        setPhotosExplicitlyRemoved(true); // Indicar que las fotos existentes han sido eliminadas
-        document.getElementById('photoFile').value = ''; // Limpiar el input de archivo
+        setSelectedCoverPhoto(null);
+        setPreviewCoverPhotoUrl(null);
+        setCoverPhotoExplicitlyRemoved(true);
+        document.getElementById('coverPhotoFile').value = '';
     };
 
+    // Manejar la eliminación de las fotos del carrusel
+    const handleRemoveCarouselPhotos = () => {
+        setMensaje({ text: '', type: '' });
+        setSelectedCarouselPhotos([]);
+        setPreviewCarouselPhotoUrls([]);
+        setCarouselPhotosExplicitlyRemoved(true);
+        document.getElementById('carouselPhotoFiles').value = '';
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // Llama a la función handleSaveComplejo que se pasa como prop desde AdminPanel
+        handleSaveComplejo(
+            e, 
+            selectedCoverPhoto, 
+            selectedCarouselPhotos, 
+            coverPhotoExplicitlyRemoved, 
+            carouselPhotosExplicitlyRemoved
+        );
+    };
+
+
     return (
-        <form className="admin-complejo-form" onSubmit={(e) => handleSaveComplejo(e, selectedPhotoFiles, photosExplicitlyRemoved)}>
+        <form className="admin-complejo-form" onSubmit={handleSubmit}>
             <h3>Datos Generales del Complejo</h3>
             <div className="admin-form-group">
                 <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
@@ -127,40 +203,74 @@ const ComplejoForm = ({
                 <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
             </div>
 
-            <div className="admin-form-group">
-                <label htmlFor="photoFile">Fotos del Complejo:</label>
+            {/* NUEVA SECCIÓN: IMAGEN DE PORTADA */}
+            <div className="admin-form-group photo-upload-section">
+                <label htmlFor="coverPhotoFile">Imagen de Portada (principal):</label>
                 <input
                     type="file"
-                    id="photoFile"
-                    name="photos"
+                    id="coverPhotoFile"
+                    name="coverPhoto"
+                    accept="image/*"
+                    onChange={handleCoverPhotoChange}
+                />
+                <p className="small-info">Esta imagen será la principal del complejo. Tamaño máximo: 5MB. Formatos: JPG, PNG, GIF, WebP.</p>
+
+                {previewCoverPhotoUrl ? (
+                    <div className="image-preview-container">
+                        <p>Previsualización de Portada:</p>
+                        <img
+                            src={previewCoverPhotoUrl}
+                            alt="Previsualización de Portada"
+                            className="image-preview-thumbnail cover-photo-preview"
+                            onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
+                        />
+                        <button type="button" className="admin-btn-delete remove-photo-btn" onClick={handleRemoveCoverPhoto}>
+                            Eliminar Portada
+                        </button>
+                    </div>
+                ) : (
+                    <div className="image-preview-container">
+                        <p className="no-photo-message">No hay imagen de portada seleccionada.</p>
+                        {editingComplejo?.id && <p className="small-info">Para mantener la portada existente, no selecciones una nueva ni la elimines.</p>}
+                    </div>
+                )}
+            </div>
+
+            {/* NUEVA SECCIÓN: IMÁGENES ADICIONALES PARA CARRUSEL */}
+            <div className="admin-form-group photo-upload-section">
+                <label htmlFor="carouselPhotoFiles">Imágenes para Carrusel (opcional):</label>
+                <input
+                    type="file"
+                    id="carouselPhotoFiles"
+                    name="carouselPhotos"
                     accept="image/*"
                     multiple
-                    onChange={handlePhotoFileChange}
+                    onChange={handleCarouselPhotosChange}
                 />
-                <p className="small-info">Tamaño máximo de archivo: 5MB cada uno. Formatos permitidos: JPG, PNG, GIF o WebP.</p>
+                <p className="small-info">Sube imágenes adicionales para el carrusel del complejo. Tamaño máximo: 5MB cada una.</p>
 
-                {(previewPhotoUrls && previewPhotoUrls.length > 0) ? (
+                {(previewCarouselPhotoUrls && previewCarouselPhotoUrls.length > 0) ? (
                     <div className="image-preview-container">
-                        <p>Previsualización de las fotos:</p>
+                        <p>Previsualización de Carrusel:</p>
                         <div className="image-preview-grid">
-                            {previewPhotoUrls.map((url, index) => (
+                            {previewCarouselPhotoUrls.map((url, index) => (
                                 <img
                                     key={index}
                                     src={url}
-                                    alt={`Previsualización ${index + 1}`}
+                                    alt={`Previsualización Carrusel ${index + 1}`}
                                     className="image-preview-thumbnail"
                                     onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                                 />
                             ))}
                         </div>
-                        <button type="button" className="admin-btn-delete remove-photo-btn" onClick={handleRemovePhotos}>
-                            Eliminar Fotos
+                        <button type="button" className="admin-btn-delete remove-photo-btn" onClick={handleRemoveCarouselPhotos}>
+                            Eliminar Imágenes de Carrusel
                         </button>
                     </div>
                 ) : (
                     <div className="image-preview-container">
-                        <p className="no-photo-message">No hay fotos seleccionadas.</p>
-                        {editingComplejo?.id && <p className="small-info">Para mantener las fotos existentes, no selecciones nuevas ni las elimines.</p>}
+                        <p className="no-photo-message">No hay imágenes de carrusel seleccionadas.</p>
+                        {editingComplejo?.id && <p className="small-info">Para mantener las imágenes existentes, no selecciones nuevas ni las elimines.</p>}
                     </div>
                 )}
             </div>

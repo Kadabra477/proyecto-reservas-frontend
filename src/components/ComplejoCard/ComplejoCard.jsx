@@ -30,8 +30,7 @@ function ComplejoCard({ complejo }) {
         arrows: true
     };
     
-    // CORRECCIÓN: Obtener las imágenes del nuevo mapa de URLs por resolución
-    const images = (complejo.fotoUrlsPorResolucion && Object.keys(complejo.fotoUrlsPorResolucion).length > 0)
+    const images = (complejo.fotoUrlsPorResolucion && Object.values(complejo.fotoUrlsPorResolucion).length > 0)
         ? Object.values(complejo.fotoUrlsPorResolucion)
         : (complejo.fotoUrls && complejo.fotoUrls.length > 0)
             ? complejo.fotoUrls
@@ -39,7 +38,7 @@ function ComplejoCard({ complejo }) {
 
     return (
         <div className="complejo-card-item">
-            {/* CORRECCIÓN: Usar el carrusel solo si hay más de una imagen */}
+            {/* Se corrige la lógica para que el Slider solo se renderice si hay más de una imagen */}
             {images.length > 1 ? (
                 <Slider {...settings} className="complejo-card-slider">
                     {images.map((img, index) => (
@@ -66,19 +65,15 @@ function ComplejoCard({ complejo }) {
             
             <div className="complejo-card-content">
                 <h3 className="complejo-card-title">{complejo.nombre || 'Nombre no disponible'}</h3>
-                
                 <p className="complejo-card-location"><i className="fas fa-map-marker-alt"></i> {complejo.ubicacion || 'Ubicación no disponible'}</p> 
-
                 {complejo.descripcion && complejo.descripcion.trim() !== '' && ( 
                     <p className="complejo-card-description-short">{complejo.descripcion}</p>
                 )}
-                
                 {complejo.canchaCounts && Object.keys(complejo.canchaCounts).length > 0 && (
                     <p className="complejo-card-canchas-summary">
                         Canchas: {Object.values(complejo.canchaCounts).reduce((sum, count) => sum + count, 0)} disponibles
                     </p>
                 )}
-
                 <div className="complejo-card-buttons-container">
                     <button
                         onClick={handleViewDetailsClick}
