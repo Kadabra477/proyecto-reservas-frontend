@@ -54,7 +54,7 @@ function ComplejoDetalle() {
         return <div className="error-container"><p>Complejo no encontrado.</p><button className="retry-button" onClick={() => navigate('/complejos')}>Volver</button></div>;
     }
     
-    // **MODIFICACIÓN CLAVE**: Obtener la imagen principal del mapa de URLs por resolución.
+    // CORRECCIÓN: Obtener la imagen principal del mapa de URLs por resolución.
     const imageSrc = (complejo.fotoUrlsPorResolucion && complejo.fotoUrlsPorResolucion['original'])
         ? complejo.fotoUrlsPorResolucion['original'] // Usar la versión original como imagen principal
         : (complejo.fotoUrls && complejo.fotoUrls.length > 0)
@@ -63,7 +63,6 @@ function ComplejoDetalle() {
         
     return (
         <div className="complejo-detalle-container">
-            {/* Sección de Cabecera (Hero) */}
             <div className="hero-banner" style={{ backgroundImage: `url(${imageSrc})` }}>
                 <div className="hero-content">
                     <button className="back-button" onClick={() => navigate(-1)}>
@@ -75,7 +74,6 @@ function ComplejoDetalle() {
             </div>
 
             <div className="main-content">
-                {/* Sección de Información Principal */}
                 <section className="info-card">
                     <h2>Descripción</h2>
                     <p>{complejo.descripcion || 'No hay descripción disponible.'}</p>
@@ -92,7 +90,6 @@ function ComplejoDetalle() {
                     </div>
                 </section>
 
-                {/* Sección de Canchas Disponibles */}
                 <section className="canchas-section">
                     <h2>Canchas Disponibles</h2>
                     {Object.keys(complejo.canchaCounts || {}).length > 0 ? (
@@ -136,7 +133,6 @@ function ComplejoDetalle() {
                     )}
                 </section>
 
-                {/* Botón de Reserva al pie de la página */}
                 <div className="reserve-button-container">
                     <button
                         onClick={() => navigate('/reservar', { state: { preselectedComplejoId: complejo.id } })}

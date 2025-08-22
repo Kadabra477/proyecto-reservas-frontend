@@ -30,13 +30,16 @@ function ComplejoCard({ complejo }) {
         arrows: true
     };
     
-    // **MODIFICACIÓN CLAVE**: Priorizar el mapa de URLs para obtener las imágenes.
-    const images = (complejo.fotoUrlsPorResolucion && Object.values(complejo.fotoUrlsPorResolucion).length > 0)
+    // CORRECCIÓN: Obtener las imágenes del nuevo mapa de URLs por resolución
+    const images = (complejo.fotoUrlsPorResolucion && Object.keys(complejo.fotoUrlsPorResolucion).length > 0)
         ? Object.values(complejo.fotoUrlsPorResolucion)
-        : [complejo.fotoUrl || placeholderImage];
-    
+        : (complejo.fotoUrls && complejo.fotoUrls.length > 0)
+            ? complejo.fotoUrls
+            : [placeholderImage];
+
     return (
         <div className="complejo-card-item">
+            {/* CORRECCIÓN: Usar el carrusel solo si hay más de una imagen */}
             {images.length > 1 ? (
                 <Slider {...settings} className="complejo-card-slider">
                     {images.map((img, index) => (

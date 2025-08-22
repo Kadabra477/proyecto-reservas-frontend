@@ -416,7 +416,6 @@ function ReservaForm() {
                         <p className="small-info-text">Este complejo no tiene tipos de cancha configurados.</p>
                     )}
                 </div>
-
                 <div className="form-group">
                     <label htmlFor="fecha">Fecha:</label>
                     <input
@@ -427,6 +426,7 @@ function ReservaForm() {
                         onChange={handleChange}
                         required
                         min={getMinDate()}
+                        max={getMaxDate()}
                         disabled={isSubmitting || isLoadingInitialData || !selectedTipoCancha}
                     />
                 </div>
