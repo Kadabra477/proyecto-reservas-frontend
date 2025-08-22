@@ -29,14 +29,11 @@ function ReservaForm() {
         metodoPago: 'mercadopago',
     });
     
-    // Se elimina el estado de 'selectedCanchaName'
-
     const [mensaje, setMensaje] = useState({ text: '', type: '' });
     const [isLoadingInitialData, setIsLoadingInitialData] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCreatingPreference, setIsCreatingPreference] = useState(false);
 
-    // Se revierte a un contador
     const [availableCanchasCount, setAvailableCanchasCount] = useState(null);
     const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
     const [availabilityMessage, setAvailabilityMessage] = useState('');
@@ -47,6 +44,16 @@ function ReservaForm() {
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // NUEVA FUNCIÓN para obtener la fecha máxima de reserva (hoy + 1)
+    const getMaxDate = () => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const year = tomorrow.getFullYear();
+        const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const day = String(tomorrow.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
 

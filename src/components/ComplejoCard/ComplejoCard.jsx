@@ -27,13 +27,14 @@ function ComplejoCard({ complejo }) {
         slidesToScroll: 1,
         autoplay: true,
         autoplaySpeed: 3000,
-        arrows: true // <-- Se activa la navegación con flechas
+        arrows: true
     };
     
-    const images = (complejo.fotoUrls && complejo.fotoUrls.length > 0)
-        ? complejo.fotoUrls
+    // **MODIFICACIÓN CLAVE**: Priorizar el mapa de URLs para obtener las imágenes.
+    const images = (complejo.fotoUrlsPorResolucion && Object.values(complejo.fotoUrlsPorResolucion).length > 0)
+        ? Object.values(complejo.fotoUrlsPorResolucion)
         : [complejo.fotoUrl || placeholderImage];
-        
+    
     return (
         <div className="complejo-card-item">
             {images.length > 1 ? (

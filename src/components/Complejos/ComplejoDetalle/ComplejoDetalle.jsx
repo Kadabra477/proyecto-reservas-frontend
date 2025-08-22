@@ -1,3 +1,4 @@
+// frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../api/axiosConfig';
@@ -53,9 +54,12 @@ function ComplejoDetalle() {
         return <div className="error-container"><p>Complejo no encontrado.</p><button className="retry-button" onClick={() => navigate('/complejos')}>Volver</button></div>;
     }
     
-    const imageSrc = (complejo.fotoUrls && complejo.fotoUrls.length > 0)
-        ? complejo.fotoUrls[0]
-        : placeholderImage;
+    // **MODIFICACIÓN CLAVE**: Obtener la imagen principal del mapa de URLs por resolución.
+    const imageSrc = (complejo.fotoUrlsPorResolucion && complejo.fotoUrlsPorResolucion['original'])
+        ? complejo.fotoUrlsPorResolucion['original'] // Usar la versión original como imagen principal
+        : (complejo.fotoUrls && complejo.fotoUrls.length > 0)
+            ? complejo.fotoUrls[0] // Fallback a la lista antigua
+            : placeholderImage;
         
     return (
         <div className="complejo-detalle-container">
