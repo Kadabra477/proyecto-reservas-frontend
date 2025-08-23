@@ -1,7 +1,11 @@
 // frontend/src/components/Complejos/ComplejoDetalle/ComplejoDetalle.jsx
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../api/axiosConfig';
+import Slider from 'react-slick'; // Importar el componente Slider
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
 import './ComplejoDetalle.css'; 
 import { FaPhone, FaMapMarkerAlt, FaClock, FaFutbol, FaSnowflake, FaSun, FaCloud, FaRulerCombined } from 'react-icons/fa';
 
@@ -19,6 +23,7 @@ function ComplejoDetalle() {
             setLoading(true);
             setError(null);
             try {
+                // Se asume que el backend devuelve un ComplejoResponseDTO para esta llamada
                 const response = await api.get(`/complejos/${id}`);
                 setComplejo(response.data);
             } catch (err) {
@@ -54,16 +59,25 @@ function ComplejoDetalle() {
         return <div className="error-container"><p>Complejo no encontrado.</p><button className="retry-button" onClick={() => navigate('/complejos')}>Volver</button></div>;
     }
     
-    const imageSrc = (complejo.fotoUrlsPorResolucion && complejo.fotoUrlsPorResolucion['original'])
-        ? complejo.fotoUrlsPorResolucion['original']
-        : (complejo.fotoUrls && complejo.fotoUrls.length > 0)
-            ? complejo.fotoUrls[0]
-            : placeholderImage;
-        
+    // Aquí se utiliza la URL de portada del DTO para el fondo
+    const heroImageSrc = complejo.portadaUrl || placeholderImage;
+    // Y aquí se usa la lista de URLs para el carrusel
+    const carouselImages = (complejo.carruselUrls && complejo.carruselUrls.length > 0) ? complejo.carruselUrls : [placeholderImage];
+
+    const sliderSettings = {
+        dots: true,
+        infinite: true,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: true,
+        autoplaySpeed: 3000,
+        arrows: true
+    };
+    
     return (
         <div className="complejo-detalle-container">
-            {/* La imagen de fondo se maneja con CSS para ser más responsiva */}
-            <div className="hero-banner" style={{ backgroundImage: `url(${imageSrc})` }}>
+            <div className="hero-banner" style={{ backgroundImage: `url(${heroImageSrc})` }}>
                 <div className="hero-content">
                     <button className="back-button" onClick={() => navigate(-1)}>
                         ← Volver a Complejos
@@ -72,8 +86,24 @@ function ComplejoDetalle() {
                     <p className="hero-subtitle"><FaMapMarkerAlt /> {complejo.ubicacion || 'Ubicación no disponible'}</p>
                 </div>
             </div>
-
+            
             <div className="main-content">
+                {/* Carrusel de imágenes aquí */}
+                <section className="image-carousel-section">
+                    <Slider {...sliderSettings}>
+                        {carouselImages.map((img, index) => (
+                            <div key={index}>
+                                <img
+                                    src={img}
+                                    alt={`Imagen ${index + 1} de ${complejo.nombre}`}
+                                    className="carousel-img"
+                                    onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
+                                />
+                            </div>
+                        ))}
+                    </Slider>
+                </section>
+                
                 <section className="info-card">
                     <h2>Descripción</h2>
                     <p>{complejo.descripcion || 'No hay descripción disponible.'}</p>

@@ -14,8 +14,6 @@ const ComplejoForm = ({
     editingComplejo,
     cancelEditingComplejo,
     isAdmin,
-    // selectedPhotoFiles, // Ya no se usa directamente aquí
-    // setSelectedPhotoFiles, // Ya no se usa directamente aquí
     setMensaje
 }) => {
     // Estados para la imagen de portada
@@ -30,24 +28,32 @@ const ComplejoForm = ({
 
     // useEffect para inicializar las previsualizaciones al cargar un complejo para edición
     useEffect(() => {
-        // Lógica para la imagen de portada
-        if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && editingComplejo.fotoUrlsPorResolucion['original']) {
-            setPreviewCoverPhotoUrl(editingComplejo.fotoUrlsPorResolucion['original']);
+        if (editingComplejo) {
+            // Lógica para la imagen de portada (usa la nueva propiedad portadaUrl)
+            if (editingComplejo.portadaUrl) {
+                setPreviewCoverPhotoUrl(editingComplejo.portadaUrl);
+                setCoverPhotoExplicitlyRemoved(false);
+            } else {
+                setPreviewCoverPhotoUrl(null);
+                setCoverPhotoExplicitlyRemoved(false);
+            }
             setSelectedCoverPhoto(null);
-            setCoverPhotoExplicitlyRemoved(false);
+
+            // Lógica para las imágenes del carrusel (usa la nueva propiedad carruselUrls)
+            if (editingComplejo.carruselUrls && editingComplejo.carruselUrls.length > 0) {
+                setPreviewCarouselPhotoUrls(editingComplejo.carruselUrls);
+                setCarouselPhotosExplicitlyRemoved(false);
+            } else {
+                setPreviewCarouselPhotoUrls([]);
+                setCarouselPhotosExplicitlyRemoved(false);
+            }
+            setSelectedCarouselPhotos([]);
         } else {
+            // Limpiar estados al cancelar la edición o al crear un nuevo complejo
             setPreviewCoverPhotoUrl(null);
             setSelectedCoverPhoto(null);
             setCoverPhotoExplicitlyRemoved(false);
-        }
 
-        // Lógica para las imágenes del carrusel (excluyendo la original si se usa como portada)
-        if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && Object.keys(editingComplejo.fotoUrlsPorResolucion).length > 0) {
-            const carouselUrls = Object.values(editingComplejo.fotoUrlsPorResolucion).filter(url => url !== editingComplejo.fotoUrlsPorResolucion['original']);
-            setPreviewCarouselPhotoUrls(carouselUrls);
-            setSelectedCarouselPhotos([]);
-            setCarouselPhotosExplicitlyRemoved(false);
-        } else {
             setPreviewCarouselPhotoUrls([]);
             setSelectedCarouselPhotos([]);
             setCarouselPhotosExplicitlyRemoved(false);
@@ -84,13 +90,13 @@ const ComplejoForm = ({
             setMensaje({ text: '', type: '' });
         } else {
             setSelectedCoverPhoto(null);
-            // Si no se selecciona archivo, volvemos a mostrar la foto existente o nada
-            if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && editingComplejo.fotoUrlsPorResolucion['original']) {
-                setPreviewCoverPhotoUrl(editingComplejo.fotoUrlsPorResolucion['original']);
+            if (editingComplejo?.portadaUrl) {
+                setPreviewCoverPhotoUrl(editingComplejo.portadaUrl);
+                setCoverPhotoExplicitlyRemoved(false);
             } else {
                 setPreviewCoverPhotoUrl(null);
+                setCoverPhotoExplicitlyRemoved(false);
             }
-            setCoverPhotoExplicitlyRemoved(false);
             setMensaje({ text: '', type: '' });
         }
     };
@@ -131,14 +137,13 @@ const ComplejoForm = ({
             setMensaje({ text: '', type: '' });
         } else {
             setSelectedCarouselPhotos([]);
-            // Si no se seleccionan archivos, volvemos a mostrar las fotos existentes o nada
-            if (editingComplejo && editingComplejo.fotoUrlsPorResolucion && Object.keys(editingComplejo.fotoUrlsPorResolucion).length > 0) {
-                const carouselUrls = Object.values(editingComplejo.fotoUrlsPorResolucion).filter(url => url !== editingComplejo.fotoUrlsPorResolucion['original']);
-                setPreviewCarouselPhotoUrls(carouselUrls);
+            if (editingComplejo?.carruselUrls && editingComplejo.carruselUrls.length > 0) {
+                setPreviewCarouselPhotoUrls(editingComplejo.carruselUrls);
+                setCarouselPhotosExplicitlyRemoved(false);
             } else {
                 setPreviewCarouselPhotoUrls([]);
+                setCarouselPhotosExplicitlyRemoved(false);
             }
-            setCarouselPhotosExplicitlyRemoved(false);
             setMensaje({ text: '', type: '' });
         }
     };
@@ -173,7 +178,6 @@ const ComplejoForm = ({
         );
     };
 
-
     return (
         <form className="admin-complejo-form" onSubmit={handleSubmit}>
             <h3>Datos Generales del Complejo</h3>
@@ -203,7 +207,7 @@ const ComplejoForm = ({
                 <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
             </div>
 
-            {/* NUEVA SECCIÓN: IMAGEN DE PORTADA */}
+            {/* SECCIÓN: IMAGEN DE PORTADA */}
             <div className="admin-form-group photo-upload-section">
                 <label htmlFor="coverPhotoFile">Imagen de Portada (principal):</label>
                 <input
@@ -236,7 +240,7 @@ const ComplejoForm = ({
                 )}
             </div>
 
-            {/* NUEVA SECCIÓN: IMÁGENES ADICIONALES PARA CARRUSEL */}
+            {/* SECCIÓN: IMÁGENES ADICIONALES PARA CARRUSEL */}
             <div className="admin-form-group photo-upload-section">
                 <label htmlFor="carouselPhotoFiles">Imágenes para Carrusel (opcional):</label>
                 <input

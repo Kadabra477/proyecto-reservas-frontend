@@ -1,7 +1,7 @@
 // frontend/src/components/Complejos/ComplejoCard/ComplejoCard.jsx
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css"; 
 import "slick-carousel/slick/slick-theme.css";
 import './ComplejoCard.css'; 
@@ -18,50 +18,20 @@ function ComplejoCard({ complejo }) {
     const handleReserveClick = () => {
         navigate('/reservar', { state: { preselectedComplejoId: complejo.id } });
     };
-
-    const settings = {
-        dots: true,
-        infinite: true,
-        speed: 500,
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 3000,
-        arrows: true
-    };
     
-    const images = (complejo.fotoUrlsPorResolucion && Object.values(complejo.fotoUrlsPorResolucion).length > 0)
-        ? Object.values(complejo.fotoUrlsPorResolucion)
-        : (complejo.fotoUrls && complejo.fotoUrls.length > 0)
-            ? complejo.fotoUrls
-            : [placeholderImage];
+    // Aquí se utiliza la URL de la portada del DTO
+    const cardImageUrl = complejo.portadaUrl || placeholderImage;
 
     return (
         <div className="complejo-card-item">
-            {/* Se corrige la lógica para que el Slider solo se renderice si hay más de una imagen */}
-            {images.length > 1 ? (
-                <Slider {...settings} className="complejo-card-slider">
-                    {images.map((img, index) => (
-                        <div key={index}>
-                            <img
-                                src={img}
-                                alt={`Imagen ${index + 1} de ${complejo.nombre}`}
-                                className="complejo-card-img"
-                                onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
-                            />
-                        </div>
-                    ))}
-                </Slider>
-            ) : (
-                <div className="complejo-card-single-image-container">
-                    <img
-                        src={images[0]}
-                        alt={`Complejo ${complejo.nombre}`}
-                        className="complejo-card-img"
-                        onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
-                    />
-                </div>
-            )}
+            <div className="complejo-card-single-image-container">
+                <img
+                    src={cardImageUrl}
+                    alt={`Complejo ${complejo.nombre}`}
+                    className="complejo-card-img"
+                    onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
+                />
+            </div>
             
             <div className="complejo-card-content">
                 <h3 className="complejo-card-title">{complejo.nombre || 'Nombre no disponible'}</h3>
