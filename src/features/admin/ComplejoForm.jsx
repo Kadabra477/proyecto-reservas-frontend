@@ -1,4 +1,3 @@
-// frontend/src/features/admin/ComplejoForm.jsx
 import React, { useState, useEffect } from 'react';
 import './ComplejoForm.css';
 

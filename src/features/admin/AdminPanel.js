@@ -1,4 +1,3 @@
-// frontend/src/features/admin/AdminPanel.js
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axiosConfig';
 import AdminEstadisticas from './AdminEstadisticas';
@@ -13,7 +12,8 @@ const estadoInicialComplejoAdmin = {
     descripcion: '',
     ubicacion: '',
     telefono: '',
-    fotoUrlsPorResolucion: {}, // MODIFICADO: Ahora es un objeto/mapa para las URLs de fotos
+    // MODIFICADO: Esto ahora se inicializa aquí pero no se usa en el form para la subida
+    fotoUrlsPorResolucion: {}, 
     horarioApertura: '10:00',
     horarioCierre: '23:00',
     emailPropietario: '',
@@ -29,9 +29,6 @@ function AdminPanel() {
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [editingComplejo, setEditingComplejo] = useState(null);
     const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin);
-
-    // MODIFICADO: Ahora es un array de archivos seleccionados
-    const [selectedPhotoFiles, setSelectedPhotoFiles] = useState([]);
 
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
@@ -99,12 +96,8 @@ function AdminPanel() {
                 emailPropietario: editingComplejo.propietario?.username || '',
                 canchas: mapComplejoToFormCanchas(editingComplejo)
             });
-            // MODIFICADO: Limpiar el estado de los archivos al editar
-            setSelectedPhotoFiles([]);
         } else {
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            // MODIFICADO: Limpiar el estado de los archivos al crear uno nuevo
-            setSelectedPhotoFiles([]);
         }
     }, [editingComplejo, mapComplejoToFormCanchas]);
 
@@ -225,8 +218,8 @@ function AdminPanel() {
         setNuevoComplejoAdmin(prev => ({ ...prev, canchas: newCanchas }));
     };
 
-    // MODIFICADO: Ahora recibe un array de archivos `photoFiles` y el flag `photosExplicitlyRemoved`
-    const handleSaveComplejo = async (e, photoFiles, photosExplicitlyRemoved) => {
+    // FUNCIÓN CORREGIDA
+    const handleSaveComplejo = async (e, selectedCoverPhoto, selectedCarouselPhotos, coverPhotoExplicitlyRemoved, carouselPhotosExplicitlyRemoved) => {
         e.preventDefault();
         setMensaje({ text: '', type: '' });
 
@@ -258,34 +251,6 @@ function AdminPanel() {
         });
 
         const formData = new FormData();
-
-        // MODIFICADO: Añadir cada archivo del array `photoFiles`
-        if (photoFiles && photoFiles.length > 0) {
-            photoFiles.forEach(file => {
-                formData.append('photos', file); // 'photos' debe coincidir con el backend
-            });
-        }
-
-        // Determinar qué enviar para fotoUrlsPorResolucion
-        let fotoUrlsPorResolucionToSend = {};
-        if (editingComplejo?.id) { // Si estamos editando un complejo existente
-            if (photosExplicitlyRemoved) {
-                // Si el usuario hizo clic en "Eliminar Fotos", enviamos un objeto vacío
-                fotoUrlsPorResolucionToSend = {};
-            } else if (photoFiles && photoFiles.length > 0) {
-                // Si se subieron nuevas fotos, el backend las procesará y reemplazará
-                // No necesitamos enviar las URLs antiguas aquí, ya que el backend las manejará.
-            } else {
-                // Si no se subieron nuevas fotos y no se eliminaron explícitamente,
-                // mantenemos las URLs existentes del complejo original.
-                fotoUrlsPorResolucionToSend = editingComplejo.fotoUrlsPorResolucion || {};
-            }
-        } else { // Si estamos creando un nuevo complejo
-            // Si no se subieron fotos, el backend manejará un array vacío para 'photos'
-            fotoUrlsPorResolucionToSend = {}; // Siempre vacío al crear si no hay archivos
-        }
-
-
         const complejoData = {
             id,
             nombre,
@@ -299,14 +264,31 @@ function AdminPanel() {
             canchaSurfaces,
             canchaIluminacion,
             canchaTecho,
-            fotoUrlsPorResolucion: fotoUrlsPorResolucionToSend // Usar el nuevo campo
+            // Envía la propiedad fotoUrlsPorResolucion con el estado actual del complejo que se está editando
+            // Esto es crucial para que el backend sepa qué URLs mantener si no se subieron nuevas fotos
+            fotoUrlsPorResolucion: editingComplejo?.id ? editingComplejo.fotoUrlsPorResolucion : {}
         };
+        
+        // Agregar el JSON del complejo primero
+        const complejoBlob = new Blob([JSON.stringify(complejoData)], { type: 'application/json' });
+        formData.append('complejo', complejoBlob, 'complejo.json');
 
-        if (!id && isAdmin && emailPropietario) {
-            complejoData.propietarioUsername = emailPropietario;
+        // Agregar la imagen de portada
+        if (selectedCoverPhoto) {
+            formData.append('coverPhoto', selectedCoverPhoto);
+        } else if (coverPhotoExplicitlyRemoved) {
+            formData.append('coverPhoto', new Blob(), 'empty');
         }
 
-        formData.append('complejo', new Blob([JSON.stringify(complejoData)], { type: 'application/json' }));
+        // Agregar las imágenes del carrusel
+        if (selectedCarouselPhotos && selectedCarouselPhotos.length > 0) {
+            selectedCarouselPhotos.forEach(file => {
+                formData.append('carouselPhotos', file);
+            });
+        } else if (carouselPhotosExplicitlyRemoved) {
+            formData.append('carouselPhotos', new Blob(), 'empty');
+        }
+
 
         try {
             let response;
@@ -327,7 +309,6 @@ function AdminPanel() {
             }
             setEditingComplejo(null);
             setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            setSelectedPhotoFiles([]);
             fetchComplejos();
 
         } catch (err) {
@@ -337,17 +318,16 @@ function AdminPanel() {
         }
     };
 
-    const startEditingComplejo = (complejoParaEditar) => {
+    const startEditingComplejo = async (complejoParaEditar) => {
         setEditingComplejo(complejoParaEditar);
-        setSelectedPhotoFiles([]);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const cancelEditingComplejo = () => {
         setEditingComplejo(null);
         setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-        setSelectedPhotoFiles([]);
-        document.getElementById('photoFile').value = '';
+        document.getElementById('coverPhotoFile').value = '';
+        document.getElementById('carouselPhotoFiles').value = '';
     };
 
     const handleConfirmarReserva = (id) => {
@@ -552,7 +532,6 @@ function AdminPanel() {
                     fetchComplejos();
                     setEditingComplejo(null);
                     setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-                    setSelectedPhotoFiles([]);
                 } catch (err) {
                     console.error('Error al eliminar el complejo:', err);
                     const errorMsg = err.response?.data?.message || err.response?.data || 'Ocurrió un error al eliminar el complejo.';
@@ -631,14 +610,11 @@ function AdminPanel() {
                             handleCanchaChange={handleCanchaChange}
                             handleAddCancha={handleAddCancha}
                             handleRemoveCancha={handleRemoveCancha}
-                            // MODIFICADO: Pasar la función handleSaveComplejo con los nuevos parámetros
+                            // Pasar la función handleSaveComplejo con los nuevos parámetros
                             handleSaveComplejo={handleSaveComplejo}
                             editingComplejo={editingComplejo}
                             cancelEditingComplejo={cancelEditingComplejo}
                             isAdmin={isAdmin}
-                            // MODIFICADO: Pasar el estado de los archivos seleccionados
-                            selectedPhotoFiles={selectedPhotoFiles}
-                            setSelectedPhotoFiles={setSelectedPhotoFiles}
                             setMensaje={setMensaje}
                         />
                     )}
@@ -668,7 +644,6 @@ function AdminPanel() {
                                                 <td data-label="Ubicación">{c.ubicacion || 'N/A'}</td>
                                                 <td data-label="Horario">{c.horarioApertura || 'N/A'} - {c.horarioCierre || 'N/A'}</td>
                                                 <td data-label="Canchas">
-                                                    {/* MODIFICADO: Acceder a los tipos de cancha desde el mapa canchaCounts */}
                                                     {Object.keys(c.canchaCounts || {}).map(tipo => (
                                                         <span key={tipo} className="cancha-type-badge">
                                                             {c.canchaCounts[tipo]}x {tipo} (${c.canchaPrices[tipo]?.toLocaleString('es-AR') || 'N/A'})
