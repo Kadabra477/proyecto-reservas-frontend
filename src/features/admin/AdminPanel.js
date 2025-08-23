@@ -28,6 +28,7 @@ function AdminPanel() {
     const [isLoadingData, setIsLoadingData] = useState(false);
     const [editingComplejo, setEditingComplejo] = useState(null);
     const [nuevoComplejoAdmin, setNuevoComplejoAdmin] = useState(estadoInicialComplejoAdmin);
+    
 
     const [managingUserRoles, setManagingUserRoles] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]);
@@ -217,97 +218,89 @@ function AdminPanel() {
     };
 
     const handleSaveComplejo = async (e, selectedCoverPhoto, selectedCarouselPhotos, coverPhotoExplicitlyRemoved, carouselPhotosExplicitlyRemoved) => {
-        e.preventDefault();
-        setMensaje({ text: '', type: '' });
+    e.preventDefault();
+    setMensaje({ text: '', type: '' });
 
-        const { id, nombre, propietarioUsername, canchas, descripcion, ubicacion, telefono, horarioApertura, horarioCierre } = nuevoComplejoAdmin;
+    const { id, nombre, propietarioUsername, canchas, descripcion, ubicacion, telefono, horarioApertura, horarioCierre } = nuevoComplejoAdmin;
 
-        if (!nombre?.trim()) { setMensaje({ text: 'El nombre del complejo es obligatorio.', type: 'error' }); return; }
-        if (!ubicacion?.trim()) { setMensaje({ text: 'La ubicación del complejo es obligatoria.', type: 'error' }); return; }
-        if (!horarioApertura || !horarioCierre) { setMensaje({ text: 'Los horarios de apertura y cierre son obligatorios.', type: 'error' }); return; }
-        if (!id && isAdmin && !propietarioUsername?.trim()) { setMensaje({ text: 'El email del propietario es obligatorio para nuevos complejos (Administrador).', type: 'error' }); return; }
+    if (!nombre?.trim()) { setMensaje({ text: 'El nombre del complejo es obligatorio.', type: 'error' }); return; }
+    if (!ubicacion?.trim()) { setMensaje({ text: 'La ubicación del complejo es obligatoria.', type: 'error' }); return; }
+    if (!horarioApertura || !horarioCierre) { setMensaje({ text: 'Los horarios de apertura y cierre son obligatorios.', type: 'error' }); return; }
+    if (!id && isAdmin && !propietarioUsername?.trim()) { setMensaje({ text: 'El email del propietario es obligatorio para nuevos complejos (Administrador).', type: 'error' }); return; }
 
-        const formattedCanchas = canchas.filter(c => c.tipoCancha.trim() !== '');
-        if (formattedCanchas.length === 0 || formattedCanchas.some(c => !c.tipoCancha?.trim() || isNaN(parseFloat(c.precioHora)) || parseFloat(c.precioHora) <= 0 || isNaN(parseInt(c.cantidad, 10)) || parseInt(c.cantidad, 10) <= 0 || !c.superficie?.trim())) {
-            setMensaje({ text: 'Todos los tipos de canchas deben tener un tipo, cantidad, precio, y superficie válidos.', type: 'error' });
-            return;
-        }
+    const formattedCanchas = canchas.filter(c => c.tipoCancha.trim() !== '');
+    if (formattedCanchas.length === 0 || formattedCanchas.some(c => !c.tipoCancha?.trim() || isNaN(parseFloat(c.precioHora)) || parseFloat(c.precioHora) <= 0 || isNaN(parseInt(c.cantidad, 10)) || parseInt(c.cantidad, 10) <= 0 || !c.superficie?.trim())) {
+        setMensaje({ text: 'Todos los tipos de canchas deben tener un tipo, cantidad, precio, y superficie válidos.', type: 'error' });
+        return;
+    }
 
-        const canchaCounts = {};
-        const canchaPrices = {};
-        const canchaSurfaces = {};
-        const canchaIluminacion = {};
-        const canchaTecho = {};
+    const canchaCounts = {};
+    const canchaPrices = {};
+    const canchaSurfaces = {};
+    const canchaIluminacion = {};
+    const canchaTecho = {};
 
-        formattedCanchas.forEach(cancha => {
-            canchaCounts[cancha.tipoCancha] = parseInt(cancha.cantidad, 10);
-            canchaPrices[cancha.tipoCancha] = parseFloat(cancha.precioHora);
-            canchaSurfaces[cancha.tipoCancha] = cancha.superficie;
-            canchaIluminacion[cancha.tipoCancha] = cancha.iluminacion;
-            canchaTecho[cancha.tipoCancha] = cancha.techo;
+    formattedCanchas.forEach(cancha => {
+        canchaCounts[cancha.tipoCancha] = parseInt(cancha.cantidad, 10);
+        canchaPrices[cancha.tipoCancha] = parseFloat(cancha.precioHora);
+        canchaSurfaces[cancha.tipoCancha] = cancha.superficie;
+        canchaIluminacion[cancha.tipoCancha] = cancha.iluminacion;
+        canchaTecho[cancha.tipoCancha] = cancha.techo;
+    });
+
+    const complejoData = {
+        ...(editingComplejo?.id && { id }), // incluir id solo si se está editando
+        nombre,
+        propietarioUsername,
+        descripcion: descripcion || null,
+        ubicacion,
+        telefono: telefono || null,
+        horarioApertura,
+        horarioCierre,
+        canchaCounts,
+        canchaPrices,
+        canchaSurfaces,
+        canchaIluminacion,
+        canchaTecho
+    };
+
+    const formData = new FormData();
+    const complejoBlob = new Blob([JSON.stringify(complejoData)], { type: 'application/json' });
+    formData.append('complejo', complejoBlob);
+
+    if (selectedCoverPhoto) {
+        formData.append('coverPhoto', selectedCoverPhoto);
+    } else if (coverPhotoExplicitlyRemoved) {
+        formData.append('coverPhoto', new Blob(), 'empty');
+    }
+
+    if (selectedCarouselPhotos && selectedCarouselPhotos.length > 0) {
+        selectedCarouselPhotos.forEach(file => {
+            formData.append('carouselPhotos', file);
         });
+    } else if (carouselPhotosExplicitlyRemoved) {
+        formData.append('carouselPhotos', new Blob(), 'empty');
+    }
 
-        const formData = new FormData();
-        const complejoData = {
-            id,
-            nombre,
-            propietarioUsername,
-            descripcion: descripcion || null,
-            ubicacion,
-            telefono: telefono || null,
-            horarioApertura,
-            horarioCierre,
-            canchaCounts,
-            canchaPrices,
-            canchaSurfaces,
-            canchaIluminacion,
-            canchaTecho,
-            fotoUrlsPorResolucion: editingComplejo?.id ? editingComplejo.fotoUrlsPorResolucion : {}
-        };
-        
-        const complejoBlob = new Blob([JSON.stringify(complejoData)], { type: 'application/json' });
-        formData.append('complejo', complejoBlob, 'complejo.json');
-
-        if (selectedCoverPhoto) {
-            formData.append('coverPhoto', selectedCoverPhoto);
-        } else if (coverPhotoExplicitlyRemoved) {
-            formData.append('coverPhoto', new Blob(), 'empty');
+    try {
+        let response;
+        if (editingComplejo?.id) {
+            response = await api.put(`/complejos/${id}`, formData, { headers: { 'Content-Type': undefined } });
+            setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
+        } else {
+            response = await api.post('/complejos', formData, { headers: { 'Content-Type': undefined } });
+            setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
         }
 
-        if (selectedCarouselPhotos && selectedCarouselPhotos.length > 0) {
-            selectedCarouselPhotos.forEach(file => {
-                formData.append('carouselPhotos', file);
-            });
-        } else if (carouselPhotosExplicitlyRemoved) {
-            formData.append('carouselPhotos', new Blob(), 'empty');
-        }
+        setEditingComplejo(null);
+        setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
+        fetchComplejos();
 
-        try {
-            let response;
-            if (editingComplejo?.id) {
-                response = await api.put(`/complejos/${id}`, formData, {
-                    headers: {
-                        'Content-Type': undefined,
-                    },
-                });
-                setMensaje({ text: 'Complejo actualizado correctamente.', type: 'success' });
-            } else {
-                response = await api.post('/complejos', formData, {
-                    headers: {
-                        'Content-Type': undefined,
-                    },
-                });
-                setMensaje({ text: 'Complejo creado correctamente y asignado al propietario.', type: 'success' });
-            }
-            setEditingComplejo(null);
-            setNuevoComplejoAdmin(estadoInicialComplejoAdmin);
-            fetchComplejos();
-
-        } catch (err) {
-            console.error('Error al guardar complejo (Frontend):', err);
-            const errorMsg = err.response?.data?.message || err.message || 'Ocurrió un error al guardar el complejo.';
-            setMensaje({ text: errorMsg, type: 'error' });
-        }
+    } catch (err) {
+        console.error('Error al guardar complejo (Frontend):', err);
+        const errorMsg = err.response?.data?.message || err.message || 'Ocurrió un error al guardar el complejo.';
+        setMensaje({ text: errorMsg, type: 'error' });
+    }
     };
 
     const startEditingComplejo = async (complejoParaEditar) => {
