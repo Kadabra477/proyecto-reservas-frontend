@@ -52,7 +52,7 @@ body {
     align-items: flex-end;
     color: white;
     animation: fadeIn 1s ease-in-out;
-    background-size: contain;
+    background-size: cover; /* ¡AQUÍ ESTÁ EL CAMBIO! */
     background-position: center;
     background-repeat: no-repeat;
 }
