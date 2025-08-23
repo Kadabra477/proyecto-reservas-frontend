@@ -1,3 +1,4 @@
+// frontend/src/features/admin/ComplejoForm.jsx
 import React, { useState, useEffect } from 'react';
 import './ComplejoForm.css';
 
@@ -169,10 +170,10 @@ const ComplejoForm = ({
         e.preventDefault();
         // Llama a la función handleSaveComplejo que se pasa como prop desde AdminPanel
         handleSaveComplejo(
-            e, 
-            selectedCoverPhoto, 
-            selectedCarouselPhotos, 
-            coverPhotoExplicitlyRemoved, 
+            e,
+            selectedCoverPhoto,
+            selectedCarouselPhotos,
+            coverPhotoExplicitlyRemoved,
             carouselPhotosExplicitlyRemoved
         );
     };
@@ -188,7 +189,7 @@ const ComplejoForm = ({
             {isAdmin && !editingComplejo?.id && (
                 <div className="admin-form-group">
                     <label htmlFor="emailPropietario">Email del Propietario (usuario existente): <span className="obligatorio">*</span></label>
-                    <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario} onChange={handleComplejoFormChange} required={!editingComplejo?.id && isAdmin} placeholder='dueño@ejemplo.com' />
+                    <input type="email" id="emailPropietario" name="emailPropietario" value={nuevoComplejoAdmin.emailPropietario || ''} onChange={handleComplejoFormChange} required={!editingComplejo?.id && isAdmin} placeholder='dueño@ejemplo.com' />
                     <p className="small-info">El usuario con este email será asignado como &quot;COMPLEX_OWNER&quot;.</p>
                 </div>
             )}
