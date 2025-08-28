@@ -46,48 +46,43 @@ body {
 /* --- CONTENEDOR PRINCIPAL DEL CARRUSEL Y TEXTO --- */
 .carrusel-header {
     position: relative;
-    height: 450px; /* Altura sugerida para una mejor visualización */
+    height: 500px; /* un poco más alto para mejor impacto */
     display: flex;
     align-items: flex-end;
+    justify-content: center;
     color: white;
-}
-
-/* --- ESTILO DEL CARRUSEL DE IMÁGENES --- */
-.image-carousel-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 5;
     overflow: hidden;
 }
 
-/* 🖼️ ESTE ES EL AJUSTE CLAVE 🖼️ */
-/* Asegura que cada imagen dentro del carrusel ocupe todo el espacio de su contenedor sin distorsionarse. */
+/* Carrusel ocupa todo */
+.image-carousel-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
 .image-carousel-container img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover;   /* foto siempre se adapta */
     object-position: center;
 }
 
-/* Agrega un overlay oscuro para que el texto sea legible */
+/* Overlay oscuro para contraste */
 .image-carousel-container::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 6;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 2;
 }
 
 /* --- CONTENIDO DEL BANNER --- */
 .hero-content {
     position: relative;
-    z-index: 10;
+    z-index: 3;
     padding: 2rem;
     width: 100%;
     text-align: center;
@@ -95,7 +90,7 @@ body {
 }
 
 .hero-title {
-    font-size: 3.5rem;
+    font-size: 3.2rem;
     font-weight: 800;
     margin: 0;
     text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
@@ -103,16 +98,16 @@ body {
 
 .hero-subtitle {
     font-size: 1.2rem;
-    font-weight: 400;
     margin-top: 0.5rem;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
 }
 
+/* Botón atrás */
 .back-button {
     position: absolute;
     top: 1rem;
     left: 1rem;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
     border: none;
     color: white;
     padding: 0.5rem 1rem;
@@ -121,20 +116,18 @@ body {
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
 }
-
 .back-button:hover {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.6);
     transform: scale(1.05);
 }
 
 /* --- CONTENIDO PRINCIPAL --- */
 .main-content {
     max-width: 1200px;
-    margin: -30px auto 3rem;
-    position: relative;
-    z-index: 20;
+    margin: 2rem auto;   /* 🚀 QUITA EL NEGATIVO */
+    padding: 0 1rem;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     gap: 2rem;
