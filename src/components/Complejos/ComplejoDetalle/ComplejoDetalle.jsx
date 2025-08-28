@@ -58,18 +58,10 @@ function ComplejoDetalle() {
         return <div className="error-container"><p>Complejo no encontrado.</p><button className="retry-button" onClick={() => navigate('/complejos')}>Volver</button></div>;
     }
 
-    // Lógica para el carrusel: agrega la portada al inicio del array de carrusel, si existe
-    let carouselImages = [];
-    if (complejo.portadaUrl) {
-        carouselImages.push(complejo.portadaUrl);
-    }
-    if (complejo.carruselUrls && complejo.carruselUrls.length > 0) {
-        carouselImages = [...carouselImages, ...complejo.carruselUrls];
-    }
-    // Si no hay ninguna imagen, usa la por defecto
-    if (carouselImages.length === 0) {
-        carouselImages.push(placeholderImage);
-    }
+    // Lógica para el carrusel: usar solo las fotos grandes (carruselUrls)
+    let carouselImages = (complejo.carruselUrls && complejo.carruselUrls.length > 0)
+    ? [...complejo.carruselUrls]
+    : [placeholderImage];
 
     const sliderSettings = {
         dots: true,
