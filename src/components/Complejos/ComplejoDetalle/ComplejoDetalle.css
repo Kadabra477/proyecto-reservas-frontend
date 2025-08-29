@@ -3,17 +3,25 @@
 /* Importa las variables globales desde el archivo centralizado */
 @import url("../../../App.css");
 
+/* Asegúrate de importar los Material Symbols en tu index.html o App.jsx */
+/* Ejemplo: <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" /> */
+
+
+/* Estilos generales del cuerpo */
 body {
     background-color: var(--background);
     color: var(--text);
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', sans-serif; /* Consistente con App.css */
 }
 
+/* Contenedor principal del detalle */
 .complejo-detalle-container {
     padding: 0;
-    max-width: 100%;
+    max-width: 100%; /* Ocupa todo el ancho */
+    overflow-x: hidden; /* Evita scroll horizontal */
 }
 
+/* Contenedores de carga y error */
 .loading-container, .error-container {
     display: flex;
     flex-direction: column;
@@ -21,16 +29,17 @@ body {
     justify-content: center;
     min-height: 80vh;
     text-align: center;
+    padding: 20px;
 }
 
 .loading-container p, .error-container p {
     font-size: 1.2em;
-    color: var(--text-light);
+    color: var(--text-light); /* Usando variable global */
 }
 
 .spinner {
-    border: 5px solid var(--border-light);
-    border-top: 5px solid var(--primary);
+    border: 5px solid var(--gray-light); /* Usando variable global */
+    border-top: 5px solid var(--primary); /* Usando variable global */
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -43,19 +52,20 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* --- CONTENEDOR PRINCIPAL DEL CARRUSEL Y TEXTO --- */
-.carrusel-header {
+/* --- SECCIÓN HERO (CARRUSEL Y TEXTO SUPERPUESTO) --- */
+.hero-section {
     position: relative;
-    height: 500px; /* un poco más alto para mejor impacto */
+    height: 550px; /* Altura generosa para impacto visual */
     display: flex;
-    align-items: flex-end;
+    align-items: flex-end; /* Alinear contenido abajo */
     justify-content: center;
-    color: white;
+    color: var(--white); /* Texto blanco para contraste */
     overflow: hidden;
+    margin-bottom: 2rem;
 }
 
-/* Carrusel ocupa todo */
-.image-carousel-container {
+/* Contenedor del carrusel */
+.image-carousel-wrapper {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -63,183 +73,260 @@ body {
     z-index: 1;
 }
 
-.image-carousel-container img {
+.carousel-slide {
     width: 100%;
     height: 100%;
-    object-fit: cover;   /* foto siempre se adapta */
-    object-position: center;
 }
 
-/* Overlay oscuro para contraste */
-.image-carousel-container::after {
+.carousel-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    filter: brightness(0.9); /* Ligeramente más oscuro para que el overlay no sea tan agresivo */
+}
+
+/* Overlay oscuro para mejorar la legibilidad del texto */
+.image-carousel-overlay {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.45);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 50%, rgba(0, 0, 0, 0) 100%);
     z-index: 2;
 }
 
-/* --- CONTENIDO DEL BANNER --- */
+/* Puntos del Slider (dots) */
+.slick-dots {
+    bottom: 20px;
+    z-index: 4; /* Asegura que los puntos estén sobre el overlay */
+}
+
+.slick-dots li button:before {
+    color: var(--white);
+    opacity: 0.5;
+    font-size: 10px;
+    transition: opacity 0.3s ease;
+}
+
+.slick-dots li.slick-active button:before {
+    color: var(--primary); /* Puntos activos en color primario */
+    opacity: 1;
+}
+
+/* Contenido del Hero (título, subtítulo, botón volver) */
 .hero-content {
     position: relative;
     z-index: 3;
-    padding: 2rem;
+    padding: 3rem 1.5rem; /* Más padding para que no esté pegado al borde */
     width: 100%;
     text-align: center;
     animation: fadeIn 1s ease-in-out;
 }
 
 .hero-title {
-    font-size: 3.2rem;
+    font-family: 'Montserrat', sans-serif; /* Consistente con App.css */
+    font-size: 3.8rem; /* Tamaño de fuente grande */
     font-weight: 800;
     margin: 0;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8); /* Sombra más pronunciada para el texto */
+    line-height: 1.1;
 }
 
 .hero-subtitle {
-    font-size: 1.2rem;
-    margin-top: 0.5rem;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+    font-family: 'Poppins', sans-serif; /* Consistente con App.css */
+    font-size: 1.4rem;
+    margin-top: 1rem;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    display: flex; /* Para alinear el icono con el texto */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
-/* Botón atrás */
+.hero-icon {
+    font-size: 1.8rem;
+    color: var(--primary-light); /* Ícono en color claro para resaltar */
+}
+
+/* Botón "Volver" */
 .back-button {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
-    background: rgba(0, 0, 0, 0.4);
+    top: 1.5rem;
+    left: 1.5rem;
+    background: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
     border: none;
     color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: bold;
+    padding: 0.7rem 1.2rem;
+    border-radius: var(--radius-lg); /* Bordes más redondeados */
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition-medium); /* Usando variable global */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 4; /* Asegura que esté por encima de todo */
 }
 .back-button:hover {
-    background-color: rgba(0, 0, 0, 0.6);
-    transform: scale(1.05);
+    background-color: rgba(0, 0, 0, 0.7);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover); /* Usando variable global */
 }
 
+.back-button .material-symbols-outlined {
+    font-size: 1.3em;
+}
+
+
 /* --- CONTENIDO PRINCIPAL --- */
-.main-content {
-    max-width: 1200px;
-    margin: 2rem auto;   /* 🚀 QUITA EL NEGATIVO */
-    padding: 0 1rem;
-    z-index: 2;
+.main-content-wrapper {
+    max-width: var(--max-width); /* Usando variable global */
+    margin: -80px auto 4rem auto; /* Eleva el contenido sobre el hero, con más margen abajo */
+    padding: 0 1.5rem;
+    z-index: 5; /* Asegura que este contenido esté siempre encima */
+    position: relative; /* Necesario para z-index */
     display: flex;
     flex-direction: column;
     gap: 2rem;
 }
 
 .info-card, .canchas-section {
-    background-color: var(--white);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    background-color: var(--white); /* Usando variable global */
+    padding: 2.5rem; /* Más padding */
+    border-radius: var(--radius-lg); /* Usando variable global */
+    box-shadow: var(--shadow-medium); /* Usando variable global */
 }
 
-.info-card h2, .canchas-section h2 {
-    font-size: 2rem;
+.section-heading {
+    font-family: 'Montserrat', sans-serif; /* Consistente con App.css */
+    font-size: 2.2rem;
     font-weight: 700;
-    color: var(--primary-dark);
-    margin-bottom: 1rem;
-    border-bottom: 2px solid var(--border-light);
-    padding-bottom: 0.5rem;
+    color: var(--primary-dark); /* Usando variable global */
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 10px;
 }
 
-.info-card p {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: var(--text);
+.section-heading::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 70px;
+    height: 4px;
+    background-color: var(--primary); /* Usando variable global */
+    border-radius: 2px;
+}
+
+.complejo-description {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text-light); /* Usando variable global */
+    margin-bottom: 1.5rem;
 }
 
 .info-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adaptativo */
+    gap: 1.5rem;
+    margin-top: 2rem;
 }
 
 .info-item {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1rem;
     font-size: 1.1rem;
-    color: var(--text);
-    background: var(--background-light);
-    padding: 1rem;
-    border-radius: 8px;
+    color: var(--text); /* Usando variable global */
+    background: var(--background-light); /* Usando variable global */
+    padding: 1.2rem;
+    border-radius: var(--radius); /* Usando variable global */
+    box-shadow: var(--shadow-light); /* Usando variable global */
+    border-left: 5px solid var(--primary); /* Borde de énfasis */
 }
 
-.info-icon {
-    color: var(--primary);
+.info-item .info-icon { /* Para los iconos de Material Symbols */
+    color: var(--primary); /* Usando variable global */
+    font-size: 1.8rem;
+}
+
+.info-item .fa-icon { /* Para los iconos de Font Awesome */
+    color: var(--primary); /* Usando variable global */
     font-size: 1.5rem;
 }
 
+
 /* --- SECCIÓN DE CANCHAS --- */
 .canchas-section {
-    order: 1;
+    order: 1; /* Esto es si quieres cambiar el orden en mobile, si no, puedes quitarlo */
 }
 
 .cancha-grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Tarjetas un poco más grandes */
+    gap: 2rem; /* Más espacio entre tarjetas */
 }
 
 .cancha-card {
-    background-color: var(--secondary-light);
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: var(--white); /* Fondo blanco para las tarjetas */
+    border-radius: var(--radius-lg); /* Bordes redondeados */
+    padding: 2rem;
+    box-shadow: var(--shadow); /* Sombra estándar */
+    transition: var(--transition-medium); /* Usando variable global */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    border: 1px solid var(--border-light); /* Borde sutil */
 }
 
 .cancha-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-7px); /* Efecto de elevación más notorio */
+    box-shadow: var(--shadow-medium); /* Sombra más intensa al pasar el mouse */
 }
 
 .cancha-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gray-light); /* Separador */
+    padding-bottom: 1rem;
 }
 
 .cancha-icon {
-    font-size: 2.5rem;
-    color: var(--primary);
+    font-size: 2.8rem; /* Ícono más grande */
+    color: var(--primary); /* Usando variable global */
 }
 
 .cancha-type {
-    font-size: 1.5rem;
+    font-family: 'Montserrat', sans-serif; /* Consistente con App.css */
+    font-size: 1.7rem;
     font-weight: 700;
     margin: 0;
+    color: var(--text-dark); /* Usando variable global */
 }
 
 .cancha-count {
     font-size: 1.1rem;
-    color: var(--text-light);
+    color: var(--text-light); /* Usando variable global */
     font-style: italic;
     margin-left: auto;
+    font-weight: 500;
 }
 
 .price-tag {
-    font-size: 2rem;
+    font-size: 2.5rem; /* Precio más destacado */
     font-weight: 800;
-    color: var(--primary-dark);
-    margin-bottom: 1rem;
+    color: var(--success); /* Usando variable global para el precio */
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
 }
 
 .price-tag small {
     font-size: 0.6em;
-    color: var(--text-light);
+    color: var(--text-light); /* Usando variable global */
     font-weight: normal;
 }
 
@@ -249,69 +336,215 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 1rem;
 }
 
 .cancha-features li {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    font-size: 1rem;
-    color: var(--text);
+    gap: 1rem;
+    font-size: 1.05rem;
+    color: var(--text-light); /* Usando variable global */
 }
 
-.feature-icon {
-    color: var(--primary);
+.feature-icon { /* Para iconos de Font Awesome */
+    color: var(--primary-light); /* Usando variable global */
+    font-size: 1.4rem;
+}
+
+.cancha-features .material-symbols-outlined { /* Para iconos de Material Symbols */
+    color: var(--primary-light); /* Usando variable global */
+    font-size: 1.5rem;
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; /* Relleno y peso para que se vean bien */
+}
+
+
+.no-canchas-info {
+    text-align: center;
+    font-style: italic;
+    color: var(--text-light); /* Usando variable global */
+    padding: 30px;
+    background-color: var(--background-light); /* Usando variable global */
+    border-radius: var(--radius); /* Usando variable global */
+    margin-top: 20px;
+    font-size: 1.1em;
 }
 
 /* --- BOTÓN DE RESERVA AL PIE DE PÁGINA --- */
 .reserve-button-container {
     text-align: center;
-    padding: 2rem 0;
+    padding: 3rem 0;
 }
 
 .reserve-button {
-    background-color: var(--success);
+    background-color: var(--primary); /* Usando variable global */
     color: white;
-    padding: 1rem 3rem;
-    font-size: 1.2rem;
+    padding: 1.2rem 3.5rem; /* Más grande y prominente */
+    font-size: 1.3rem;
     font-weight: bold;
     border: none;
-    border-radius: 50px;
+    border-radius: 50px; /* Completamente redondeado */
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: var(--transition-medium); /* Usando variable global */
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3); /* Sombra temática */
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .reserve-button:hover {
-    background-color: var(--success-dark);
-    transform: translateY(-3px);
+    background-color: var(--primary-dark); /* Usando variable global */
+    transform: translateY(-5px); /* Efecto de elevación más pronunciado */
+    box-shadow: 0 12px 25px rgba(0, 123, 255, 0.4);
+}
+
+.reserve-button .material-symbols-outlined {
+    font-size: 1.5em; /* Tamaño del ícono */
+}
+
+/* --- ANIMACIONES --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* --- MEDIA QUERIES --- */
+@media (max-width: 992px) {
+    .hero-title {
+        font-size: 3rem;
+    }
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    .main-content-wrapper {
+        margin-top: -60px; /* Ajuste para tablets */
+    }
+    .info-card, .canchas-section {
+        padding: 2rem;
+    }
+    .section-heading {
+        font-size: 1.8rem;
+    }
+    .cancha-grid-container {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    .cancha-type {
+        font-size: 1.4rem;
+    }
+    .price-tag {
+        font-size: 2rem;
+    }
+    .reserve-button {
+        padding: 1rem 2.5rem;
+        font-size: 1.1rem;
+    }
+}
+
 @media (max-width: 768px) {
-    .carrusel-header {
-        height: 300px;
+    .hero-section {
+        height: 400px;
+    }
+    .hero-content {
+        padding: 2rem 1rem;
     }
     .hero-title {
         font-size: 2.5rem;
     }
     .hero-subtitle {
         font-size: 1rem;
+        flex-direction: column; /* Apilar icono y texto en móvil si es necesario */
+        gap: 5px;
     }
-    .main-content {
-        margin-top: -30px;
+    .hero-icon {
+        font-size: 1.5rem;
+    }
+    .main-content-wrapper {
+        margin-top: -40px; /* Ajuste para móviles */
+        padding: 0 1rem;
     }
     .back-button {
         top: 1rem;
         left: 1rem;
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
-        border-radius: 6px;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        gap: 5px;
+    }
+    .back-button .material-symbols-outlined {
+        font-size: 1.1em;
+    }
+    .info-card, .canchas-section {
+        padding: 1.5rem;
+    }
+    .section-heading {
+        font-size: 1.6rem;
     }
     .info-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Una columna en móvil */
     }
-    .canchas-section {
+    .cancha-grid-container {
+        grid-template-columns: 1fr; /* Una columna en móvil */
+    }
+    .cancha-card {
         padding: 1.5rem;
+    }
+    .cancha-header {
+        flex-wrap: wrap; /* Permitir que los elementos se envuelvan */
+        gap: 0.8rem;
+    }
+    .cancha-type {
+        font-size: 1.2rem;
+        flex-basis: 100%; /* El tipo de cancha ocupa toda la línea */
+    }
+    .cancha-count {
+      margin-left: 0;
+      font-size: 1em;
+    }
+    .cancha-icon {
+        font-size: 2.2rem;
+    }
+    .price-tag {
+        font-size: 2.2rem;
+    }
+    .reserve-button {
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
+        width: 100%; /* Botón de reserva a ancho completo */
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        height: 350px;
+    }
+    .hero-title {
+        font-size: 2rem;
+    }
+    .hero-subtitle {
+        font-size: 0.9rem;
+    }
+    .main-content-wrapper {
+      margin-top: -30px;
+    }
+    .section-heading {
+        font-size: 1.4rem;
+    }
+    .info-item {
+        font-size: 1rem;
+    }
+    .info-item .info-icon {
+        font-size: 1.5rem;
+    }
+    .cancha-type {
+        font-size: 1.1rem;
+    }
+    .price-tag {
+        font-size: 1.8rem;
+    }
+    .cancha-features li {
+        font-size: 0.95rem;
+    }
+    .feature-icon, .cancha-features .material-symbols-outlined {
+        font-size: 1.3rem;
     }
 }
