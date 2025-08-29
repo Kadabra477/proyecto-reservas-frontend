@@ -1,213 +1,325 @@
 /* frontend/src/features/admin/ComplejoForm.css */
 
 /* Importa las variables globales desde el archivo centralizado */
-@import url("../../App.css"); /* Asegúrate de que esta ruta sea correcta */
+@import url("../../App.css"); 
+/* Asegúrate de que esta ruta sea correcta y que App.css esté en src/ */
 
+/* Estilos para el formulario del complejo */
 .admin-complejo-form {
-    background-color: var(--white); /* Usando la variable global */
+    background-color: var(--white);
     padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius-lg); /* Usando variable global */
+    box-shadow: var(--shadow-medium); /* Usando variable global */
     margin-bottom: 40px;
+    font-family: 'Poppins', sans-serif; /* Usando fuente de App.css */
+    color: var(--text); /* Usando variable global */
 }
 
-.admin-complejo-form h3 {
+/* Títulos de sección dentro del formulario */
+.form-section-title {
+    font-family: 'Montserrat', sans-serif; /* Usando fuente de App.css */
     font-size: 1.8em;
-    color: var(--primary-dark); /* Usando la variable global */
+    color: var(--text-dark); /* Usando variable global */
     margin-bottom: 25px;
-    text-align: center;
     font-weight: 700;
-    border-bottom: 2px solid var(--gray-light); /* Usando la variable global */
-    padding-bottom: 10px;
+    position: relative;
+    padding-bottom: 15px;
 }
 
+.form-section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background-color: var(--primary); /* Usando variable global */
+    border-radius: 2px;
+}
+
+/* Grupos de campos para layout flexible */
+.form-field-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.form-field-group .admin-form-group {
+    flex: 1;
+    min-width: 280px; /* Asegura un tamaño mínimo para campos */
+}
+
+/* Estilos de grupo de formulario general */
 .admin-form-group {
     margin-bottom: 20px;
-    text-align: left;
 }
 
 .admin-form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: var(--text-dark); /* Usando la variable global */
+    color: var(--text-dark); /* Usando variable global */
     font-size: 0.95em;
 }
 
-.admin-form-group input[type="text"],
-.admin-form-group input[type="email"],
-.admin-form-group input[type="tel"],
-.admin-form-group input[type="url"],
-.admin-form-group input[type="number"],
-.admin-form-group input[type="time"],
+.admin-form-group input,
 .admin-form-group textarea,
 .admin-form-group select {
-    width: calc(100% - 20px);
-    padding: 12px 10px;
-    border: 1px solid var(--gray); /* Usando la variable global */
-    border-radius: 8px;
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--gray-medium); /* Usando variable global */
+    border-radius: var(--radius); /* Usando variable global */
     font-size: 1em;
     box-sizing: border-box;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: var(--transition-medium); /* Usando variable global */
+    background-color: var(--white); /* Usando variable global */
+    color: var(--text); /* Asegura que el texto dentro sea legible */
 }
 
 .admin-form-group input:focus,
 .admin-form-group textarea:focus,
 .admin-form-group select:focus {
-    border-color: var(--primary); /* Usando la variable global */
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    border-color: var(--primary); /* Usando variable global */
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1); /* Sombra suave para enfoque */
     outline: none;
 }
 
 .admin-form-group textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 100px;
 }
 
-.admin-form-group .obligatorio {
-    color: var(--danger); /* Usando la variable global */
+.obligatorio {
+    color: var(--danger); /* Usando variable global */
     font-weight: bold;
 }
 
 .small-info {
     font-size: 0.85em;
-    color: var(--text-light); /* Usando la variable global */
+    color: var(--text-light); /* Usando variable global */
     margin-top: 5px;
-    line-height: 1.4;
 }
 
-/* Nuevos estilos para la previsualización de imágenes */
+/* Estilos para la sección de carga de imágenes */
+.photo-upload-section {
+    border: 1px dashed var(--gray-medium); /* Usando variable global */
+    padding: 20px;
+    border-radius: var(--radius); /* Usando variable global */
+    background-color: var(--background-light); /* Usando variable global */
+    margin-bottom: 25px;
+}
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex; /* Para alinear el botón de carga */
+    align-items: center;
+}
+
+.file-input-wrapper input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+    font-size: 100px; /* Para que sea fácil hacer clic en cualquier parte del área */
+    width: 100%; /* Asegura que cubra el botón */
+    height: 100%; /* Asegura que cubra el botón */
+}
+
+.custom-file-upload {
+    background-color: var(--secondary); /* Usando variable global */
+    color: var(--white); /* Usando variable global */
+    padding: 10px 20px;
+    border-radius: var(--radius); /* Usando variable global */
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition-medium); /* Usando variable global */
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* Espacio entre el ícono y el texto */
+}
+
+.custom-file-upload:hover {
+    background-color: var(--secondary-dark); /* Usando variable global */
+    transform: translateY(-1px); /* Efecto sutil al pasar el mouse */
+}
+
+/* Estilos de previsualización de imágenes */
 .image-preview-container {
-    margin-top: 15px;
-    text-align: center;
-    border: 1px dashed var(--gray-light); /* Usando la variable global */
-    border-radius: 8px;
+    margin-top: 20px;
+    background-color: var(--white); /* Usando variable global */
     padding: 15px;
-    background-color: var(--background-light); /* Usando la variable global */
+    border-radius: var(--radius); /* Usando variable global */
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.03); /* Sombra interior suave */
 }
 
-.image-preview-container p {
-    font-size: 0.9em;
-    color: var(--text-dark); /* Usando la variable global */
+.preview-title {
+    font-weight: 600;
+    color: var(--text-dark);
     margin-bottom: 10px;
-    font-style: italic;
+}
+
+.preview-image-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 5px;
+}
+
+.preview-image-wrapper .remove-photo-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--danger); /* Usando variable global */
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--white); /* Borde blanco para contraste */
+    cursor: pointer;
+    font-size: 16px;
+    transition: var(--transition-fast); /* Usando variable global */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.preview-image-wrapper .remove-photo-btn:hover {
+    transform: scale(1.1) rotate(5deg);
+    background-color: var(--danger-dark); /* Usando variable global */
 }
 
 .image-preview-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    justify-content: center;
+    justify-content: flex-start;
+    margin-top: 10px;
 }
 
 .image-preview-thumbnail {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 80px;
     object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid var(--gray); /* Usando la variable global */
+    border-radius: var(--radius-sm); /* Usando un radio más pequeño para miniaturas */
+    border: 1px solid var(--gray); /* Usando variable global */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .cover-photo-preview {
-    width: 150px; /* Tamaño un poco más grande para la portada */
-    height: 100px;
+    width: 180px;
+    height: 120px;
 }
 
-.remove-photo-btn {
-    margin-top: 15px;
-    background-color: var(--danger); /* Usando la variable global */
+.remove-all-carousel-btn {
+    background-color: var(--danger); /* Usando variable global */
     color: white;
     padding: 8px 15px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius); /* Usando variable global */
     cursor: pointer;
     font-size: 0.9em;
-    transition: background-color 0.3s ease;
-}
-
-.remove-photo-btn:hover {
-    background-color: var(--danger-dark); /* Usando la variable global */
-}
-
-/* Checkbox specific styles */
-.admin-form-group.checkbox {
-    display: flex;
+    margin-top: 15px;
+    transition: var(--transition-medium); /* Usando variable global */
+    display: inline-flex;
     align-items: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    gap: 5px;
 }
 
-.admin-form-group.checkbox input[type="checkbox"] {
-    width: auto;
-    margin-right: 10px;
-    transform: scale(1.2);
-    accent-color: var(--primary); /* Usando la variable global */
+.remove-all-carousel-btn:hover {
+    background-color: var(--danger-dark); /* Usando variable global */
+    transform: translateY(-1px);
 }
 
-.admin-form-group.checkbox label {
-    margin-bottom: 0;
-    cursor: pointer;
-}
-
+/* Estilos para las canchas dinámicas */
 .canchas-dinamicas-container {
-    border: 1px dashed var(--primary-dark); /* Usando la variable global */
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 20px;
-    background-color: rgba(0, 123, 255, 0.03);
+    padding: 25px;
+    border-radius: var(--radius-lg); /* Usando variable global */
+    background-color: var(--background-light); /* Usando variable global */
+    border: 2px dashed var(--primary-light); /* Usando variable global */
+    margin-top: 25px;
+    margin-bottom: 25px;
 }
 
 .cancha-item-form {
-    background-color: var(--white); /* Usando la variable global */
-    border: 1px solid var(--gray-light); /* Usando la variable global */
-    border-radius: 10px;
+    background-color: var(--white); /* Usando variable global */
+    border: 1px solid var(--border-light); /* Usando variable global */
+    border-radius: var(--radius); /* Usando variable global */
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    position: relative;
+    box-shadow: var(--shadow-light); /* Usando variable global */
+}
+
+.cancha-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed var(--gray-light); /* Usando variable global */
+    padding-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .cancha-item-form h4 {
-    font-size: 1.3em;
-    color: var(--primary); /* Usando la variable global */
-    margin-top: 0;
-    margin-bottom: 15px;
-    text-align: left;
-    border-bottom: 1px dashed var(--gray-light); /* Usando la variable global */
-    padding-bottom: 5px;
+    font-family: 'Montserrat', sans-serif; /* Usando fuente de App.css */
+    font-size: 1.25em;
+    color: var(--primary-dark); /* Usando variable global */
+    margin: 0;
+    font-weight: 600;
 }
 
-.remove-cancha-btn {
-    background-color: var(--danger); /* Usando la variable global */
-    color: white;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 6px;
+/* Checkbox group styling */
+.admin-form-group.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-top: 10px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    transform: scale(1.25); /* Un poco más grande para mejor clicabilidad */
+    accent-color: var(--primary); /* Usando variable global */
     cursor: pointer;
-    font-size: 0.9em;
-    margin-top: 15px;
-    transition: background-color 0.3s ease;
 }
 
-.remove-cancha-btn:hover {
-    background-color: var(--danger-dark); /* Usando la variable global */
+.checkbox-item label {
+    margin: 0;
+    cursor: pointer;
+    color: var(--text-dark); /* Usando variable global */
 }
 
+/* Botones de acción */
 .admin-btn-add {
-    background-color: var(--success); /* Usando la variable global */
+    background-color: var(--success); /* Usando variable global */
     color: white;
-    padding: 12px 20px;
+    padding: 12px 25px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius); /* Usando variable global */
     cursor: pointer;
     font-size: 1em;
     font-weight: bold;
     margin-top: 15px;
-    transition: background-color 0.3s ease;
+    transition: var(--transition-medium); /* Usando variable global */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(var(--success-rgb), 0.2); /* Sombra temática */
 }
 
 .admin-btn-add:hover {
-    background-color: var(--success-dark); /* Usando la variable global */
+    background-color: var(--success-dark); /* Usando variable global */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(var(--success-rgb), 0.3);
 }
 
 .admin-form-buttons {
@@ -216,7 +328,7 @@
     gap: 15px;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid var(--gray-light); /* Usando la variable global */
+    border-top: 1px solid var(--gray-light); /* Usando variable global */
 }
 
 .admin-btn-save, .admin-btn-cancel {
@@ -224,43 +336,82 @@
     font-size: 1em;
     font-weight: bold;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--radius); /* Usando variable global */
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: var(--transition-medium); /* Usando variable global */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .admin-btn-save {
-    background-color: var(--primary); /* Usando la variable global */
+    background-color: var(--primary); /* Usando variable global */
     color: white;
+    box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.2);
 }
 
 .admin-btn-save:hover {
-    background-color: var(--primary-dark); /* Usando la variable global */
+    background-color: var(--primary-dark); /* Usando variable global */
     transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(var(--primary-rgb), 0.3);
 }
 
 .admin-btn-cancel {
-    background-color: var(--gray); /* Usando la variable global */
-    color: var(--text-dark); /* Usando la variable global */
+    background-color: var(--gray-medium); /* Usando variable global */
+    color: var(--text-dark); /* Usando variable global */
 }
 
 .admin-btn-cancel:hover {
-    background-color: #a0a0a0;
+    background-color: #a0a0a0; /* Un gris un poco más oscuro */
     transform: translateY(-2px);
 }
 
+/* Iconos de Google Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
     .admin-complejo-form {
         padding: 20px;
     }
-    .admin-complejo-form h3 {
+    .form-section-title {
         font-size: 1.5em;
     }
-    .admin-form-buttons {
+    .form-field-group {
         flex-direction: column;
+        gap: 0; /* Eliminar el gap en móvil para más espacio vertical */
+    }
+    .form-field-group .admin-form-group {
+        min-width: 100%;
+    }
+    .admin-form-buttons {
+        flex-direction: column-reverse; /* Cancelar arriba, Guardar abajo */
         align-items: stretch;
     }
-    .admin-btn-save, .admin-btn-cancel {
+    .admin-btn-save, .admin-btn-cancel, .admin-btn-add {
         width: 100%;
+        margin-top: 10px; /* Espacio entre botones en pila */
+    }
+    .cancha-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .remove-cancha-btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+    .admin-form-group.checkbox-group {
+        flex-direction: column; /* Apilar checkboxes en móvil */
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .remove-all-carousel-btn {
+      width: 100%;
     }
 }
