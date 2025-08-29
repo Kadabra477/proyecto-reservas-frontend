@@ -2,6 +2,7 @@
   "name": "react-proyecto-reservas",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
     "axios": "^1.6.7",
