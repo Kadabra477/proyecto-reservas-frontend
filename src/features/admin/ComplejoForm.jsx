@@ -1,3 +1,5 @@
+// frontend/src/features/admin/ComplejoForm.jsx
+
 import React, { useState, useEffect } from 'react';
 import './ComplejoForm.css';
 
@@ -183,7 +185,7 @@ const ComplejoForm = ({
       <div className="form-field-group">
         <div className="admin-form-group">
           <label htmlFor="nombre">Nombre del Complejo: <span className="obligatorio">*</span></label>
-          <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre} onChange={handleComplejoFormChange} required placeholder='Ej: El Alargue' />
+          <input type="text" id="nombre" name="nombre" value={nuevoComplejoAdmin.nombre} onChange={handleComplejoFormChange} required placeholder="Ej: El Alargue" />
         </div>
 
         {isAdmin && !editingComplejo?.id && (
@@ -196,7 +198,7 @@ const ComplejoForm = ({
               value={nuevoComplejoAdmin.propietarioUsername || ''} 
               onChange={handleComplejoFormChange} 
               required={!editingComplejo?.id && isAdmin} 
-              placeholder='dueño@ejemplo.com' 
+              placeholder="dueño@ejemplo.com" 
             />
             <p className="small-info">El usuario con este email será asignado como "COMPLEX_OWNER".</p>
           </div>
@@ -205,17 +207,17 @@ const ComplejoForm = ({
 
       <div className="admin-form-group">
         <label htmlFor="descripcion">Descripción:</label>
-        <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion} onChange={handleComplejoFormChange} rows={3} placeholder='Breve descripción del complejo...' />
+        <textarea id="descripcion" name="descripcion" value={nuevoComplejoAdmin.descripcion} onChange={handleComplejoFormChange} rows={3} placeholder="Breve descripción del complejo..." />
       </div>
 
       <div className="form-field-group">
         <div className="admin-form-group">
           <label htmlFor="ubicacion">Ubicación: <span className="obligatorio">*</span></label>
-          <input type="text" id="ubicacion" name="ubicacion" value={nuevoComplejoAdmin.ubicacion} onChange={handleComplejoFormChange} required placeholder='Ej: Calle Falsa 123, San Martín' />
+          <input type="text" id="ubicacion" name="ubicacion" value={nuevoComplejoAdmin.ubicacion} onChange={handleComplejoFormChange} required placeholder="Ej: Calle Falsa 123, San Martín" />
         </div>
         <div className="admin-form-group">
           <label htmlFor="telefono">Teléfono:</label>
-          <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder='Ej: +549261xxxxxxx' />
+          <input type="tel" id="telefono" name="telefono" value={nuevoComplejoAdmin.telefono} onChange={handleComplejoFormChange} placeholder="Ej: +549261xxxxxxx" />
         </div>
       </div>
 
@@ -240,13 +242,15 @@ const ComplejoForm = ({
             accept="image/*"
             onChange={handleCoverPhotoChange}
           />
-          <button type="button" className="custom-file-upload">Seleccionar Archivo</button>
+          <button type="button" className="custom-file-upload" onClick={() => document.getElementById('coverPhotoFile').click()}>
+            <span className="material-symbols-outlined">upload_file</span> Seleccionar Archivo
+          </button>
         </div>
         <p className="small-info">Esta imagen será la principal del complejo. Tamaño máximo: 5MB.</p>
 
         {previewCoverPhotoUrl && (
           <div className="image-preview-container">
-            <p>Previsualización de Portada:</p>
+            <p className="preview-title">Previsualización de Portada:</p>
             <div className="preview-image-wrapper">
               <img
                 src={previewCoverPhotoUrl}
@@ -273,13 +277,15 @@ const ComplejoForm = ({
             multiple
             onChange={handleCarouselPhotosChange}
           />
-          <button type="button" className="custom-file-upload">Seleccionar Archivos</button>
+          <button type="button" className="custom-file-upload" onClick={() => document.getElementById('carouselPhotoFiles').click()}>
+            <span className="material-symbols-outlined">upload_file</span> Seleccionar Archivos
+          </button>
         </div>
         <p className="small-info">Sube imágenes adicionales para el carrusel. Tamaño máximo: 5MB cada una.</p>
 
         {(previewCarouselPhotoUrls && previewCarouselPhotoUrls.length > 0) && (
           <div className="image-preview-container">
-            <p>Previsualización de Carrusel:</p>
+            <p className="preview-title">Previsualización de Carrusel:</p>
             <div className="image-preview-grid">
               {previewCarouselPhotoUrls.map((url, index) => (
                 <div key={index} className="preview-image-wrapper">
@@ -289,12 +295,11 @@ const ComplejoForm = ({
                     className="image-preview-thumbnail"
                     onError={(e) => { e.target.onerror = null; e.target.src = placeholderImage; }}
                   />
-                  {/* El botón de eliminar todas las imágenes del carrusel se queda */}
                 </div>
               ))}
             </div>
             <button type="button" className="remove-all-carousel-btn" onClick={handleRemoveCarouselPhotos}>
-              Eliminar todas las imágenes de carrusel
+              <span className="material-symbols-outlined">delete</span> Eliminar todas las imágenes de carrusel
             </button>
           </div>
         )}
@@ -308,7 +313,7 @@ const ComplejoForm = ({
               <h4>Espacio deportivo #{index + 1}</h4>
               {nuevoComplejoAdmin.canchas.length > 1 && (
                 <button type="button" className="admin-btn-delete remove-cancha-btn" onClick={() => handleRemoveCancha(index)}>
-                  Eliminar Cancha
+                  <span className="material-symbols-outlined">delete</span> Eliminar Cancha
                 </button>
               )}
             </div>
@@ -342,7 +347,7 @@ const ComplejoForm = ({
                   onChange={(e) => handleCanchaChange(index, e)}
                   required
                   min="1"
-                  placeholder='Ej: 6'
+                  placeholder="Ej: 6"
                 />
               </div>
             </div>
@@ -358,7 +363,7 @@ const ComplejoForm = ({
                 required
                 step="0.01"
                 min="0"
-                placeholder='Ej: 35000.00'
+                placeholder="Ej: 35000.00"
               />
             </div>
             
@@ -394,16 +399,16 @@ const ComplejoForm = ({
         ))}
       </div>
       <button type="button" className="admin-btn-add" onClick={handleAddCancha}>
-        Agregar Tipo de Cancha
+        <span className="material-symbols-outlined">add_circle</span> Agregar Tipo de Cancha
       </button>
 
       <div className="admin-form-buttons">
         <button type="submit" className="admin-btn-save">
-          {editingComplejo?.id ? 'Actualizar Complejo' : 'Crear Complejo'}
+          <span className="material-symbols-outlined">save</span> {editingComplejo?.id ? 'Actualizar Complejo' : 'Crear Complejo'}
         </button>
         {editingComplejo?.id && (
           <button type="button" className="admin-btn-cancel" onClick={cancelEditingComplejo}>
-            Cancelar
+            <span className="material-symbols-outlined">cancel</span> Cancelar
           </button>
         )}
       </div>
