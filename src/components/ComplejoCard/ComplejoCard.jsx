@@ -6,7 +6,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import './ComplejoCard.css'; 
 
-const placeholderImage = '/imagenes/default-complejo.png';
+const placeholderImage = 'https://placehold.co/800x600/e0e0e0/555555?text=Complejo+sin+Imagen';
 
 function ComplejoCard({ complejo }) {
     const navigate = useNavigate();
@@ -23,8 +23,8 @@ function ComplejoCard({ complejo }) {
     const cardImageUrl = complejo.portadaUrl || placeholderImage;
 
     return (
-        <div className="complejo-card-item">
-            <div className="complejo-card-single-image-container">
+        <div className="complejo-card"> {/* Clase principal renombrada */}
+            <div className="complejo-card-image-wrapper"> {/* Contenedor de imagen renombrado */}
                 <img
                     src={cardImageUrl}
                     alt={`Complejo ${complejo.nombre}`}
@@ -35,27 +35,31 @@ function ComplejoCard({ complejo }) {
             
             <div className="complejo-card-content">
                 <h3 className="complejo-card-title">{complejo.nombre || 'Nombre no disponible'}</h3>
-                <p className="complejo-card-location"><i className="fas fa-map-marker-alt"></i> {complejo.ubicacion || 'Ubicación no disponible'}</p> 
+                <p className="complejo-card-location">
+                    <span className="material-symbols-outlined card-icon-location">location_on</span> {/* Icono de Material Symbols */}
+                    {complejo.ubicacion || 'Ubicación no disponible'}
+                </p> 
                 {complejo.descripcion && complejo.descripcion.trim() !== '' && ( 
                     <p className="complejo-card-description-short">{complejo.descripcion}</p>
                 )}
                 {complejo.canchaCounts && Object.keys(complejo.canchaCounts).length > 0 && (
                     <p className="complejo-card-canchas-summary">
-                        Canchas: {Object.values(complejo.canchaCounts).reduce((sum, count) => sum + count, 0)} disponibles
+                        <span className="material-symbols-outlined card-icon-sports">sports_soccer</span> {/* Icono de Material Symbols */}
+                        {Object.values(complejo.canchaCounts).reduce((sum, count) => sum + count, 0)} canchas disponibles
                     </p>
                 )}
-                <div className="complejo-card-buttons-container">
+                <div className="complejo-card-buttons"> {/* Contenedor de botones renombrado */}
                     <button
                         onClick={handleViewDetailsClick}
-                        className="complejo-card-button primary"
+                        className="btn btn-secondary card-button" // Usando clases globales
                     >
-                        Ver Detalles
+                        <span className="material-symbols-outlined">info</span> Ver Detalles
                     </button>
                     <button
                         onClick={handleReserveClick}
-                        className="complejo-card-button secondary"
+                        className="btn btn-primary card-button" // Usando clases globales
                     >
-                        Reservar
+                        <span className="material-symbols-outlined">calendar_month</span> Reservar
                     </button>
                 </div>
             </div>
