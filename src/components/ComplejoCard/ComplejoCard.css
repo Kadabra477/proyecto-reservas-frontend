@@ -1,8 +1,6 @@
 /* frontend/src/components/Complejos/ComplejoCard/ComplejoCard.css */
 
 /* Importa las variables globales desde el archivo centralizado */
-@import url("../../../App.css");
-
 /* Asegúrate de importar los Material Symbols en tu index.html o App.jsx */
 /* Ejemplo: <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" /> */
 
