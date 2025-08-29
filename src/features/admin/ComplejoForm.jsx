@@ -200,7 +200,8 @@ const ComplejoForm = ({
               required={!editingComplejo?.id && isAdmin} 
               placeholder="dueño@ejemplo.com" 
             />
-            <p className="small-info">El usuario con este email será asignado como "COMPLEX_OWNER".</p>
+            {/* CORRECCIÓN: Usar &quot; para escapar las comillas dobles */}
+            <p className="small-info">El usuario con este email será asignado como &quot;COMPLEX_OWNER&quot;.</p>
           </div>
         )}
       </div>
